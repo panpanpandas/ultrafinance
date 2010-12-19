@@ -12,6 +12,7 @@ class Configuration(object):
         pass
     
     def getConfiguration(self):
+        ''' load all configuration '''
         configs = dict()
         self.__config = ConfigParser.SafeConfigParser()
         self.__config.read('config/dev.ini')
