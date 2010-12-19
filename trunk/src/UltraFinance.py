@@ -3,7 +3,8 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from feeder.DefaultFeeder import DefaultFeeder
+#from feeder.DefaultFeeder import DefaultFeeder
+from feeder.yahooFinanceFeeder import YahooFinanceFeeder
 from processing.DefaultProcessing import DefaultProcessing
 from output.DefaultOutput import DefaultOutput
 
@@ -15,6 +16,9 @@ class FeederManager():
         
     def start(self):
         ''' start '''
+        for plugin in self.plugins:
+            feeder = plugin()
+            feeder.run({})
         print 'start feederManager'
         
 class ProcessingManager():
@@ -46,7 +50,7 @@ class UltraFinance():
     def setup(self):
         ''' setup feeder, output and processing plugins '''
         self.feederManager = FeederManager()
-        self.feederManager.plugins.append(DefaultFeeder)
+        self.feederManager.plugins.append(YahooFinanceFeeder)
         
         self.processingManager = ProcessingManager()
         self.processingManager.plugins.append(DefaultProcessing)
