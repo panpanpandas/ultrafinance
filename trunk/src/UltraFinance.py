@@ -3,42 +3,42 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-#from feeder.DefaultFeeder import DefaultFeeder
-from feeder.yahooFinanceFeeder import YahooFinanceFeeder
-from processing.DefaultProcessing import DefaultProcessing
-from output.DefaultOutput import DefaultOutput
+import os
+from util import import_class
+from Configuration import app_global
 
 class FeederManager():
     ''' manager to control feeders '''
     def __init__(self):
         ''' constructor '''
-        self.plugins = []
+        print app_global
+        self.plugin = import_class(os.getcwd() + '\\feeder', app_global['feeder'])
         
     def start(self):
         ''' start '''
-        for plugin in self.plugins:
-            feeder = plugin()
-            feeder.run({})
+        self.plugin().run({})
         print 'start feederManager'
         
 class ProcessingManager():
     ''' manager to control feeders '''
     def __init__(self):
         ''' constructor '''
-        self.plugins = []
+        self.plugin = import_class(os.getcwd() + '\\processing', app_global['processing'])
         
     def start(self):
         ''' start '''
+        self.plugin().run({})
         print 'start processingManager'
 
 class OutputManager():
     ''' manager to control feeders '''
     def __init__(self):
         ''' constructor '''
-        self.plugins = []
+        self.plugin = import_class(os.getcwd() + '\\output', app_global['output'])
 
     def start(self):
         ''' start '''
+        self.plugin().run({})
         print 'start outputManager'
 
 class UltraFinance():
@@ -50,14 +50,9 @@ class UltraFinance():
     def setup(self):
         ''' setup feeder, output and processing plugins '''
         self.feederManager = FeederManager()
-        self.feederManager.plugins.append(YahooFinanceFeeder)
-        
         self.processingManager = ProcessingManager()
-        self.processingManager.plugins.append(DefaultProcessing)
-
         self.outputManager = OutputManager()
-        self.outputManager.plugins.append(DefaultOutput)
-                
+        
     def start(self):
         ''' run function '''
         self.feederManager.start()
