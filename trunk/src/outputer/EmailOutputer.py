@@ -28,7 +28,7 @@ def mail(to, text):
     # Should be mailServer.quit(), but that crashes...
     mailServer.close()
 
-class EmailOutput(BaseOutput):
+class EmailOutputer(BaseOutputer):
     ''' Default feeder '''
     def before(self):
         ''' init output '''

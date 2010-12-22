@@ -19,22 +19,22 @@ class FeederManager():
         self.plugin().run({})
         print 'start feederManager'
         
-class ProcessingManager():
+class ProcessorManager():
     ''' manager to control feeders '''
     def __init__(self):
         ''' constructor '''
-        self.plugin = import_class(os.getcwd() + '\\processing', app_global['processing'])
+        self.plugin = import_class(os.getcwd() + '\\processor', app_global['processor'])
         
     def start(self):
         ''' start '''
         self.plugin().run({})
-        print 'start processingManager'
+        print 'start processorManager'
 
-class OutputManager():
+class OutputerManager():
     ''' manager to control feeders '''
     def __init__(self):
         ''' constructor '''
-        self.plugin = import_class(os.getcwd() + '\\output', app_global['output'])
+        self.plugin = import_class(os.getcwd() + '\\outputer', app_global['outputer'])
 
     def start(self):
         ''' start '''
@@ -50,14 +50,14 @@ class UltraFinance():
     def setup(self):
         ''' setup feeder, output and processing plugins '''
         self.feederManager = FeederManager()
-        self.processingManager = ProcessingManager()
-        self.outputManager = OutputManager()
+        self.processorManager = ProcessorManager()
+        self.outputerManager = OutputerManager()
         
     def start(self):
         ''' run function '''
         self.feederManager.start()
-        self.processingManager.start()
-        self.outputManager.start()
+        self.processorManager.start()
+        self.outputerManager.start()
         print 'HAHAHA'
 
 if __name__ == '__main__':
