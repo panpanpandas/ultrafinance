@@ -3,9 +3,9 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from processing.BaseProcessing import BaseProcessing
+from processor.BaseProcessor import BaseProcessor
 
-class DefaultProcessing(BaseProcessing):
+class DefaultProcessor(BaseProcessor):
     ''' Default feeder '''
     def before(self):
         ''' init processing '''

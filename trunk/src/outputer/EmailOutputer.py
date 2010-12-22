@@ -4,7 +4,7 @@ Created on Dec 19, 2010
 @author: ppa
 '''
 import smtplib
-from output.BaseOutput import BaseOutput
+from outputer.BaseOutputer import BaseOutputer
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 import json

@@ -3,9 +3,9 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from output.BaseOutput import BaseOutput
+from outputer.BaseOutputer import BaseOutputer
 
-class DefaultOutput(BaseOutput):
+class DefaultOutputer(BaseOutputer):
     ''' Default feeder '''
     def before(self):
         ''' init output '''

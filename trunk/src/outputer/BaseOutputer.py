@@ -5,7 +5,7 @@ Created on Dec 18, 2010
 '''
 import abc
 
-class BaseProcessing(object):
+class BaseOutputer(object):
     '''
     Base class for a feeder, all concrete feeder should be derived from here
     '''
@@ -13,7 +13,7 @@ class BaseProcessing(object):
 
     @abc.abstractmethod
     def before(self):
-        ''' init operation for processing data'''
+        ''' init operation for preparing output'''
         pass
 
     @abc.abstractmethod
@@ -22,5 +22,5 @@ class BaseProcessing(object):
         pass
 
     def run(self, data):
-        ''' processsing data'''
+        ''' prepare data for processing to use '''
         pass
