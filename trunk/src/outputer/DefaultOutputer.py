@@ -15,7 +15,6 @@ class DefaultOutputer(BaseOutputer):
         ''' close output '''
         print 'after output'
         
-    def run(self, data):
+    def run(self, input, data):
         ''' do output'''
-        print 'doing output'
-        return True
+        print input

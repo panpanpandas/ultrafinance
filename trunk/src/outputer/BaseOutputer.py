@@ -21,6 +21,6 @@ class BaseOutputer(object):
         ''' operation for cleaing up(e.g. close connection, database ...) '''
         pass
 
-    def run(self, data):
+    def run(self, input, data):
         ''' prepare data for processing to use '''
         pass

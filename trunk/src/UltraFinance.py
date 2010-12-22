@@ -11,13 +11,13 @@ class FeederManager():
     ''' manager to control feeders '''
     def __init__(self):
         ''' constructor '''
-        print app_global
+        print 'app_gloabl is ' + str(app_global)
         self.plugin = import_class(os.getcwd() + '\\feeder', app_global['feeder'])
         
-    def start(self):
+    def start(self, input, data):
         ''' start '''
-        self.plugin().run({})
         print 'start feederManager'
+        self.plugin().run(input, data)
         
 class ProcessorManager():
     ''' manager to control feeders '''
@@ -25,10 +25,10 @@ class ProcessorManager():
         ''' constructor '''
         self.plugin = import_class(os.getcwd() + '\\processor', app_global['processor'])
         
-    def start(self):
+    def start(self, input, data):
         ''' start '''
-        self.plugin().run({})
         print 'start processorManager'
+        self.plugin().run(input, data)
 
 class OutputerManager():
     ''' manager to control feeders '''
@@ -36,10 +36,10 @@ class OutputerManager():
         ''' constructor '''
         self.plugin = import_class(os.getcwd() + '\\outputer', app_global['outputer'])
 
-    def start(self):
+    def start(self, input, data):
         ''' start '''
-        self.plugin().run({})
         print 'start outputManager'
+        self.plugin().run(input, data)
 
 class UltraFinance():
     ''' base class for ultraFinance'''
@@ -55,9 +55,13 @@ class UltraFinance():
         
     def start(self):
         ''' run function '''
-        self.feederManager.start()
-        self.processorManager.start()
-        self.outputerManager.start()
+        feederInput = {'symbol': 'GOOG'}
+        feederData = {}
+        processorData = {}
+        outputerData = {}
+        self.feederManager.start(feederInput, feederData)
+        self.processorManager.start(feederData, processorData)
+        self.outputerManager.start(processorData, outputerData)
         print 'HAHAHA'
 
 if __name__ == '__main__':

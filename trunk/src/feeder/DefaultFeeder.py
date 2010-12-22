@@ -15,7 +15,6 @@ class DefaultFeeder(BaseFeeder):
         ''' close connection '''
         print 'connection closed'
         
-    def run(self, data):
+    def run(self, input, data):
         ''' preparing data'''
         data = {'defaultStock':('12/18/2010', '$20')}
-        return True

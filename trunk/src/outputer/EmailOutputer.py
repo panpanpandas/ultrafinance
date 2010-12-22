@@ -38,7 +38,7 @@ class EmailOutputer(BaseOutputer):
         ''' close output '''
         print 'after output'
         
-    def run(self, data):
+    def run(self, input, data):
         ''' do output'''
         print 'sending email'
         mail("des@gmail.com", json.dumps(data))
