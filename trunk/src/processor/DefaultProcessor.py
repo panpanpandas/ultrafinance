@@ -15,7 +15,7 @@ class DefaultProcessor(BaseProcessor):
         ''' after processing '''
         print 'after processing'
         
-    def run(self, data):
+    def run(self, input, data):
         ''' processing data'''
-        print 'Cong! YOU JUST WIN A DOLLOA'
+        data.update(input)
         return True
