@@ -3,19 +3,14 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from processor.BaseProcessor import BaseProcessor
+from BaseModule import BaseModule
 
-class DefaultProcessor(BaseProcessor):
-    ''' Default feeder '''
-    def before(self):
-        ''' init processing '''
-        print 'init processing'
+class DefaultProcessor(BaseModule):
+    def __init__(self):
+        ''' constructor '''
+        super(DefaultProcessor, self).__init__()
         
-    def after(self):
-        ''' after processing '''
-        print 'after processing'
-        
-    def run(self, input, data):
+    def execute(self, input):
         ''' processing data'''
-        data.update(input)
-        return True
+        super(DefaultProcessor, self).execute(input)
+        return input

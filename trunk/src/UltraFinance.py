@@ -3,65 +3,27 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-import os
-from util import import_class
-from Configuration import app_global
-
-class FeederManager():
-    ''' manager to control feeders '''
-    def __init__(self):
-        ''' constructor '''
-        print 'app_gloabl is ' + str(app_global)
-        self.plugin = import_class(os.getcwd() + '\\feeder', app_global['feeder'])
-        
-    def start(self, input, data):
-        ''' start '''
-        print 'start feederManager'
-        self.plugin().run(input, data)
-        
-class ProcessorManager():
-    ''' manager to control feeders '''
-    def __init__(self):
-        ''' constructor '''
-        self.plugin = import_class(os.getcwd() + '\\processor', app_global['processor'])
-        
-    def start(self, input, data):
-        ''' start '''
-        print 'start processorManager'
-        self.plugin().run(input, data)
-
-class OutputerManager():
-    ''' manager to control feeders '''
-    def __init__(self):
-        ''' constructor '''
-        self.plugin = import_class(os.getcwd() + '\\outputer', app_global['outputer'])
-
-    def start(self, input, data):
-        ''' start '''
-        print 'start outputManager'
-        self.plugin().run(input, data)
+from PluginManager import PluginManager
 
 class UltraFinance():
     ''' base class for ultraFinance'''
     def __init__(self):
         ''' constructor '''
-        pass
-    
+        self.pluginManager = PluginManager()
+        self.pluginManager.setupPlugins()
+            
     def setup(self):
         ''' setup feeder, output and processing plugins '''
-        self.feederManager = FeederManager()
-        self.processorManager = ProcessorManager()
-        self.outputerManager = OutputerManager()
-        
+        pass
+
     def start(self):
         ''' run function '''
-        feederInput = {'symbol': 'GOOG'}
-        feederData = {}
-        processorData = {}
-        outputerData = {}
-        self.feederManager.start(feederInput, feederData)
-        self.processorManager.start(feederData, processorData)
-        self.outputerManager.start(processorData, outputerData)
+        self.pluginManager.setInput('feeder', 'HistoricalDataFeeder', 'GOOG')
+        
+        for pluginName in self.pluginManager.plugins['feeder']:
+            self.pluginManager.runPlugin('feeder', pluginName)
+            self.pluginManager.triggerDispatcher('feeder', pluginName)
+
         print 'HAHAHA'
 
 if __name__ == '__main__':

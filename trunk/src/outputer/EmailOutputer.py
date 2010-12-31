@@ -3,11 +3,11 @@ Created on Dec 19, 2010
 
 @author: ppa
 '''
-import smtplib
-from outputer.BaseOutputer import BaseOutputer
+from BaseModule import BaseModule
+
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
-import json
+import json, smtplib
 
 gmail_user = "your@gmail.com"
 gmail_pwd = "your_password"
@@ -28,18 +28,15 @@ def mail(to, text):
     # Should be mailServer.quit(), but that crashes...
     mailServer.close()
 
-class EmailOutputer(BaseOutputer):
+class EmailOutputer(BaseModule):
     ''' Default feeder '''
-    def before(self):
-        ''' init output '''
-        print 'before output'
+    def __init__(self):
+        ''' constructor '''
+        super(EmailOutputer, self).__init__()
         
-    def after(self):
-        ''' close output '''
-        print 'after output'
-        
-    def run(self, input, data):
+    def execute(self, input):
         ''' do output'''
+        super(EmailOutputer, self).execute(input)
         print 'sending email'
-        mail("des@gmail.com", json.dumps(data))
-        return True
+        mail("des@gmail.com", json.dumps(input))
+        return None

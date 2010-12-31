@@ -3,18 +3,16 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from feeder.BaseFeeder import BaseFeeder
+from BaseModule import BaseModule
 
-class DefaultFeeder(BaseFeeder):
+class DefaultFeeder(BaseModule):
     ''' Default feeder '''
-    def before(self):
-        ''' init connection '''
-        print 'connection established'
+    def __init__(self):
+        ''' Constructor '''
+        super(DefaultFeeder, self).__init__()
         
-    def after(self):
-        ''' close connection '''
-        print 'connection closed'
-        
-    def run(self, input, data):
+    def execute(self, input):
         ''' preparing data'''
+        super(DefaultFeeder, self).execute(input)
         data = {'defaultStock':('12/18/2010', '$20')}
+        return data
