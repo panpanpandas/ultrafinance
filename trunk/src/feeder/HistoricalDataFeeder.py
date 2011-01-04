@@ -7,6 +7,7 @@ from datetime import date
 
 from lib.YahooFinance import YahooFinance
 from BaseModule import BaseModule
+from operator import itemgetter
 
 class HistoricalDataFeeder(BaseModule):
     '''
@@ -26,4 +27,5 @@ class HistoricalDataFeeder(BaseModule):
         for value in values[1:]:
             data[value[0]] = value[4]
         
-        return data
+        dateValues = sorted(data.items(), key=itemgetter(0))
+        return dateValues

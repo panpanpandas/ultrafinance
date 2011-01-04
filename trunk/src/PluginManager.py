@@ -4,11 +4,11 @@ Created on Dec 25, 2010
 @author: ppa
 '''
 
-import os
+import os, fnmatch
 from util import import_class
 from pydispatch.dispatcher import connect, send
 
-from Configuration import Configuration, app_global
+from Configuration import Configuration
 
 class PluginManager(object):
     ''' plugin manager that init and run all plugins '''
@@ -22,8 +22,10 @@ class PluginManager(object):
     
     def __loadGroupPlugins(self, groupName):
         ''' load a group of plugins under a folder '''
-        for pluginName in [name.strip() for name in app_global[groupName].split(',')]:
-            self.plugins[groupName][pluginName] = import_class(os.getcwd() + '\\' + groupName, pluginName)()
+        path = os.getcwd() + '\\' + groupName
+        for pluginName in [os.path.splitext(filename)[0] for filename in fnmatch.filter(os.listdir(path), '*.py')]:
+            if '__init__' != pluginName:
+                self.plugins[groupName][pluginName] = import_class(path, pluginName)()
 
     def setupPlugins(self):
         ''' dynamically load all plugins '''

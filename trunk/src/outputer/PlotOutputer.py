@@ -6,7 +6,7 @@ Created on Dec 18, 2010
 from BaseModule import BaseModule
 from matplotlib import pyplot
 from datetime import datetime
-from operator import itemgetter
+#from operator import itemgetter
 import pylab
 
 class PlotOutputer(BaseModule):
@@ -15,9 +15,9 @@ class PlotOutputer(BaseModule):
         ''' constructor '''
         super(PlotOutputer, self).__init__()
         
-    def execute(self, input):
+    def execute(self, dateValues):
         ''' do output '''
-        dateValues = sorted(input.items(), key=itemgetter(0))
+        #dateValues = sorted(input.items(), key=itemgetter(0))
         super(PlotOutputer, self).execute(input)
         fig = pylab.figure()
         ax = fig.gca()
