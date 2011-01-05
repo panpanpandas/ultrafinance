@@ -4,6 +4,7 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 import abc
+from threading import Thread
 from pydispatch.dispatcher import send
 
 class BaseModule(object):
@@ -34,9 +35,13 @@ class BaseModule(object):
     def run(self, input):
         ''' full execution'''
         print 'running %s' % self.__class__.__name__
-        self.before()
-        self.output = self.execute(input)
-        self.after()
+        def runFunc(input):
+            self.before()
+            self.output = self.execute(input)
+            self.after()
+        
+        thread = Thread(target=runFunc, args=(input,))
+        thread.start()
 
     def __getName(self):
         ''' retrun name '''
