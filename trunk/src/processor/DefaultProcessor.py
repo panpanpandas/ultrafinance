@@ -13,4 +13,5 @@ class DefaultProcessor(BaseModule):
     def execute(self, input):
         ''' processing data'''
         super(DefaultProcessor, self).execute(input)
-        return input
+        return [(date, value[0]) for date, value in input]
+        #return input

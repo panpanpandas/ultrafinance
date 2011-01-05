@@ -7,7 +7,6 @@ from datetime import date
 
 from lib.YahooFinance import YahooFinance
 from BaseModule import BaseModule
-from operator import itemgetter
 
 class HistoricalDataFeeder(BaseModule):
     '''
@@ -21,11 +20,6 @@ class HistoricalDataFeeder(BaseModule):
     def execute(self, input):
         ''' preparing data'''
         super(HistoricalDataFeeder, self).execute(input)
-        data = {}
         #print self.__yahooFinance.get_price(self.__symbol)
-        values = self.__yahooFinance.get_historical_prices(input, '199000101', str(date.today()).replace('-', ''))
-        for value in values[1:]:
-            data[value[0]] = value[4]
-        
-        dateValues = sorted(data.items(), key=itemgetter(0))
-        return dateValues
+        return self.__yahooFinance.get_dates_values(input, '1990-01-01', date.today())
+        #return [(date, value[0]) for date, value in dateValues]

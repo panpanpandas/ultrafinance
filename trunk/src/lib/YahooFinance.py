@@ -9,8 +9,8 @@ sample usage:
 >>> print YahooFinance.get_price('GOOG')
 529.46
 '''
-
 import urllib
+from operator import itemgetter
 
 class YahooFinance():
     def __request(self, symbol, stat):
@@ -125,3 +125,18 @@ class YahooFinance():
         days = urllib.urlopen(url).readlines()
         data = [day[:-2].split(',') for day in days]
         return data
+
+    def get_dates_values(self, symbol, start_date, end_date):
+        values = self.get_historical_prices(symbol, \
+                                            str(start_date).replace('-', ''), 
+                                            str(end_date).replace('-', ''))
+        data = {}
+        for value in values[1:]:
+            data[value[0]] = (value[4], value[6])
+        
+        dateValues = sorted(data.items(), key=itemgetter(0))
+        return dateValues
+
+if __name__ == '__main__':
+    yahooFinance = YahooFinance()
+    print yahooFinance.get_historical_prices('SPY', '199000101', '20100101')
