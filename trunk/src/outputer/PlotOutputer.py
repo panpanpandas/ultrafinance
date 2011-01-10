@@ -17,12 +17,14 @@ class PlotOutputer(BaseModule):
         
     def execute(self, dateValues):
         ''' do output '''
-        #dateValues = sorted(input.items(), key=itemgetter(0))
+        print 'dateValues'
+        print dateValues
         super(PlotOutputer, self).execute(input)
         fig = pylab.figure()
         ax = fig.gca()
  
         # Plotting here ...
-        ax.plot_date([datetime.strptime(dateValue[0], '%Y-%m-%d') for dateValue in dateValues], \
-                     [dateValue[1] for dateValue in dateValues], fmt='b-')
+        ax.plot_date([datetime.strptime(dateValue.date, '%Y-%m-%d') for dateValue in dateValues], \
+                     [dateValue.adjClose for dateValue in dateValues], fmt='b-')
+        pylab.grid()
         pyplot.show()

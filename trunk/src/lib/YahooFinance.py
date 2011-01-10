@@ -10,6 +10,7 @@ sample usage:
 529.46
 '''
 import urllib
+from collections import namedtuple
 from operator import itemgetter
 
 class YahooFinance():
@@ -109,10 +110,13 @@ class YahooFinance():
     def get_historical_prices(self, symbol, start_date, end_date):
         """
         Get historical prices for the given ticker symbol.
-        Date format is 'YYYYMMDD'
+        Date format is 'YYYY-MM-DD'
     
         Returns a nested list.
         """
+        start_date = str(start_date).replace('-', '')
+        end_date = str(end_date).replace('-', '')
+
         url = 'http://ichart.yahoo.com/table.csv?s=%s&' % symbol + \
             'd=%s&' % str(int(end_date[4:6]) - 1) + \
             'e=%s&' % str(int(end_date[6:8])) + \
@@ -123,20 +127,20 @@ class YahooFinance():
             'c=%s&' % str(int(start_date[0:4])) + \
             'ignore=.csv'
         days = urllib.urlopen(url).readlines()
-        data = [day[:-2].split(',') for day in days]
-        return data
-
-    def get_dates_values(self, symbol, start_date, end_date):
-        values = self.get_historical_prices(symbol, \
-                                            str(start_date).replace('-', ''), 
-                                            str(end_date).replace('-', ''))
-        data = {}
-        for value in values[1:]:
-            data[value[0]] = (value[4], value[6])
+        values = [day[:-2].split(',') for day in days]
+        # sample values:[['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos'], \
+        #              ['2009-12-31', '112.77', '112.80', '111.39', '111.44', '90637900', '109.7']...]
         
-        dateValues = sorted(data.items(), key=itemgetter(0))
+        stockDaylyData = namedtuple('stockDaylyData', 'date, open, high, low, close, volume, adjClose') 
+        data = []       
+        for value in values[1:]:
+            data.append(stockDaylyData(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
+        
+        dateValues = sorted(data, key=itemgetter(0))
         return dateValues
+        #sample output
+        #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose='111.6'))...]
 
 if __name__ == '__main__':
     yahooFinance = YahooFinance()
-    print yahooFinance.get_historical_prices('SPY', '199000101', '20100101')
+    print yahooFinance.get_historical_prices('SPY', '20100101', '20101201')
