@@ -35,4 +35,4 @@ class Configuration(object):
 app_global = Configuration().getConfiguration("app_main")
 
 if __name__ == '__main__':
-    print Configuration().getOption('HistoricalDataFeeder_mapping', 'receiver')
+    print Configuration().getOption('app_main', 'feeder')

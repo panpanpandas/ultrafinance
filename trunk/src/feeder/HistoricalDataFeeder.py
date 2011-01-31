@@ -20,4 +20,4 @@ class HistoricalDataFeeder(BaseModule):
     def execute(self, input):
         ''' preparing data'''
         super(HistoricalDataFeeder, self).execute(input)
-        return self.__yahooFinance.get_historical_prices(input, '1990-01-01', date.today())
+        return {'history stock': self.__yahooFinance.get_historical_prices(input, '1990-01-01', date.today())}

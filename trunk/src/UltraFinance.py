@@ -4,6 +4,7 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 from PluginManager import PluginManager
+from Configuration import Configuration
 
 class UltraFinance():
     ''' base class for ultraFinance'''
@@ -18,9 +19,10 @@ class UltraFinance():
 
     def start(self):
         ''' run function '''
-        self.pluginManager.setInput('feeder', 'HistoricalDataFeeder', 'GOOG')
+        #self.pluginManager.setInput('feeder', 'HistoricalDataFeeder', 'GOOG')
         
-        for pluginName in self.pluginManager.plugins['feeder']:
+        pluginName = Configuration().getOption('app_main', 'feeder')
+        if pluginName in self.pluginManager.plugins['feeder']:
             self.pluginManager.runPlugin('feeder', pluginName)
             self.pluginManager.triggerDispatcher('feeder', pluginName)
 

@@ -12,12 +12,13 @@ class AvgDivProcessor(BaseModule):
         ''' constructor '''
         super(AvgDivProcessor, self).__init__()
         
-    def execute(self, dateValues):
+    def execute(self, dateValuesDict):
         ''' processing input'''
-        super(AvgDivProcessor, self).execute(dateValues)
-        stockMeasurement = StockMeasurement(dateValues)
-        data = {'days': len(dateValues), 'avg': stockMeasurement.mean(), 'standard deviation': stockMeasurement.std(), \
-                'alpha': stockMeasurement.alpha(), 'beta': stockMeasurement.beta()}
-        
-        print data
-        return data
+        super(AvgDivProcessor, self).execute(dateValuesDict)
+        for dateValues in dateValuesDict.values():
+            stockMeasurement = StockMeasurement(dateValues)
+            data = {'days': len(dateValues), 'avg': stockMeasurement.mean(), 'standard deviation': stockMeasurement.std(), \
+                    'alpha': stockMeasurement.alpha(), 'beta': stockMeasurement.beta()}
+            
+            print data
+            return data

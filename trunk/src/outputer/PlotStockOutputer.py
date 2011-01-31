@@ -9,22 +9,22 @@ from datetime import datetime
 #from operator import itemgetter
 import pylab
 
-class PlotOutputer(BaseModule):
+class PlotStockOutputer(BaseModule):
     ''' Default feeder '''
     def __init__(self):
         ''' constructor '''
-        super(PlotOutputer, self).__init__()
+        super(PlotStockOutputer, self).__init__()
         
-    def execute(self, dateValues):
+    def execute(self, dateValuesDict):
         ''' do output '''
         print 'dateValues'
-        print dateValues
-        super(PlotOutputer, self).execute(input)
+        super(PlotStockOutputer, self).execute(input)
         fig = pylab.figure()
         ax = fig.gca()
  
         # Plotting here ...
-        ax.plot_date([datetime.strptime(dateValue.date, '%Y-%m-%d') for dateValue in dateValues], \
+        for dateValues in dateValuesDict.values():
+            ax.plot_date([datetime.strptime(dateValue.date, '%Y-%m-%d') for dateValue in dateValues], \
                      [dateValue.adjClose for dateValue in dateValues], fmt='b-')
-        pylab.grid()
-        pyplot.show()
+            pylab.grid()
+            pyplot.show()

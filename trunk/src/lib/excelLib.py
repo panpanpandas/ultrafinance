@@ -4,8 +4,6 @@ Created on Jan 30, 2011
 @author: ppa
 '''
 from xlrd import open_workbook,XL_CELL_TEXT
-import os
-#print os.getcwd()
 
 class ExcelLib():
     ''' lib for aceesing excel '''
@@ -35,7 +33,7 @@ class ExcelLib():
             print "start col too big"
             return None
         if endCol > self.sheet.ncols:
-            print "end col too big"
+            print "end col too big, max is %s" %str(self.sheet.ncols) 
             return None
         if -1 == endCol:
             endCol = self.sheet.ncols
@@ -46,11 +44,11 @@ class ExcelLib():
         if colNumber > self.sheet.ncols:
             print "col number too big"
             return None
-        if startRow > self.sheet.ncols:
-            print "start row too big"
+        if startRow > self.sheet.nrows:
+            print "start row too big, max is %s" %str(self.sheet.nrows)
             return None
-        if endRow > self.sheet.ncols:
-            print "end row too big"
+        if endRow > self.sheet.nrows:
+            print "end row too big, max is %s" %str(self.sheet.nrows)
             return None
         if -1 == endRow:
             endRow = self.sheet.nrows
