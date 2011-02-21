@@ -28,7 +28,7 @@ class ExcelDataFeeder(BaseModule):
             for i in range(len(year)):
                 self.hoursingData.append(DateValueType(str(int(year[i])), hoursing[i]))
                 self.interestData.append(DateValueType(str(int(year[i])), interest[i]))
-    
+
         with ExcelLib('../dataSource/longTerm_1871.xls', 0) as excel:
             year = excel.readCol(0, 8, 147)
             stock = excel.readCol(1, 8, 147)

@@ -17,14 +17,14 @@ class PlotDateValueDict(object):
         self.leftMargin = leftMargin
         self.rightMargin = rightMargin
         self.dateFormat = dateFormat
-        
+
         self.rect = []
         height =  float(1 - self.lowMargin - self.upMargin - (self.length-1)*betweenMargin)/self.length
         pre = self.lowMargin
         for index in range(self.length):
             self.rect.append([self.leftMargin, pre, 1 - self.leftMargin - self.rightMargin , height])
             pre = pre + height + betweenMargin
-            
+
         pyplot.rc('axes', grid=True)
         pyplot.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 

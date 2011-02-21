@@ -31,7 +31,7 @@ class BaseModule(object):
     def execute(self, input):
         ''' processsing data'''
         self.input = input
-    
+
     def run(self, input):
         ''' full execution'''
         print 'running %s' % self.__class__.__name__
@@ -39,12 +39,12 @@ class BaseModule(object):
             self.before()
             self.output = self.execute(input)
             self.after()
-        
+
         thread = Thread(target=runFunc, args=(input,))
         thread.start()
 
     def __getName(self):
         ''' retrun name '''
         return self.__class__.__name__
-    
+
     name = property(__getName)

@@ -3,7 +3,7 @@ Created on Jan 30, 2011
 
 @author: ppa
 '''
-from xlrd import open_workbook,XL_CELL_TEXT
+from xlrd import open_workbook
 
 class ExcelLib():
     ''' lib for aceesing excel '''
@@ -14,17 +14,17 @@ class ExcelLib():
         if fileName is not None:
             self.book = open_workbook(fileName)
             self.sheet = self.book.sheet_by_index(sheetNumber)
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, type, value, traceback):
         ''' do nothing '''
         pass
 
     def setSheetNumber(self, sheetNumber):
         self.sheet = self.book.sheet_by_index(sheetNumber)
-    
+
     def readRow(self, rowNumber, startCol=0, endCol=-1):
         if rowNumber > self.sheet.nrows:
             print "row number too big"
@@ -33,7 +33,7 @@ class ExcelLib():
             print "start col too big"
             return None
         if endCol > self.sheet.ncols:
-            print "end col too big, max is %s" %str(self.sheet.ncols) 
+            print "end col too big, max is %s" %str(self.sheet.ncols)
             return None
         if -1 == endCol:
             endCol = self.sheet.ncols
@@ -55,7 +55,7 @@ class ExcelLib():
 
         return [self.sheet.cell(i, colNumber).value for i in range(startRow, endRow)]
 
-        
+
     def readCell(self, rowNumber, colNumber):
         ''' read a cell'''
         return self.sheet(rowNumber, colNumber)
