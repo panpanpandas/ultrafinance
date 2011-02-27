@@ -11,7 +11,7 @@ class AvgDivProcessor(BaseModule):
     def __init__(self):
         ''' constructor '''
         super(AvgDivProcessor, self).__init__()
-        
+
     def execute(self, dateValuesDict):
         ''' processing input'''
         super(AvgDivProcessor, self).execute(dateValuesDict)
@@ -19,6 +19,6 @@ class AvgDivProcessor(BaseModule):
             stockMeasurement = StockMeasurement(dateValues)
             data = {'days': len(dateValues), 'avg': stockMeasurement.mean(), 'standard deviation': stockMeasurement.std(), \
                     'alpha': stockMeasurement.alpha(), 'beta': stockMeasurement.beta()}
-            
+
             print data
             return data
