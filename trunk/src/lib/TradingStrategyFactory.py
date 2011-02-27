@@ -9,7 +9,7 @@ def fixAmountPerPeriod(dateValues, interval):
     share = sum([amount/dateValues[index].value for index in range(len(dateValues)/interval)])
     return share * dateValues[-1].value / (amount * len(dateValues) / interval)
 
-def adjustFixAmountPerPeriod(dateValues, intervalSlidingWindow):
+def fixAmountPerPeriodWithAddtionWhenDrop(dateValues, intervalSlidingWindow):
     ''' fix amount investment for each time period'''
     amount = float(100)
     interval = intervalSlidingWindow[0]
@@ -20,10 +20,31 @@ def adjustFixAmountPerPeriod(dateValues, intervalSlidingWindow):
     share = adjustShare + fixShare
     return share * dateValues[-1].value / (amount * len(dateValues) / interval)
 
+def adjustFixAmountPerPeriod(dateValues, intervalSlidingWindow):
+    ''' fix amount investment for each time period'''
+    amount = float(100)
+    interval = intervalSlidingWindow[0]
+    slidingWindow = intervalSlidingWindow[1]
+    share = 0
+    for frame in range(len(dateValues)/interval):
+        bought = False
+        for i in range(interval):
+            index = frame*interval + i
+            if index >= slidingWindow and min([dateValue.value for dateValue in dateValues[index-slidingWindow:index+1]]) == dateValues[index].value:
+                share += amount/dateValues[index].value
+                bought = True
+                break
+
+        if not bought:
+            share += amount/dateValues[(frame+1) * interval - 1].value
+
+    return share * dateValues[-1].value / (amount * len(dateValues) / interval)
 
 class TradingStrategyFactory():
     ''' Factory method for trading Strategies '''
-    strategyDict = {'fixAmountPerPeriod': fixAmountPerPeriod, 'adjustFixAmountPerPeriod':adjustFixAmountPerPeriod}
+    strategyDict = {'fixAmountPerPeriod': fixAmountPerPeriod,
+                    'adjustFixAmountPerPeriod': adjustFixAmountPerPeriod,
+                    'fixAmountPerPeriodWithAddtionWhenDrop': fixAmountPerPeriodWithAddtionWhenDrop}
 
     def __init__(self, strategyName):
         ''' constructor '''

@@ -17,7 +17,10 @@ class TradingStrategyProcessor(BaseModule):
         tradingStrategyFactory = TradingStrategyFactory('fixAmountPerPeriod')
         ret = tradingStrategyFactory.calculateReturn(dateValuesDict, 1)
         print 'fixAmountPerPeriod %s' %ret
-        tradingStrategyFactory = TradingStrategyFactory('adjustFixAmountPerPeriod')
+        tradingStrategyFactory = TradingStrategyFactory('fixAmountPerPeriodWithAddtionWhenDrop')
         ret = tradingStrategyFactory.calculateReturn(dateValuesDict, [1, 5])
+        print 'fixAmountPerPeriodWithAddtionWhenDrop %s' %ret
+        tradingStrategyFactory = TradingStrategyFactory('adjustFixAmountPerPeriod')
+        ret = tradingStrategyFactory.calculateReturn(dateValuesDict, [5, 5])
         print 'adjustFixAmountPerPeriod %s' %ret
         return ret
