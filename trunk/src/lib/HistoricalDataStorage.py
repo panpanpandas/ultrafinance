@@ -56,5 +56,9 @@ class HistoricalDataStorage():
         print stock + 'saved'
 
 if __name__ == "__main__":
+    '''
     storage = HistoricalDataStorage('../../dataSource/SPY/SPY')
     storage.buildExlsFromFile('../../dataSource/SPY/SPY500.list', 5)
+    '''
+    storage = HistoricalDataStorage('../../dataSource/SPY/SPYINDEX')
+    storage.buildExls(['SPY'], 1)
