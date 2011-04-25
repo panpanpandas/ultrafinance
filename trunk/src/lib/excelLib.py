@@ -7,13 +7,14 @@ from xlrd import open_workbook
 
 class ExcelLib():
     ''' lib for aceesing excel '''
-    def __init__(self, fileName=None, sheetNumber=0):
+    def __init__(self, fileName=None, sheetNumber=0, sheetName=None):
         ''' constructor '''
         self.book = None
         self.sheet = None
         if fileName is not None:
             self.book = open_workbook(fileName)
-            self.sheet = self.book.sheet_by_index(sheetNumber)
+            self.sheet = self.book.sheet_by_name(sheetName) if sheetName \
+                         else self.book.sheet_by_index(sheetNumber)
 
     def __enter__(self):
         return self
@@ -22,17 +23,25 @@ class ExcelLib():
         ''' do nothing '''
         pass
 
+    @staticmethod
+    def getTotalSheetNumber(fileName):
+        return open_workbook(fileName).nsheets
+
+    @staticmethod
+    def getSheetNames(fileName):
+        return open_workbook(fileName).sheet_names()
+
     def setSheetNumber(self, sheetNumber):
         self.sheet = self.book.sheet_by_index(sheetNumber)
 
     def readRow(self, rowNumber, startCol=0, endCol=-1):
-        if rowNumber > self.sheet.nrows:
+        if abs(rowNumber) > self.sheet.nrows:
             print "row number too big"
             return None
-        if startCol > self.sheet.ncols:
+        if abs(startCol) > self.sheet.ncols:
             print "start col too big"
             return None
-        if endCol > self.sheet.ncols:
+        if abs(endCol) > self.sheet.ncols:
             print "end col too big, max is %s" %str(self.sheet.ncols)
             return None
         if -1 == endCol:
@@ -41,13 +50,13 @@ class ExcelLib():
         return [self.sheet.cell(rowNumber, i).value for i in range(startCol, endCol)]
 
     def readCol(self, colNumber, startRow=0, endRow=-1):
-        if colNumber > self.sheet.ncols:
+        if abs(colNumber) > self.sheet.ncols:
             print "col number too big"
             return None
-        if startRow > self.sheet.nrows:
+        if abs(startRow) > self.sheet.nrows:
             print "start row too big, max is %s" %str(self.sheet.nrows)
             return None
-        if endRow > self.sheet.nrows:
+        if abs(endRow) > self.sheet.nrows:
             print "end row too big, max is %s" %str(self.sheet.nrows)
             return None
         if -1 == endRow:
