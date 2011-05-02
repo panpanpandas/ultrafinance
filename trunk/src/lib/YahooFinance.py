@@ -46,72 +46,72 @@ class YahooFinance():
         data['price_book_ratio'] = values[18]
         data['short_ratio'] = values[19]
         return data
-        
-    def get_price(self, symbol): 
+
+    def get_price(self, symbol):
         return self.__request(symbol, 'l1')
-    
+
     def get_change(self, symbol):
         return self.__request(symbol, 'c1')
-        
-    def get_volume(self, symbol): 
+
+    def get_volume(self, symbol):
         return self.__request(symbol, 'v')
-    
-    def get_avg_daily_volume(self, symbol): 
+
+    def get_avg_daily_volume(self, symbol):
         return self.__request(symbol, 'a2')
-        
-    def get_stock_exchange(self, symbol): 
+
+    def get_stock_exchange(self, symbol):
         return self.__request(symbol, 'x')
-         
+
     def get_market_cap(self, symbol):
         return self.__request(symbol, 'j1')
-       
+
     def get_book_value(self, symbol):
         return self.__request(symbol, 'b4')
-    
-    def get_ebitda(self, symbol): 
+
+    def get_ebitda(self, symbol):
         return self.__request(symbol, 'j4')
-        
+
     def get_dividend_per_share(self, symbol):
         return self.__request(symbol, 'd')
-    
-    def get_dividend_yield(self, symbol): 
+
+    def get_dividend_yield(self, symbol):
         return self.__request(symbol, 'y')
-        
-    def get_earnings_per_share(self, symbol): 
+
+    def get_earnings_per_share(self, symbol):
         return self.__request(symbol, 'e')
-    
-    def get_52_week_high(self, symbol): 
+
+    def get_52_week_high(self, symbol):
         return self.__request(symbol, 'k')
-        
-    def get_52_week_low(self, symbol): 
+
+    def get_52_week_low(self, symbol):
         return self.__request(symbol, 'j')
-    
-    def get_50day_moving_avg(self, symbol): 
+
+    def get_50day_moving_avg(self, symbol):
         return self.__request(symbol, 'm3')
-        
+
     def get_200day_moving_avg(self, symbol):
         return self.__request(symbol, 'm4')
-        
-    def get_price_earnings_ratio(self, symbol): 
+
+    def get_price_earnings_ratio(self, symbol):
         return self.__request(symbol, 'r')
-    
-    def get_price_earnings_growth_ratio(self, symbol): 
+
+    def get_price_earnings_growth_ratio(self, symbol):
         return self.__request(symbol, 'r5')
-    
-    def get_price_sales_ratio(self, symbol): 
+
+    def get_price_sales_ratio(self, symbol):
         return self.__request(symbol, 'p5')
-        
-    def get_price_book_ratio(self, symbol): 
+
+    def get_price_book_ratio(self, symbol):
         return self.__request(symbol, 'p6')
 
-    def get_short_ratio(self, symbol): 
+    def get_short_ratio(self, symbol):
         return self.__request(symbol, 's7')
-        
+
     def get_historical_prices(self, symbol, start_date, end_date):
         """
         Get historical prices for the given ticker symbol.
         Date format is 'YYYY-MM-DD'
-    
+
         Returns a nested list.
         """
         start_date = str(start_date).replace('-', '')
@@ -130,12 +130,12 @@ class YahooFinance():
         values = [day[:-2].split(',') for day in days]
         # sample values:[['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos'], \
         #              ['2009-12-31', '112.77', '112.80', '111.39', '111.44', '90637900', '109.7']...]
-        
-        stockDaylyData = namedtuple('stockDaylyData', 'date, open, high, low, close, volume, adjClose') 
-        data = []       
+
+        stockDaylyData = namedtuple('stockDaylyData', 'date, open, high, low, close, volume, adjClose')
+        data = []
         for value in values[1:]:
             data.append(stockDaylyData(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
-        
+
         dateValues = sorted(data, key=itemgetter(0))
         return dateValues
         #sample output
@@ -143,4 +143,4 @@ class YahooFinance():
 
 if __name__ == '__main__':
     yahooFinance = YahooFinance()
-    print yahooFinance.get_historical_prices('SPY', '20100101', '20101201')
+    print yahooFinance.get_historical_prices('^STI', '19010101', '20130101')

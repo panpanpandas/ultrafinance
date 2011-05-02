@@ -23,6 +23,10 @@ class ExcelLib():
         ''' do nothing '''
         pass
 
+    def openSheet(self, sheetNumber=0, sheetName=None):
+        self.sheet = self.book.sheet_by_name(sheetName) if sheetName \
+                     else self.book.sheet_by_index(sheetNumber)
+
     @staticmethod
     def getTotalSheetNumber(fileName):
         return open_workbook(fileName).nsheets
@@ -35,13 +39,13 @@ class ExcelLib():
         self.sheet = self.book.sheet_by_index(sheetNumber)
 
     def readRow(self, rowNumber, startCol=0, endCol=-1):
-        if abs(rowNumber) > self.sheet.nrows:
+        if abs(rowNumber) >= self.sheet.nrows:
             print "row number too big"
             return None
-        if abs(startCol) > self.sheet.ncols:
+        if abs(startCol) >= self.sheet.ncols:
             print "start col too big"
             return None
-        if abs(endCol) > self.sheet.ncols:
+        if abs(endCol) >= self.sheet.ncols:
             print "end col too big, max is %s" %str(self.sheet.ncols)
             return None
         if -1 == endCol:
