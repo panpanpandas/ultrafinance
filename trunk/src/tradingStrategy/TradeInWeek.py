@@ -3,7 +3,7 @@ Created on Mar 27, 2011
 
 @author: ppa
 '''
-from lib.ExcelLib import ExcelLib
+from lib.excelLib import ExcelLib
 from lib.DataType import DateValueType
 from datetime import date
 
