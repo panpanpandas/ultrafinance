@@ -5,8 +5,13 @@ Created on Mar 20, 2011
 '''
 from datetime import date
 from xlwt import Workbook
-from lib.YahooFinance import YahooFinance
 import time
+
+from lib.errors import ufException, Errors
+from lib.yahooFinance import YahooFinance
+
+import logging
+LOG = logging.getLogger(__name__)
 
 class HistoricalDataStorage():
     ''' class that store historical data from Yahoo finance '''
@@ -18,8 +23,10 @@ class HistoricalDataStorage():
 
     def buildExls(self, stocks, div=1):
         ''' get a list of stock data and store '''
+        LOG.debug("buildExls %s, div %s" % (stocks, div))
+
         if div < 1:
-            raise Exception("div need to be at least 1")
+            raise ufException(Errors.INDEX_RANGE_ERROR, "div need to be at least 1, %s are given" % div)
 
         for i in range(div):
             workbook = Workbook()
@@ -27,38 +34,38 @@ class HistoricalDataStorage():
                 try:
                     self.__buildExl(stock, workbook)
                 except:
-                    pass
+                    LOG.debug("failed buildExl for stock %s" % stock)
+
+                #sleep for 2 seconds, or Yahoo server will throw exception
                 time.sleep(2)
 
             workbook.save(self.__outputPrefix + str(i) + '.xls')
 
     def buildExlsFromFile(self, fileName, div=1):
         ''' read a file with stock names, get data and store'''
+        LOG.debug("buildExlsFromFile %s, div %s" % (fileName, div))
+
         f = open(fileName)
         lines = [line.rstrip() for line in f]
-        print lines
         self.buildExls(lines, div)
 
     def __buildExl(self, stock, workbook):
         ''' get one stock historical data and store it '''
-        ws = workbook.add_sheet(stock)
+        try:
+            ws = workbook.add_sheet(stock)
 
-        #get data
-        yahooFinance = YahooFinance()
-        allData = yahooFinance.get_historical_prices(stock, self.__startDate, self.__endDate)
-        for col, field in enumerate(['date', 'open', 'high', 'low', 'close', 'volume', 'adjClose']):
-            ws.write(0, col, field)
-
-        for row, data in enumerate(allData):
+            #get data
+            yahooFinance = YahooFinance()
+            allData = yahooFinance.get_historical_prices(stock, self.__startDate, self.__endDate)
             for col, field in enumerate(['date', 'open', 'high', 'low', 'close', 'volume', 'adjClose']):
-                ws.write(row+1, col, getattr(data, field) )
+                ws.write(0, col, field)
 
-        print stock + 'saved'
+            for row, data in enumerate(allData):
+                for col, field in enumerate(['date', 'open', 'high', 'low', 'close', 'volume', 'adjClose']):
+                    ws.write(row+1, col, getattr(data, field) )
 
-if __name__ == "__main__":
-    storage = HistoricalDataStorage('../../dataSource/CHINA/CHINA')
-    storage.buildExlsFromFile('../../dataSource/CHINA/china544.list', 5)
-    '''
-    storage = HistoricalDataStorage('../../dataSource/SPY/SPYINDEX')
-    storage.buildExls(['SPY'], 1)
-    '''
+            LOG.debug(stock + 'saved')
+        except ufException as excep:
+            raise excep
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error")

@@ -10,13 +10,22 @@ sample usage:
 529.46
 '''
 import urllib
-from collections import namedtuple
 from operator import itemgetter
+from lib.dataType import StockDailyType
+from lib.errors import ufException, Errors
 
-class YahooFinance():
+import logging
+LOG = logging.getLogger(__name__)
+
+class YahooFinance(object):
     def __request(self, symbol, stat):
-        url = 'http://finance.yahoo.com/d/quotes.csv?s=%s&f=%s' % (symbol, stat)
-        return urllib.urlopen(url).read().strip().strip('"')
+        try:
+            url = 'http://finance.yahoo.com/d/quotes.csv?s=%s&f=%s' % (symbol, stat)
+            return urllib.urlopen(url).read().strip().strip('"')
+        except IOError:
+            raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request")
 
     def get_all(self, symbol):
         """
@@ -114,33 +123,33 @@ class YahooFinance():
 
         Returns a nested list.
         """
-        start_date = str(start_date).replace('-', '')
-        end_date = str(end_date).replace('-', '')
+        try:
+            start_date = str(start_date).replace('-', '')
+            end_date = str(end_date).replace('-', '')
 
-        url = 'http://ichart.yahoo.com/table.csv?s=%s&' % symbol + \
-            'd=%s&' % str(int(end_date[4:6]) - 1) + \
-            'e=%s&' % str(int(end_date[6:8])) + \
-            'f=%s&' % str(int(end_date[0:4])) + \
-            'g=d&' + \
-            'a=%s&' % str(int(start_date[4:6]) - 1) + \
-            'b=%s&' % str(int(start_date[6:8])) + \
-            'c=%s&' % str(int(start_date[0:4])) + \
-            'ignore=.csv'
-        days = urllib.urlopen(url).readlines()
-        values = [day[:-2].split(',') for day in days]
-        # sample values:[['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos'], \
-        #              ['2009-12-31', '112.77', '112.80', '111.39', '111.44', '90637900', '109.7']...]
+            url = 'http://ichart.yahoo.com/table.csv?s=%s&' % symbol + \
+                'd=%s&' % str(int(end_date[4:6]) - 1) + \
+                'e=%s&' % str(int(end_date[6:8])) + \
+                'f=%s&' % str(int(end_date[0:4])) + \
+                'g=d&' + \
+                'a=%s&' % str(int(start_date[4:6]) - 1) + \
+                'b=%s&' % str(int(start_date[6:8])) + \
+                'c=%s&' % str(int(start_date[0:4])) + \
+                'ignore=.csv'
+            days = urllib.urlopen(url).readlines()
+            values = [day[:-2].split(',') for day in days]
+            # sample values:[['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'Adj Clos'], \
+            #              ['2009-12-31', '112.77', '112.80', '111.39', '111.44', '90637900', '109.7']...]
+            data = []
+            for value in values[1:]:
+                data.append(StockDailyType(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
 
-        stockDaylyData = namedtuple('stockDaylyData', 'date, open, high, low, close, volume, adjClose')
-        data = []
-        for value in values[1:]:
-            data.append(stockDaylyData(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
+            dateValues = sorted(data, key=itemgetter(0))
+            return dateValues
 
-        dateValues = sorted(data, key=itemgetter(0))
-        return dateValues
+        except IOError:
+            raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.get_historical_prices")
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose='111.6'))...]
-
-if __name__ == '__main__':
-    yahooFinance = YahooFinance()
-    print yahooFinance.get_historical_prices('^STI', '19010101', '20130101')

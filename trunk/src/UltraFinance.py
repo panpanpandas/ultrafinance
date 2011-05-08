@@ -3,8 +3,11 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from PluginManager import PluginManager
-from Configuration import Configuration
+from pluginManager import PluginManager
+from configuration import Configuration
+
+import logging
+LOG = logging.getLogger(__name__)
 
 class UltraFinance():
     ''' base class for ultraFinance'''
@@ -12,7 +15,7 @@ class UltraFinance():
         ''' constructor '''
         self.pluginManager = PluginManager()
         self.pluginManager.setupPlugins()
-            
+
     def setup(self):
         ''' setup feeder, output and processing plugins '''
         pass
@@ -20,7 +23,7 @@ class UltraFinance():
     def start(self):
         ''' run function '''
         #self.pluginManager.setInput('feeder', 'HistoricalDataFeeder', 'GOOG')
-        
+
         pluginName = Configuration().getOption('app_main', 'feeder')
         if pluginName in self.pluginManager.plugins['feeder']:
             self.pluginManager.runPlugin('feeder', pluginName)

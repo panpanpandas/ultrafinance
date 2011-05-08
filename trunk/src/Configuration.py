@@ -5,12 +5,15 @@ Created on Dec 18, 2010
 '''
 import ConfigParser
 
+import logging
+LOG = logging.getLogger(__name__)
+
 class Configuration(object):
     ''' class that handles configuration '''
     def __init__(self):
         ''' Constructor '''
         pass
-    
+
     def getConfiguration(self, section):
         ''' load all configuration '''
         configs = dict()
@@ -30,7 +33,7 @@ class Configuration(object):
         if parser.has_option(section, option):
             return parser.get(section, option)
         else:
-            return None 
+            return None
 
 app_global = Configuration().getConfiguration("app_main")
 

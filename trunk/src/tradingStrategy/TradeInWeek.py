@@ -3,9 +3,12 @@ Created on Mar 27, 2011
 
 @author: ppa
 '''
-from lib.excelLib import ExcelLib
-from lib.DataType import DateValueType
 from datetime import date
+
+from lib.excelLib import ExcelLib
+
+import logging
+LOG = logging.getLogger(__name__)
 
 class TradeInWeek():
     '''

@@ -5,8 +5,13 @@ Created on Jan 3, 2011
 '''
 from scipy import polyfit
 import copy
-from lib.YahooFinance import YahooFinance
 import numpy
+
+from lib.yahooFinance import YahooFinance
+from lib.errors import ufException, Errors
+
+import logging
+LOG = logging.getLogger(__name__)
 
 class StockMeasurement():
     ''' measurement of a single stock/index '''
@@ -31,34 +36,34 @@ class StockMeasurement():
         if self.__regressioned:
             return
 
-        self.__regressioned = True
         if not self.__benchmarkValues:
-            print "wrrrrrong"
             self.__benchmarkValues = YahooFinance().get_historical_prices(self.__benchmark, self.__dateValues[0].date, self.__dateValues[-1].date)
 
-        toBreak = False
-        for dateValue in self.__dateValues:
-            if not float(dateValue.adjClose):
-                toBreak = True
-                break
+        tradeSuspended = False
+        if 0 in map(lambda x: float(x.adjClose), self.__dateValues):
+            tradeSuspended = True
 
-
+        #filter out date tha't not in both stock and benchmark
         dateSet = set([dateValue.date for dateValue in self.__dateValues]) & set([dateValue.date for dateValue in self.__benchmarkValues])
         self.__dateValues = filter(lambda dateValue: dateValue.date in dateSet, self.__dateValues)
         self.__benchmarkValues = filter(lambda dateValue: dateValue.date in dateSet, self.__benchmarkValues)
-        if len(self.__dateValues) <= 1 or toBreak:
+
+        if len(self.__dateValues) <= 1 or tradeSuspended:
+            msg = "Not enought dateValues" if len(self.__dateValues) <= 1 else "trade suspended"
+            LOG.debug(msg)
+
             self.__beta = 0
             self.__alpha = 0
+            self.__regressioned = True
             return
 
-        if len(self.__benchmarkValues) == len(self.__dateValues):
+        try:
             x = [float(self.__benchmarkValues[index + 1].adjClose)/float(self.__benchmarkValues[index].adjClose) for index in range(len(self.__benchmarkValues) - 1)]
             y = [float(self.__dateValues[index + 1].adjClose)/float(self.__dateValues[index].adjClose) for index in range(len(self.__dateValues) - 1)]
             (self.__beta, self.__alpha) = polyfit(x, y, 1)
-        else:
-            self.__beta = 0
-            self.__alpha = 0
-            print 'benchmark %s don\'t have enough data' % self.__benchmark
+            self.__regressioned = True
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "stockMeasurement.linearRegression got unknown error")
 
     def marketReturnRate(self):
         if not self.__regressioned:

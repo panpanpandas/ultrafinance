@@ -6,6 +6,9 @@ Created on Jan 3, 2011
 from matplotlib import pyplot
 from datetime import datetime
 
+import logging
+LOG = logging.getLogger(__name__)
+
 class PlotDateValueDict(object):
     ''' plot dict with date value '''
     def __init__(self, dateValueDict, dateFormat='%Y', lowMargin=0.05, upMargin=0.05, rightMargin=0.05, leftMargin=0.05, betweenMargin=0.05):

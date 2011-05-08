@@ -3,13 +3,16 @@ Created on Apr 24, 2011
 
 @author: ppa
 '''
-from lib.StockMeasurement import StockMeasurement
-from lib.DataType import StockDailyType
+from lib.stockMeasurement import StockMeasurement
+from lib.dataType import StockDailyType
 from lib.excelLib import ExcelLib
 from operator import itemgetter
-from lib.YahooFinance import YahooFinance
+from lib.yahooFinance import YahooFinance
 import time
 import os
+
+import logging
+LOG = logging.getLogger(__name__)
 
 benchmarks = {'DEFAULT': '^GSPC',
               'L': '^STI',

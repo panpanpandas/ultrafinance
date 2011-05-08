@@ -5,10 +5,17 @@ Created on Jan 30, 2011
 '''
 from xlrd import open_workbook
 
+from lib.errors import ufException, Errors
+import logging
+LOG = logging.getLogger(__name__)
+
 class ExcelLib():
     ''' lib for aceesing excel '''
     def __init__(self, fileName=None, sheetNumber=0, sheetName=None):
-        ''' constructor '''
+        '''
+        constructor
+
+        '''
         self.book = None
         self.sheet = None
         if fileName is not None:
@@ -17,6 +24,10 @@ class ExcelLib():
                          else self.book.sheet_by_index(sheetNumber)
 
     def __enter__(self):
+        '''
+        do nothing because xlrd handle file close in Book constructor,
+        which make reading multiple sheets slow
+        '''
         return self
 
     def __exit__(self, type, value, traceback):
@@ -40,41 +51,31 @@ class ExcelLib():
 
     def readRow(self, rowNumber, startCol=0, endCol=-1):
         if abs(rowNumber) >= self.sheet.nrows:
-            print "row number too big"
-            return None
-        if abs(startCol) >= self.sheet.ncols:
-            print "start col too big"
-            return None
-        if abs(endCol) >= self.sheet.ncols:
-            print "end col too big, max is %s" %str(self.sheet.ncols)
-            return None
+            raise ufException(Errors.INDEX_RANGE_ERROR,
+                              "Excellib.readRow: row number too big: row %s, max %s" % (rowNumber, self.sheet.nrows) )
+        if max(abs(startCol), abs(endCol)) > self.sheet.ncols:
+            raise ufException(Errors.INDEX_RANGE_ERROR,
+                              "Excellib.readRow: col number too big: col %s, max %s" % (max(abs(startCol), abs(endCol)), self.sheet.ncols) )
         if -1 == endCol:
             endCol = self.sheet.ncols
 
-        return [self.sheet.cell(rowNumber, i).value for i in range(startCol, endCol)]
+        return [self.readCell(rowNumber, i) for i in range(startCol, endCol)]
 
     def readCol(self, colNumber, startRow=0, endRow=-1):
         if abs(colNumber) > self.sheet.ncols:
-            print "col number too big"
-            return None
-        if abs(startRow) > self.sheet.nrows:
-            print "start row too big, max is %s" %str(self.sheet.nrows)
-            return None
-        if abs(endRow) > self.sheet.nrows:
-            print "end row too big, max is %s" %str(self.sheet.nrows)
-            return None
+            raise ufException(Errors.INDEX_RANGE_ERROR,
+                              "Excellib.readCol: col number too big: col %s, max %s" % (colNumber, self.sheet.ncols) )
+        if max(abs(startRow), abs(endRow)) > self.sheet.nrows:
+            raise ufException(Errors.INDEX_RANGE_ERROR,
+                              "Excellib.readCol: row number too big: row %s, max %s" % (max(abs(startRow), abs(endRow)), self.sheet.nrows) )
         if -1 == endRow:
             endRow = self.sheet.nrows
 
-        return [self.sheet.cell(i, colNumber).value for i in range(startRow, endRow)]
-
+        return [self.readCell(i, colNumber) for i in range(startRow, endRow)]
 
     def readCell(self, rowNumber, colNumber):
         ''' read a cell'''
-        return self.sheet(rowNumber, colNumber)
-
-if __name__ == '__main__':
-    with ExcelLib('../../dataSource/hoursing_interestRate.xls') as excel:
-        excel.setSheetNumber(0)
-        print excel.readRow(0)
-        print excel.readCol(0, 7)
+        try:
+            return self.sheet.cell(rowNumber, colNumber).value
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in Excellib.readCell")

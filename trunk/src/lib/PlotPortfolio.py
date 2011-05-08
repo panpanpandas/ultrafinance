@@ -6,6 +6,9 @@ Created on Feb 20, 2011
 from matplotlib import pyplot
 import math
 
+import logging
+LOG = logging.getLogger(__name__)
+
 class PlotPortfolio(object):
     ''' plot portfolio curve. only two are supported '''
     def __init__(self, labelReturnDeviations):
@@ -15,7 +18,7 @@ class PlotPortfolio(object):
         pyplot.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 
     def plot(self):
-        ''' get average '''
+        ''' plot '''
         returns = []
         deviations = []
         portfolio1 = self.labelReturnDeviations[0]
@@ -29,9 +32,14 @@ class PlotPortfolio(object):
         pyplot.ylabel('Returns')
         pyplot.xlabel('Deviations')
 
+    def show(self):
+        '''
+        show the graph.
+        NOTICE: after show(), You can't do savefig() anymore.
+        This is a known bug: http://code.google.com/p/ultra-finance/issues/detail?id=3
+        '''
         pyplot.show()
 
-if __name__ == '__main__':
-    plotPortfolio = PlotPortfolio([{'label':'bond', 'return':0.08, 'deviation':12, 'cov':72},
-                                   {'label':'stock', 'return':0.13, 'deviation':20, 'cov':72}])
-    plotPortfolio.plot()
+    def savefig(self, fileName):
+        LOG.debug('Save portfolio to %s' % fileName)
+        pyplot.savefig(fileName)
