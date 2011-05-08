@@ -22,4 +22,3 @@ class testYahooFinance(unittest.TestCase):
         data = yahooFinance.get_historical_prices('^STI', '20110101', '20110110')
         print data
         assert len(data)
-        assert 0
