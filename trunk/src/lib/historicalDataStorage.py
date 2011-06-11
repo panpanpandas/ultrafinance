@@ -67,5 +67,5 @@ class HistoricalDataStorage():
             LOG.debug(stock + 'saved')
         except ufException as excep:
             raise excep
-        except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error")
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error  %s" % excep)

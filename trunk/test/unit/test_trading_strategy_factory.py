@@ -5,8 +5,10 @@ Created on May 6, 2011
 '''
 import unittest
 from lib.tradingStrategyFactory import *
+from lib.tradingStrategy.automaticInvestmentPlan import *
 
 from lib.dataType import DateValueType
+
 import logging
 LOG = logging.getLogger(__name__)
 

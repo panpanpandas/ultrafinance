@@ -62,8 +62,8 @@ class StockMeasurement():
             y = [float(self.__dateValues[index + 1].adjClose)/float(self.__dateValues[index].adjClose) for index in range(len(self.__dateValues) - 1)]
             (self.__beta, self.__alpha) = polyfit(x, y, 1)
             self.__regressioned = True
-        except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "stockMeasurement.linearRegression got unknown error")
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "stockMeasurement.linearRegression got unknown error %s" % excep)
 
     def marketReturnRate(self):
         if not self.__regressioned:

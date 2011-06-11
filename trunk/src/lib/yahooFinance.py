@@ -24,8 +24,8 @@ class YahooFinance(object):
             return urllib.urlopen(url).read().strip().strip('"')
         except IOError:
             raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
-        except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request")
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request %s" % excep)
 
     def get_all(self, symbol):
         """
@@ -149,7 +149,7 @@ class YahooFinance(object):
 
         except IOError:
             raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
-        except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.get_historical_prices")
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.get_historical_prices %s" % excep)
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose='111.6'))...]

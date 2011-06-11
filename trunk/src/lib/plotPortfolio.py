@@ -5,6 +5,7 @@ Created on Feb 20, 2011
 '''
 from matplotlib import pyplot
 import math
+from lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -19,18 +20,24 @@ class PlotPortfolio(object):
 
     def plot(self):
         ''' plot '''
-        returns = []
-        deviations = []
-        portfolio1 = self.labelReturnDeviations[0]
-        portfolio2 = self.labelReturnDeviations[1]
+        try:
+            returns = []
+            deviations = []
+            portfolio1 = self.labelReturnDeviations[0]
+            portfolio2 = self.labelReturnDeviations[1]
 
-        for i in range(100):
-            returns.append(portfolio1['return']*i/100 + portfolio2['return']*(100-i)/100)
-            deviations.append(pow(portfolio1['deviation']*i/100, 2) + pow(portfolio2['deviation']*(100-i)/100, 2) + 2*(i/100)*((100-i)/100)*portfolio1['cov'])
+            for i in range(100):
+                returns.append(portfolio1['return']*i/100 + portfolio2['return']*(100-i)/100)
+                deviations.append(pow(portfolio1['deviation']*i/100, 2) + pow(portfolio2['deviation']*(100-i)/100, 2) + 2*(i/100)*((100-i)/100)*portfolio1['cov'])
 
-        pyplot.plot([math.sqrt(deviation) for deviation in deviations], returns,'b-')
-        pyplot.ylabel('Returns')
-        pyplot.xlabel('Deviations')
+            pyplot.plot([math.sqrt(deviation) for deviation in deviations], returns,'b-')
+            pyplot.ylabel('Returns')
+            pyplot.xlabel('Deviations')
+
+        except ufException as excep:
+            raise excep
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "plotPortfolio.plot got unknown error %s" % excep)
 
     def show(self):
         '''

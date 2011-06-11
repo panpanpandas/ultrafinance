@@ -34,4 +34,3 @@ class ufException(Exception):
     def getMsg(self):
         """ accessor """
         return "%s: %s" % (self.__errorMsg, traceback.format_exc(5))
-

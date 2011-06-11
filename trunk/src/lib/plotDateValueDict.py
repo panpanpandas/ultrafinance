@@ -5,6 +5,7 @@ Created on Jan 3, 2011
 '''
 from matplotlib import pyplot
 from datetime import datetime
+from lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -24,7 +25,7 @@ class PlotDateValueDict(object):
         self.rect = []
         height =  float(1 - self.lowMargin - self.upMargin - (self.length-1)*betweenMargin)/self.length
         pre = self.lowMargin
-        for index in range(self.length):
+        for _ in range(self.length):
             self.rect.append([self.leftMargin, pre, 1 - self.leftMargin - self.rightMargin , height])
             pre = pre + height + betweenMargin
 
@@ -32,23 +33,29 @@ class PlotDateValueDict(object):
         pyplot.rc('grid', color='0.75', linestyle='-', linewidth=0.5)
 
     def plot(self):
-        ''' get average '''
-        fig = pyplot.figure()
+        ''' plot dataValue '''
+        try:
+            fig = pyplot.figure()
 
-        i = 0
-        ax0 = None
-        for label, dateValues in self.dateValueDict.items():
-            print dateValues
-            if 0 == i:
-                ax = fig.add_axes(self.rect[i])
-                ax0 = ax
-            else:
-                ax = fig.add_axes(self.rect[i], sharex=ax0)
-            i += 1
-            ax.plot_date([datetime.strptime(dateValue.date, self.dateFormat) for dateValue in dateValues],
-                     [dateValue.value for dateValue in dateValues], fmt='b-')
-            ax.set_ylabel(label)
-            ax.set_ylim(min([int(dateValue.value) for dateValue in dateValues]) /1.1, max([int(dateValue.value) for dateValue in dateValues]) * 1.1 )
-            #ax.set_ylim(0, 1000)
+            i = 0
+            ax0 = None
+            for label, dateValues in self.dateValueDict.items():
+                print dateValues
+                if 0 == i:
+                    ax = fig.add_axes(self.rect[i])
+                    ax0 = ax
+                else:
+                    ax = fig.add_axes(self.rect[i], sharex=ax0)
+                i += 1
+                ax.plot_date([datetime.strptime(dateValue.date, self.dateFormat) for dateValue in dateValues],
+                         [dateValue.value for dateValue in dateValues], fmt='b-')
+                ax.set_ylabel(label)
+                ax.set_ylim(min([int(dateValue.value) for dateValue in dateValues]) /1.1, max([int(dateValue.value) for dateValue in dateValues]) * 1.1 )
+                #ax.set_ylim(0, 1000)
 
-        pyplot.show()
+            pyplot.show()
+
+        except ufException as excep:
+            raise excep
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "plotDateValueDict.plot got unknown error %s" % excep)

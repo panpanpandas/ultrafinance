@@ -77,5 +77,5 @@ class ExcelLib():
         ''' read a cell'''
         try:
             return self.sheet.cell(rowNumber, colNumber).value
-        except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in Excellib.readCell")
+        except BaseException as excep:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in Excellib.readCell %s" % excep)

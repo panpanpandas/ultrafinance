@@ -14,6 +14,7 @@ import os
 import logging
 LOG = logging.getLogger(__name__)
 
+
 benchmarks = {'DEFAULT': '^GSPC',
               'L': '^STI',
               'HK': '^HSI',
