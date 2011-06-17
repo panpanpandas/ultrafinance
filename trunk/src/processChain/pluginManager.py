@@ -6,7 +6,7 @@ Created on Dec 25, 2010
 
 import os
 import fnmatch
-from util import import_class
+from lib.util import import_class
 from pydispatch.dispatcher import connect, send
 
 from configuration import Configuration
@@ -26,9 +26,11 @@ class PluginManager(object):
 
     def __loadGroupPlugins(self, groupName):
         ''' load a group of plugins under a folder '''
-        path = os.getcwd() + '\\' + groupName
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), groupName)
+        print path
         for pluginName in [os.path.splitext(filename)[0] for filename in fnmatch.filter(os.listdir(path), '*.py')]:
             if '__init__' != pluginName:
+                print pluginName
                 self.plugins[groupName][pluginName] = import_class(path, pluginName)()
 
     def setupPlugins(self):

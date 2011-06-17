@@ -3,7 +3,7 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from pluginManager import PluginManager
+from processChain.pluginManager import PluginManager
 from configuration import Configuration
 
 import logging
@@ -22,8 +22,6 @@ class UltraFinance():
 
     def start(self):
         ''' run function '''
-        #self.pluginManager.setInput('feeder', 'HistoricalDataFeeder', 'GOOG')
-
         pluginName = Configuration().getOption('app_main', 'feeder')
         if pluginName in self.pluginManager.plugins['feeder']:
             self.pluginManager.runPlugin('feeder', pluginName)
