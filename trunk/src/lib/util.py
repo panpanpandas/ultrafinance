@@ -11,7 +11,7 @@ LOG = logging.getLogger(__name__)
 def import_class(path, fileName, className=None):
     ''' dynamically import class '''
     if not className:
-        className = fileName[0].capitalize() + fileName[1:]
+        className = fileName[0].upper() + fileName[1:] if len(fileName) > 1 else fileName[0].upper()
     sys.path.append(path)
 
     mod = __import__(fileName)
