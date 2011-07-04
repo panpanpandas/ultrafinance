@@ -3,13 +3,15 @@ Created on Apr 24, 2011
 
 @author: ppa
 '''
-from lib.stockMeasurement import StockMeasurement
-from lib.dataType import StockDailyType
-from lib.excelLib import ExcelLib
 from operator import itemgetter
-from lib.yahooFinance import YahooFinance
 import time
 import os
+
+from ultrafinance.lib.stockMeasurement import StockMeasurement
+from ultrafinance.lib.historicalDataStorage import HistoricalDataStorage
+from ultrafinance.lib.yahooFinance import YahooFinance
+from ultrafinance.lib.dataType import StockDailyType
+from ultrafinance.lib.excelLib import ExcelLib
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -29,17 +31,33 @@ def buildBenchmarkValues():
     print "buildBenchmarkValues %s" % benchmarkValues.keys()
 
 class ChinaReturn():
-    def __init__(self):
-        self.excelPath = '../../dataSource/CHINA'
+    def __init__(self, fullTest=False):
+        ''' constructor '''
+        #folder path ../dataSource/CHINA'
+        self.__workingDir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                     'dataSource',
+                                     'CHINA')
+        if fullTest:
+            self.__stocklistFile = os.path.join(self.__workingDir, 'china544.list')
+        else:
+            self.__stocklistFile = os.path.join(self.__workingDir, 'china10.list')
 
-    def run(self):
+    def saveHistroyDataIntoExcel(self):
+        ''' read stock list, get historical data, and save to excel '''
+        print 'Save HistroyData Into Excel'
+        storage = HistoricalDataStorage(os.path.join(self.__workingDir, 'china') )
+        storage.buildExlsFromFile(fileName=self.__stocklistFile, div=5)
+
+    def analyze(self):
+        ''' analyze '''
+        print 'analyze'
         buildBenchmarkValues()
-        for fileName in filter( lambda f: f.endswith('.xls'), os.listdir(self.excelPath) ):
+        for fileName in filter( lambda f: f.endswith('.xls'), os.listdir(self.__workingDir) ):
             returnRates = [[], [], [], [], [], [], []]
             alphas = [[], [], [], [], [], [], []]
             relativeReturnRates = [[], [], [], [], [], [], []]
 
-            excelFile = os.path.join(self.excelPath, fileName)
+            excelFile = os.path.join(self.__workingDir, fileName)
             sheetNames = ExcelLib.getSheetNames( excelFile )
             print sheetNames
 
@@ -74,7 +92,7 @@ class ChinaReturn():
                             alphas[index].append( stockMeasurement.alpha() )
                             relativeReturnRates[index].append( stockMeasurement.relativeReturnRate() )
 
-            with open(os.path.join(self.excelPath, 'output.txt'), 'a') as outputFile:
+            with open(os.path.join(self.__workingDir, 'output.txt'), 'a') as outputFile:
                 outputReturnRates = map(lambda x: sum(x)/len(x), returnRates)
                 outputAlphas = map(lambda x: sum(x)/len(x), alphas)
                 outputRelativeReturnRates = map(lambda x: sum(x)/len(x), relativeReturnRates)
@@ -91,4 +109,5 @@ class ChinaReturn():
 
 if __name__ == '__main__':
     app = ChinaReturn()
-    app.run()
+    app.saveHistroyDataIntoExcel()
+    app.analyze()
