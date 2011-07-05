@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 import sys, os
 
 version = '1.0.0'
@@ -17,7 +17,8 @@ setup(name='ultrafinance',
       author_email='panpandas@gmail.com',
       url='http://code.google.com/p/ultra-finance/',
       license='MIT',
-      packages=['ultrafinance', 'dataSource', 'doc', 'lib', 'test'],
+
+      packages=['ultrafinance'],
       include_package_data=True,
       install_requires=[
         'xlwt>=0.7.2',
