@@ -6,7 +6,7 @@ Created on May 6, 2011
 import unittest
 
 import os
-from lib.excelLib import ExcelLib
+from ultrafinance.lib.excelLib import ExcelLib
 
 class testExcelLib(unittest.TestCase):
 

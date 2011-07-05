@@ -4,9 +4,9 @@ Created on May 6, 2011
 @author: ppa
 '''
 import unittest
-import os
 
-from lib.plotPortfolio import PlotPortfolio
+import os
+from ultrafinance.lib.plotPortfolio import PlotPortfolio
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ class testPlotPortfolio(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_Plot_SaveFig(self):
+    def testPlotSaveFig(self):
         plotPortfolio = PlotPortfolio([{'label':'bond', 'return':0.08, 'deviation':12, 'cov':72},
                                        {'label':'stock', 'return':0.13, 'deviation':20, 'cov':72}])
         plotPortfolio.plot()

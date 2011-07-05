@@ -3,8 +3,8 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from processChain.pluginManager import PluginManager
-from configuration import Configuration
+from ultrafinance.processChain.pluginManager import PluginManager
+from ultrafinance.configuration import Configuration
 
 import logging
 LOG = logging.getLogger(__name__)

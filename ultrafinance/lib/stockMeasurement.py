@@ -7,8 +7,8 @@ from scipy import polyfit
 import copy
 import numpy
 
-from lib.yahooFinance import YahooFinance
-from lib.errors import ufException, Errors
+from ultrafinance.lib.yahooFinance import YahooFinance
+from ultrafinance.lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)

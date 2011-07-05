@@ -6,7 +6,7 @@ Created on May 6, 2011
 import unittest
 
 import os
-from lib.historicalDataStorage import HistoricalDataStorage
+from ultrafinance.lib.historicalDataStorage import HistoricalDataStorage
 
 import logging
 LOG = logging.getLogger(__name__)

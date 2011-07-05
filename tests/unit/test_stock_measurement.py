@@ -6,8 +6,8 @@ Created on May 6, 2011
 import unittest
 
 import os
-from lib.stockMeasurement import StockMeasurement
-from lib.dataType import StockDailyType
+from ultrafinance.lib.stockMeasurement import StockMeasurement
+from ultrafinance.lib.dataType import StockDailyType
 
 import logging
 LOG = logging.getLogger(__name__)

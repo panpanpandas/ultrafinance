@@ -6,7 +6,7 @@ By Gary Robinson, grobinson@flyfi.com
 '''
 import unittest
 import time
-from lib.designPattern.singleton import *
+from ultrafinance.lib.designPattern.singleton import *
 
 class testSingleton(unittest.TestCase):
         def testReturnsSameObject(self):

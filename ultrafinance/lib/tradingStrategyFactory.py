@@ -3,7 +3,7 @@ Created on Feb 26, 2011
 
 @author: ppa
 '''
-from lib.errors import ufException, Errors
+from ultrafinance.lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)

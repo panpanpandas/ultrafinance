@@ -5,7 +5,7 @@ Created on Feb 20, 2011
 '''
 from matplotlib import pyplot
 import math
-from lib.errors import ufException, Errors
+from ultrafinance.lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)

@@ -11,8 +11,8 @@ sample usage:
 '''
 import urllib
 from operator import itemgetter
-from lib.dataType import StockDailyType
-from lib.errors import ufException, Errors
+from ultrafinance.lib.dataType import StockDailyType
+from ultrafinance.lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)

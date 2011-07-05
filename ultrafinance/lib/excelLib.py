@@ -4,8 +4,7 @@ Created on Jan 30, 2011
 @author: ppa
 '''
 from xlrd import open_workbook
-
-from lib.errors import ufException, Errors
+from ultrafinance.lib.errors import ufException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)

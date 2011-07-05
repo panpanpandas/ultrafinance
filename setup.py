@@ -1,5 +1,10 @@
+'''
+Created on July 1, 2011
+
+@author: ppa
+'''
 from setuptools import setup
-import sys, os
+from setupCommand import TestCommand, CleanCommand
 
 version = '1.0.0'
 
@@ -23,7 +28,9 @@ setup(name='ultrafinance',
       install_requires=[
         'xlwt>=0.7.2',
         'xlrd>=0.7.1',
+        'matplotlib>=0.99',
         'numpy>=1.5.1',
         'scipy>=0.9.0rc3'
-      ]
+      ],
+      cmdclass = {'test': TestCommand, 'clean': CleanCommand }
 )

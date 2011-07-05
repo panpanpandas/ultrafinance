@@ -4,7 +4,7 @@ Created on May 6, 2011
 @author: ppa
 '''
 import unittest
-from lib.yahooFinance import YahooFinance
+from ultrafinance.lib.yahooFinance import YahooFinance
 
 import logging
 LOG = logging.getLogger(__name__)

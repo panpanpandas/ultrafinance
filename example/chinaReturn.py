@@ -73,13 +73,13 @@ class ChinaReturn():
                         data = []
                         for i in range(1, duration + 1):
                             #print "row %d, duration %d" % (i, duration)
-                            values = excel.readRow(i)
-                            if values:
+                            try:
+                                values = excel.readRow(i)
                                 for j in range( len(values) ):
                                     values[j] = float(values[j]) if j != 0 else values[j]
 
                                 data.append( StockDailyType( *values ) )
-                            else:
+                            except:
                                 print 'break at %d' % i
                                 break
                         if data:

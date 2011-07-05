@@ -1,13 +1,2 @@
-2011-06-26 00:35:15,523.523 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] buildExlsFromFile C:\Users\ppa\workspace\ultraFinance\trunk\dataSource\CHINA\china10.list, div 5
-2011-06-26 00:35:15,523.523 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] buildExls ['AGP.L', 'BSST.L', 'CEVO.L', 'CFC.L', 'CGM.L', 'CGOP.L', 'CHNS.L', 'CHWI.L', 'CMSH.L', 'CRO.L'], div 5
-2011-06-26 00:35:15,809.809 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] AGP.Lsaved
-2011-06-26 00:35:18,118.118 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] BSST.Lsaved
-2011-06-26 00:35:20,289.289 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] failed buildExl for stock CEVO.L
-2011-06-26 00:35:22,697.697 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] CFC.Lsaved
-2011-06-26 00:35:25,328.328 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] CGM.Lsaved
-2011-06-26 00:35:27,515.515 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] failed buildExl for stock CGOP.L
-2011-06-26 00:35:30,063.063 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] CHNS.Lsaved
-2011-06-26 00:35:32,914.914 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] CHWI.Lsaved
-2011-06-26 00:35:35,121.121 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] failed buildExl for stock CMSH.L
-2011-06-26 00:35:37,881.881 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] CRO.Lsaved
-2011-06-26 00:35:49,407.407 DEBUG [ultrafinance.lib.stockMeasurement] [MainThread] Not enought dateValues
+2011-07-05 02:07:55,761.761 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] buildExls ['MMM', 'ACE', 'ABT', 'ANF', 'ADBE', 'AMD'], div 2
+2011-07-05 02:07:57,071.071 DEBUG [ultrafinance.lib.historicalDataStorage] [MainThread] failed buildExl for stock MMM

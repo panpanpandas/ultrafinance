@@ -4,8 +4,8 @@ Created on May 6, 2011
 @author: ppa
 '''
 import unittest
-from lib.tradingStrategyFactory import *
-from lib.tradingStrategy.automaticInvestmentPlan import *
+from ultrafinance.lib.tradingStrategyFactory import *
+from ultrafinance.lib.tradingStrategy.automaticInvestmentPlan import *
 
 from lib.dataType import DateValueType
 

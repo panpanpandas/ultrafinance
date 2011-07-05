@@ -7,8 +7,8 @@ from datetime import date
 from xlwt import Workbook
 import time
 
-from lib.errors import ufException, Errors
-from lib.yahooFinance import YahooFinance
+from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.yahooFinance import YahooFinance
 
 import logging
 LOG = logging.getLogger(__name__)
