@@ -5,8 +5,8 @@ Created on Dec 18, 2010
 '''
 from datetime import date
 
-from lib.yahooFinance import YahooFinance
-from processChain.baseModule import BaseModule
+from ultrafinance.lib.yahooFinance import YahooFinance
+from ultrafinance.processChain.baseModule import BaseModule
 
 import logging
 LOG = logging.getLogger(__name__)

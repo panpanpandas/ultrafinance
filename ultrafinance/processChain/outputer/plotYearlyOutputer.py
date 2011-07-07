@@ -3,8 +3,8 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from processChain.baseModule import BaseModule
-from lib.plotDateValueDict import PlotDateValueDict
+from ultrafinance.processChain.baseModule import BaseModule
+from ultrafinance.lib.plotDateValueDict import PlotDateValueDict
 
 import logging
 LOG = logging.getLogger(__name__)

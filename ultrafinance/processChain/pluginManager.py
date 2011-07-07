@@ -6,10 +6,10 @@ Created on Dec 25, 2010
 
 import os
 import fnmatch
-from lib.util import import_class
 from pydispatch.dispatcher import connect, send
 
-from configuration import Configuration
+from ultrafinance.lib.util import import_class
+from ultrafinance.processChain.configuration import Configuration
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -27,17 +27,19 @@ class PluginManager(object):
     def __loadGroupPlugins(self, groupName):
         ''' load a group of plugins under a folder '''
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), groupName)
-        print path
+        print "Loading plugins under %s" % path
         for pluginName in [os.path.splitext(filename)[0] for filename in fnmatch.filter(os.listdir(path), '*.py')]:
             if '__init__' != pluginName:
-                print pluginName
+                print "Plugin loaded: %s" % pluginName
                 self.plugins[groupName][pluginName] = import_class(path, pluginName)()
 
     def setupPlugins(self):
         ''' dynamically load all plugins '''
+        print "Start loading plugins....."
         for groupName in PluginManager.groupNames:
             self.__loadGroupPlugins(groupName)
 
+        print "Start setting up dispatcher......"
         for groupName in PluginManager.groupNames:
             for pluginName in self.plugins[groupName]:
                 self.__setup_dispatcher(groupName, pluginName)
@@ -59,10 +61,13 @@ class PluginManager(object):
                         )
 
     def runPlugin(self, groupName, pluginName):
+        ''' run plugin '''
+        print "Running plugin: %s" % pluginName
         self.plugins[groupName][pluginName].run(self.plugins[groupName][pluginName].input)
 
     def triggerDispatcher(self, groupName, pluginName):
-        ''' trigger dispatcher with the output '''
+        ''' trigger dispatcher '''
+        print "Trigger dispatcher: %s" % pluginName
         send(pluginName, pluginName, input = self.plugins[groupName][pluginName].input)
 
     def setInput(self, groupName, pluginName, input):

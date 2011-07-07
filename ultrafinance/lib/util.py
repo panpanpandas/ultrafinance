@@ -11,8 +11,16 @@ LOG = logging.getLogger(__name__)
 def import_class(path, fileName, className=None):
     ''' dynamically import class '''
     if not className:
-        className = fileName[0].upper() + fileName[1:] if len(fileName) > 1 else fileName[0].upper()
+        className = capitalize(fileName)
     sys.path.append(path)
 
     mod = __import__(fileName)
     return getattr(mod, className)
+
+def capitalize(inputString):
+    ''' capitalize first letter '''
+    return inputString[0].upper() + inputString[1:] if len(inputString) > 1 else inputString[0].upper()
+
+def deCapitalize(inputString):
+    ''' de-capitalize first letter '''
+    return inputString[0].lower() + inputString[1:] if len(inputString) > 1 else inputString[0].lower()

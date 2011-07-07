@@ -4,13 +4,14 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 from ultrafinance.processChain.pluginManager import PluginManager
-from ultrafinance.configuration import Configuration
+from ultrafinance.processChain.configuration import Configuration
 
 import logging
 LOG = logging.getLogger(__name__)
 
-class UltraFinance():
-    ''' base class for ultraFinance'''
+#TODO: use singleton pattern
+class ProcessChain():
+    ''' class processChain '''
     def __init__(self):
         ''' constructor '''
         self.pluginManager = PluginManager()
@@ -22,14 +23,15 @@ class UltraFinance():
 
     def start(self):
         ''' run function '''
+        self.pluginManager.setInput('feeder', 'historicalDataFeeder', 'GOOG')
+
         pluginName = Configuration().getOption('app_main', 'feeder')
         if pluginName in self.pluginManager.plugins['feeder']:
             self.pluginManager.runPlugin('feeder', pluginName)
             self.pluginManager.triggerDispatcher('feeder', pluginName)
 
-        print 'HAHAHA'
-
 if __name__ == '__main__':
-    ultraFinance = UltraFinance()
-    ultraFinance.setup()
-    ultraFinance.start()
+    processChain = ProcessChain()
+    processChain.setup()
+    processChain.start()
+    print 'Finish Process Chain'

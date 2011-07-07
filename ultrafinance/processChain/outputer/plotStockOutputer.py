@@ -3,12 +3,10 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from processChain.baseModule import BaseModule
+from ultrafinance.processChain.baseModule import BaseModule
 from matplotlib import pyplot
 from datetime import datetime
-#from operator import itemgetter
 import pylab
-
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -21,14 +19,13 @@ class PlotStockOutputer(BaseModule):
 
     def execute(self, dateValuesDict):
         ''' do output '''
-        print 'dateValues'
         super(PlotStockOutputer, self).execute(input)
         fig = pylab.figure()
         ax = fig.gca()
 
         # Plotting here ...
         for dateValues in dateValuesDict.values():
-            ax.plot_date([datetime.strptime(dateValue.date, '%Y-%m-%d') for dateValue in dateValues], \
-                     [dateValue.adjClose for dateValue in dateValues], fmt='b-')
+            ax.plot_date([datetime.strptime(dateValue.date, '%Y-%m-%d') for dateValue in dateValues],
+                         [dateValue.adjClose for dateValue in dateValues], fmt='b-')
             pylab.grid()
             pyplot.show()

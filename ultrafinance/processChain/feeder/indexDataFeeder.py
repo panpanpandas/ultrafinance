@@ -3,9 +3,9 @@ Created on Jan 30, 2011
 
 @author: ppa
 '''
-from lib.excelLib import ExcelLib
-from processChain.baseModule import BaseModule
-from lib.dataType import DateValueType
+from ultrafinance.lib.excelLib import ExcelLib
+from ultrafinance.processChain.baseModule import BaseModule
+from ultrafinance.lib.dataType import DateValueType
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ class IndexDataFeeder(BaseModule):
 
     def execute(self, input):
         ''' preparing data'''
-        with ExcelLib('../dataSource/longTerm_1871.xls', 0) as excel:
+        with ExcelLib('../../dataSource/longTerm_1871.xls', 0) as excel:
             year = excel.readCol(0, 8, 147)
             stock = excel.readCol(1, 8, 147)
             for i in range(len(year)):

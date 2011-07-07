@@ -3,7 +3,7 @@ Created on Dec 18, 2010
 
 @author: ppa
 '''
-from processChain.baseModule import BaseModule
+from ultrafinance.processChain.baseModule import BaseModule
 
 import logging
 LOG = logging.getLogger(__name__)

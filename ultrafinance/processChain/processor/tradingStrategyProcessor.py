@@ -3,8 +3,8 @@ Created on Feb 26, 2010
 
 @author: ppa
 '''
-from processChain.baseModule import BaseModule
-from lib.tradingStrategyFactory import TradingStrategyFactory
+from ultrafinance.processChain.baseModule import BaseModule
+from ultrafinance.lib.tradingStrategyFactory import TradingStrategyFactory
 
 import logging
 LOG = logging.getLogger(__name__)

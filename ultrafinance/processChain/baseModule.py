@@ -6,6 +6,7 @@ Created on Dec 18, 2010
 import abc
 from threading import Thread
 from pydispatch.dispatcher import send
+from ultrafinance.lib.util import deCapitalize
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -27,9 +28,9 @@ class BaseModule(object):
 
     def after(self):
         ''' operation for cleaing up(e.g. close connection, database ...) '''
-        print 'send out signal %s' % self.__class__.__name__
-        return send(self.__class__.__name__, self, \
-                    input=self.output)
+        signal = deCapitalize(self.__class__.__name__)
+        print 'send out signal %s' % signal
+        return send(signal, self, input=self.output)
 
     def execute(self, input):
         ''' processsing data'''
