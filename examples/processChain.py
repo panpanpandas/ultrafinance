@@ -14,21 +14,17 @@ class ProcessChain():
     ''' class processChain '''
     def __init__(self):
         ''' constructor '''
-        self.pluginManager = PluginManager()
-        self.pluginManager.setupPlugins()
+        self.configure = Configuration()
+        self.pluginManager = PluginManager(self.configure)
 
     def setup(self):
         ''' setup feeder, output and processing plugins '''
-        pass
+        self.pluginManager.setup()
+        self.pluginManager.setInput('feeder', 'historicalDataFeeder', 'GOOG')
 
     def start(self):
         ''' run function '''
-        self.pluginManager.setInput('feeder', 'historicalDataFeeder', 'GOOG')
-
-        pluginName = Configuration().getOption('app_main', 'feeder')
-        if pluginName in self.pluginManager.plugins['feeder']:
-            self.pluginManager.runPlugin('feeder', pluginName)
-            self.pluginManager.triggerDispatcher('feeder', pluginName)
+        self.pluginManager.runFeederPlugins()
 
 if __name__ == '__main__':
     processChain = ProcessChain()
