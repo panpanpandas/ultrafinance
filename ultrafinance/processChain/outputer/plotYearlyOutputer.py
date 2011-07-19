@@ -17,7 +17,6 @@ class PlotYearlyOutputer(BaseModule):
 
     def execute(self, dateValuesDict):
         ''' do output '''
-        print 'dateValuesDict' + str(dateValuesDict)
         super(PlotYearlyOutputer, self).execute(input)
         p = PlotDateValueDict(dateValuesDict)
         p.plot()

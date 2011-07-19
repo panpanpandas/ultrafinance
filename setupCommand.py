@@ -31,7 +31,7 @@ class TestCommand(Command):
                     ['tests', 'unit', splitext(basename(t))[0]])
                 )
 
-        print testfiles
+        print 'Running tests: %s' % testfiles
         tests = TestLoader().loadTestsFromNames(testfiles)
         t = TextTestRunner(verbosity = 1)
         t.run(tests)

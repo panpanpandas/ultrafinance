@@ -5,6 +5,9 @@ Created on Feb 26, 2010
 '''
 from ultrafinance.processChain.baseModule import BaseModule
 from ultrafinance.lib.tradingStrategyFactory import TradingStrategyFactory
+from ultrafinance.lib.tradingStrategy.automaticInvestmentPlan import adjustFixAmountPerPeriod
+from ultrafinance.lib.tradingStrategy.automaticInvestmentPlan import fixAmountPerPeriod
+from ultrafinance.lib.tradingStrategy.automaticInvestmentPlan import fixAmountPerPeriodWithAddtionWhenDrop
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -15,15 +18,15 @@ class TradingStrategyProcessor(BaseModule):
         ''' constructor '''
         super(TradingStrategyProcessor, self).__init__()
 
-    def execute(self, dateValuesDict):
+    def execute(self, dateValueList):
         ''' processing input'''
-        tradingStrategyFactory = TradingStrategyFactory('fixAmountPerPeriod')
-        ret = tradingStrategyFactory.calculateReturn(dateValuesDict, 1)
-        print 'fixAmountPerPeriod %s' %ret
-        tradingStrategyFactory = TradingStrategyFactory('fixAmountPerPeriodWithAddtionWhenDrop')
-        ret = tradingStrategyFactory.calculateReturn(dateValuesDict, 1, 5)
-        print 'fixAmountPerPeriodWithAddtionWhenDrop %s' %ret
-        tradingStrategyFactory = TradingStrategyFactory('adjustFixAmountPerPeriod')
-        ret = tradingStrategyFactory.calculateReturn(dateValuesDict, 5, 5)
-        print 'adjustFixAmountPerPeriod %s' %ret
-        return ret
+        output = {}
+        tradingStrategyFactory = TradingStrategyFactory(fixAmountPerPeriod)
+        output['fixAmountPerPeriod'] = tradingStrategyFactory.calculateReturn(dateValueList, 1)
+
+        tradingStrategyFactory = TradingStrategyFactory(fixAmountPerPeriodWithAddtionWhenDrop)
+        output['fixAmountPerPeriodWithAddtionWhenDrop'] = tradingStrategyFactory.calculateReturn(dateValueList, 1, 5)
+
+        tradingStrategyFactory = TradingStrategyFactory(adjustFixAmountPerPeriod)
+        output['adjustFixAmountPerPeriod'] = tradingStrategyFactory.calculateReturn(dateValueList, 5, 5)
+        return output

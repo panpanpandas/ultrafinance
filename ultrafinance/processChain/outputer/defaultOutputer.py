@@ -17,4 +17,4 @@ class DefaultOutputer(BaseModule):
     def execute(self, input):
         ''' do output'''
         super(DefaultOutputer, self).execute(input)
-        return None
+        print input

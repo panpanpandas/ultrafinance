@@ -40,7 +40,6 @@ class PlotDateValueDict(object):
             i = 0
             ax0 = None
             for label, dateValues in self.dateValueDict.items():
-                print dateValues
                 if 0 == i:
                     ax = fig.add_axes(self.rect[i])
                     ax0 = ax

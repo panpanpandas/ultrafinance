@@ -4,19 +4,21 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 import ConfigParser
-import os
+from os import path
 
 import logging
 LOG = logging.getLogger(__name__)
 
 class Configuration(object):
     ''' class that handles configuration '''
-    def __init__(self, configFilePath=None):
+    def __init__(self, configFileName=None):
         ''' Constructor '''
-        if configFilePath:
-            self.configFilePath = configFilePath
+        if configFileName:
+            self.configFilePath = path.join(path.dirname(path.abspath(__file__)), 'config', configFileName)
         else:
-            self.configFilePath = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config', 'dev.ini')
+            self.configFilePath = path.join(path.dirname(path.abspath(__file__)), 'config', 'dev.ini')
+
+        print "Using configure file: %s" % self.configFilePath
 
     def getConfiguration(self, section):
         ''' load all configuration '''
@@ -39,7 +41,10 @@ class Configuration(object):
         else:
             return None
 
-app_global = Configuration().getConfiguration("app_main")
+    def getAppMain(self):
+        ''' get app_main '''
+        self.getConfiguration('app_main')
+#app_global = Configuration().getConfiguration("app_main")
 
 if __name__ == '__main__':
     print Configuration().getOption('app_main', 'feeder')

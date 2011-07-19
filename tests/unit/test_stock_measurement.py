@@ -29,7 +29,6 @@ class testStockMeasurement(unittest.TestCase):
                       StockDailyType('2011-01-10', '3261.35', '3270.21', '3229.27', '3229.27', '000', '3229.2')]
         stockMeasurement = StockMeasurement(dateValues, '^GSPC')
         stockMeasurement.linearRegression()
-        print stockMeasurement.alpha()
         assert stockMeasurement.alpha()
         assert stockMeasurement.beta()
         assert stockMeasurement.mean()

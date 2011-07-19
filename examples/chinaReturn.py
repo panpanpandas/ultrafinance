@@ -23,12 +23,12 @@ benchmarks = {'DEFAULT': '^GSPC',
 benchmarkValues = {}
 
 def buildBenchmarkValues():
-    print "building BenchmarkValues"
+    print "Building BenchmarkValues"
     for key in benchmarks.values():
         benchmarkValues[key] = YahooFinance().get_historical_prices(key, '19010101', '20130101')
         time.sleep(1)
 
-    print "buildBenchmarkValues %s" % benchmarkValues.keys()
+    print "BenchmarkValues %s built" % benchmarkValues.keys()
 
 class ChinaReturn():
     def __init__(self, fullTest=False):
@@ -37,6 +37,7 @@ class ChinaReturn():
         self.__workingDir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                      'dataSource',
                                      'CHINA')
+        self.dayIntervals = [1, 3, 30, 90, 250, 500, 750]
         if fullTest:
             self.__stocklistFile = os.path.join(self.__workingDir, 'china544.list')
         else:
@@ -50,16 +51,16 @@ class ChinaReturn():
 
     def analyze(self):
         ''' analyze '''
-        print 'analyze'
+        print 'Start analyzing'
         buildBenchmarkValues()
-        for fileName in filter( lambda f: f.endswith('.xls'), os.listdir(self.__workingDir) ):
-            returnRates = [[], [], [], [], [], [], []]
-            alphas = [[], [], [], [], [], [], []]
-            relativeReturnRates = [[], [], [], [], [], [], []]
 
+        returnRates = [[], [], [], [], [], [], []]
+        alphas = [[], [], [], [], [], [], []]
+        relativeReturnRates = [[], [], [], [], [], [], []]
+
+        for fileName in filter( lambda f: f.endswith('.xls'), os.listdir(self.__workingDir) ):
             excelFile = os.path.join(self.__workingDir, fileName)
-            sheetNames = ExcelLib.getSheetNames( excelFile )
-            print sheetNames
+            sheetNames = ExcelLib.getSheetNames(excelFile)
 
             for sheetName in sheetNames:
                 with ExcelLib(excelFile) as excel:
@@ -67,20 +68,25 @@ class ChinaReturn():
 
                     contry = sheetName.split('.')[-1] if len( sheetName.split('.') ) != 1 else 'DEFAULT'
                     benchmark = benchmarks[contry]
-                    print 'processing %s with benchmark %s' % (sheetName, benchmark)
+                    print 'Processing %s with benchmark %s' % (sheetName, benchmark)
 
-                    for index, duration in enumerate([1, 3, 30, 90, 250, 500, 750]):
+                    for index, duration in enumerate(self.dayIntervals):
                         data = []
+                        broke = False
                         for i in range(1, duration + 1):
                             #print "row %d, duration %d" % (i, duration)
+                            if broke:
+                                break
+
                             try:
                                 values = excel.readRow(i)
                                 for j in range( len(values) ):
                                     values[j] = float(values[j]) if j != 0 else values[j]
 
                                 data.append( StockDailyType( *values ) )
-                            except:
-                                print 'break at %d' % i
+                            except Exception:
+                                print 'Analyzing %s break at %d' % (sheetName, i)
+                                broke = True
                                 break
                         if data:
                             dateValues = sorted(data, key=itemgetter(0))
@@ -92,20 +98,20 @@ class ChinaReturn():
                             alphas[index].append( stockMeasurement.alpha() )
                             relativeReturnRates[index].append( stockMeasurement.relativeReturnRate() )
 
-            with open(os.path.join(self.__workingDir, 'output.txt'), 'a') as outputFile:
-                outputReturnRates = map(lambda x: sum(x)/len(x), returnRates)
-                outputAlphas = map(lambda x: sum(x)/len(x), alphas)
-                outputRelativeReturnRates = map(lambda x: sum(x)/len(x), relativeReturnRates)
-                print "returnRates: %s" % outputReturnRates
-                print "alphas: %s" % outputAlphas
-                print "relativeReturnRates: %s" % outputRelativeReturnRates
-                outputFile.write("====================%s======================\n" % fileName)
-                outputFile.write("outputReturnRates %s\n" % outputReturnRates)
-                outputFile.write("outputAlphas %s\n" % outputAlphas)
-                outputFile.write("outputRelativeReturnRates %s\n" % outputRelativeReturnRates)
-                outputFile.write("returnRates %s\n" % returnRates)
-                outputFile.write("alphas %s\n" % alphas)
-                outputFile.write("relativeReturnRates %s\n" % relativeReturnRates)
+        with open(os.path.join(self.__workingDir, 'output.txt'), 'w') as outputFile:
+            outputReturnRates = map(lambda x: sum(x)/len(x), returnRates)
+            outputAlphas = map(lambda x: sum(x)/len(x), alphas)
+            outputRelativeReturnRates = map(lambda x: sum(x)/len(x), relativeReturnRates)
+            print "Days since going public %s" % self.dayIntervals
+            print "returnRates: %s" % outputReturnRates
+            print "alphas: %s" % outputAlphas
+            print "relativeReturnRates: %s" % outputRelativeReturnRates
+            outputFile.write("outputReturnRates %s\n" % outputReturnRates)
+            outputFile.write("outputAlphas %s\n" % outputAlphas)
+            outputFile.write("outputRelativeReturnRates %s\n" % outputRelativeReturnRates)
+            outputFile.write("returnRates %s\n" % returnRates)
+            outputFile.write("alphas %s\n" % alphas)
+            outputFile.write("relativeReturnRates %s\n" % relativeReturnRates)
 
 if __name__ == '__main__':
     app = ChinaReturn()

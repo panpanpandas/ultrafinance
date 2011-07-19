@@ -5,29 +5,30 @@ Created on Dec 18, 2010
 '''
 from ultrafinance.processChain.pluginManager import PluginManager
 from ultrafinance.processChain.configuration import Configuration
+import threading
+import time
 
 import logging
 LOG = logging.getLogger(__name__)
 
 #TODO: use singleton pattern
-class ProcessChain():
+class ProcessChain(threading.Thread):
     ''' class processChain '''
-    def __init__(self):
+    def __init__(self, configFile):
         ''' constructor '''
-        self.configure = Configuration()
+        super(ProcessChain, self).__init__()
+        self.configure = Configuration(configFile)
+        #self.configure = Configuration()
         self.pluginManager = PluginManager(self.configure)
 
-    def setup(self):
-        ''' setup feeder, output and processing plugins '''
+    def run(self):
+        ''' thread run function '''
         self.pluginManager.setup()
         self.pluginManager.setInput('feeder', 'historicalDataFeeder', 'GOOG')
-
-    def start(self):
-        ''' run function '''
         self.pluginManager.runFeederPlugins()
 
-if __name__ == '__main__':
-    processChain = ProcessChain()
-    processChain.setup()
+def runProcessChain(configFile):
+    ''' run process chain '''
+    print "Using configuration file %s" % configFile
+    processChain = ProcessChain(configFile)
     processChain.start()
-    print 'Finish Process Chain'

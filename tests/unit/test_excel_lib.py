@@ -21,8 +21,6 @@ class testExcelLib(unittest.TestCase):
         with ExcelLib( os.path.join(dataSourcePath, 'hoursing_interestRate.xls') ) as excel:
             excel.setSheetNumber(0)
             data = excel.readRow(0)
-            print data
             assert len(data)
             data = excel.readCol(0, 7)
-            print data
             assert len(data)

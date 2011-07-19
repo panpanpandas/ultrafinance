@@ -6,6 +6,7 @@ Created on Mar 20, 2011
 from datetime import date
 from xlwt import Workbook
 import time
+import traceback
 
 from ultrafinance.lib.errors import ufException, Errors
 from ultrafinance.lib.yahooFinance import YahooFinance
@@ -23,27 +24,30 @@ class HistoricalDataStorage():
 
     def buildExls(self, stocks, div=1):
         ''' get a list of stock data and store '''
-        LOG.debug("buildExls %s, div %s" % (stocks, div))
+        print "BuildExls %s, div %s" % (stocks, div)
 
         if div < 1:
             raise ufException(Errors.INDEX_RANGE_ERROR, "div need to be at least 1, %s are given" % div)
 
         for i in range(div):
             workbook = Workbook()
-            for stock in stocks[i * len(stocks)/div: (i+1) * len(stocks)/div]:
+            stocksToProcess = stocks[i * len(stocks)/div: (i+1) * len(stocks)/div]
+            for stock in stocksToProcess:
                 try:
                     self.__buildExl(stock, workbook)
-                except:
-                    LOG.debug("failed buildExl for stock %s" % stock)
+                except Exception:
+                    print "failed buildExl for stock %s: %s" % (stock, traceback.print_exc())
 
                 #sleep for 2 seconds, or Yahoo server will throw exception
                 time.sleep(2)
 
-            workbook.save(self.__outputPrefix + str(i) + '.xls')
+            fileName = '%s%d.xls' % (self.__outputPrefix, i)
+            print "Saved %s to %s" % (stocksToProcess, fileName)
+            workbook.save(fileName)
 
     def buildExlsFromFile(self, fileName, div=1):
         ''' read a file with stock names, get data and store'''
-        LOG.debug("buildExlsFromFile %s, div %s" % (fileName, div))
+        print "buildExlsFromFile %s, div %s" % (fileName, div)
 
         f = open(fileName)
         lines = [line.rstrip() for line in f]
@@ -64,8 +68,8 @@ class HistoricalDataStorage():
                 for col, field in enumerate(['date', 'open', 'high', 'low', 'close', 'volume', 'adjClose']):
                     ws.write(row+1, col, getattr(data, field) )
 
-            LOG.debug(stock + 'saved')
-        except ufException as excep:
-            raise excep
-        except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error  %s" % excep)
+        except ufException as excp:
+            raise excp
+        except Exception:
+            raise ufException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error  %s"
+                              % traceback.print_exc())

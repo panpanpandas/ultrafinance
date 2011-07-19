@@ -4,8 +4,8 @@ Created on Mar 27, 2011
 @author: ppa
 '''
 from datetime import date
-
-from lib.excelLib import ExcelLib
+from operator import itemgetter
+from ultrafinance.lib.excelLib import ExcelLib
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -14,6 +14,7 @@ class TradeInWeek():
     '''
     trade in one week. Which day to buy and sell is best
     '''
+    WEEKDAY = ['SUN.', 'MON.', 'TUE.', 'WED.', 'THU.', 'FRI.']
     def __init__(self, fileName, sheetNumber = 0):
         ''' Constructor '''
         self.returnRate = {}
@@ -24,7 +25,10 @@ class TradeInWeek():
         ''' preparing data'''
         for buyWeekDate in range(1, 6):
             for sellWeekDate in range(1, 6):
-                self.returnRate[(buyWeekDate, sellWeekDate)] = self.oneStrategy(buyWeekDate, sellWeekDate)
+                self.returnRate[(TradeInWeek.WEEKDAY[buyWeekDate], TradeInWeek.WEEKDAY[sellWeekDate])] = \
+                    '%.2f' % self.oneStrategy(buyWeekDate, sellWeekDate)
+
+        return sorted(self.returnRate.items(), key=itemgetter(1))
 
     def oneStrategy(self, buyWeekDate, sellWeekDate):
         totalReturn = 0
