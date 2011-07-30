@@ -30,7 +30,7 @@ class BaseModule(object):
         ''' operation for cleaing up(e.g. close connection, database ...) '''
         signal = deCapitalize(self.__class__.__name__)
         print 'send out signal %s' % signal
-        return send(signal, self, input=self.output)
+        send(signal, self, input=self.output)
 
     def execute(self, input):
         ''' processsing data'''
@@ -46,6 +46,7 @@ class BaseModule(object):
 
         thread = Thread(target=runFunc, args=(input,))
         thread.start()
+        thread.join()
 
     def __getName(self):
         ''' retrun name '''

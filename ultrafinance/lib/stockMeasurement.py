@@ -3,7 +3,6 @@ Created on Jan 3, 2011
 
 @author: ppa
 '''
-from scipy import polyfit
 import copy
 import numpy
 
@@ -60,7 +59,7 @@ class StockMeasurement():
         try:
             x = [float(self.__benchmarkValues[index + 1].adjClose)/float(self.__benchmarkValues[index].adjClose) for index in range(len(self.__benchmarkValues) - 1)]
             y = [float(self.__dateValues[index + 1].adjClose)/float(self.__dateValues[index].adjClose) for index in range(len(self.__dateValues) - 1)]
-            (self.__beta, self.__alpha) = polyfit(x, y, 1)
+            (self.__beta, self.__alpha) = numpy.polyfit(x, y, 1)
             self.__regressioned = True
         except BaseException as excep:
             raise ufException(Errors.UNKNOWN_ERROR, "stockMeasurement.linearRegression got unknown error %s" % excep)

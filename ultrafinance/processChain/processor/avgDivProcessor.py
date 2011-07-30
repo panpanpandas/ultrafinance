@@ -20,8 +20,6 @@ class AvgDivProcessor(BaseModule):
         super(AvgDivProcessor, self).execute(dateValuesDict)
         for dateValues in dateValuesDict.values():
             stockMeasurement = StockMeasurement(dateValues)
-            data = {'days': len(dateValues), 'avg': stockMeasurement.mean(), 'standard deviation': stockMeasurement.std(), \
+            data = {'days': len(dateValues), 'avg': stockMeasurement.mean(), 'standard deviation': stockMeasurement.std(),
                     'alpha': stockMeasurement.alpha(), 'beta': stockMeasurement.beta()}
-
-            print data
             return data

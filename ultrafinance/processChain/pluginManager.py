@@ -34,6 +34,7 @@ class PluginManager(object):
                 self.plugins[groupName][pluginName] = import_class(path, pluginName)()
 
     def runFeederPlugins(self):
+        print 'Start running feeders......'
         feederStrings = self.configure.getOption('app_main', 'feeder')
         if not feederStrings:
             print "No feeders provided: %s" % feederStrings
@@ -83,10 +84,10 @@ class PluginManager(object):
         print "Running plugin: %s" % pluginName
         self.plugins[groupName][pluginName].run(self.plugins[groupName][pluginName].input)
 
-#    def triggerDispatcher(self, groupName, pluginName):
-#        ''' trigger dispatcher '''
-#        print "Trigger dispatcher: %s" % pluginName
-#        send(pluginName, pluginName, input = self.plugins[groupName][pluginName].input)
+    #def triggerDispatcher(self, groupName, pluginName):
+    #    ''' trigger dispatcher '''
+    #    print "Trigger dispatcher: %s" % pluginName
+    #    send(pluginName, pluginName, input = self.plugins[groupName][pluginName].input)
 
     def setInput(self, groupName, pluginName, input):
         self.plugins[groupName][pluginName].input = input

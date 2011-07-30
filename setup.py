@@ -26,11 +26,11 @@ setup(name='ultrafinance',
       packages=['ultrafinance'],
       include_package_data=True,
       install_requires=[
+        'PyDispatcher>=2.0.1',
         'xlwt>=0.7.2',
         'xlrd>=0.7.1',
         'matplotlib>=0.99',
-        'numpy>=1.5.1',
-        'scipy>=0.9.0rc3'
+        'numpy>=1.5.1'
       ],
       cmdclass = {'test': TestCommand, 'clean': CleanCommand }
 )

@@ -20,6 +20,7 @@ class PlotStockOutputer(BaseModule):
     def execute(self, dateValuesDict):
         ''' do output '''
         super(PlotStockOutputer, self).execute(input)
+        #pyplot.ion() # turns interactive mode on
         fig = pylab.figure()
         ax = fig.gca()
 
