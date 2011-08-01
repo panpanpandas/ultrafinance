@@ -1,0 +1,79 @@
+'''
+Created on July 31, 2011
+
+@author: ppa
+'''
+import urllib2
+from BeautifulSoup import BeautifulSoup
+import traceback
+from operator import itemgetter
+from ultrafinance.lib.util import convertGoogCSVDate
+from ultrafinance.lib.dataType import StockDailyType
+from ultrafinance.lib.errors import ufException, Errors
+
+import logging
+LOG = logging.getLogger(__name__)
+
+class GoogleFinance(object):
+    def __request(self, url):
+        try:
+            return urllib2.urlopen(url)
+        except IOError:
+            raise ufException(Errors.NETWORK_ERROR, "Can't connect to Google server")
+        except urllib2.HTTPError:
+            raise ufException(Errors.NETWORK_400_ERROR, "400 error when connect to Google server")
+        except Exception:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.__request %s" % traceback.format_exc())
+
+    def getAll(self, symbol):
+        """
+        Get all available quote data for the given ticker symbol.
+        Returns a dictionary.
+        """
+        url = 'http://www.google.com/finance?q=%s' % symbol
+        page = self.__request(url)
+
+        soup = BeautifulSoup(page)
+        snapData=soup.find(id='snap-data')
+        if snapData is None:
+            raise ufException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
+        data = {}
+        for li in snapData.findAll('li'):
+            keyLi, valLi = li('span')
+            data[keyLi.getText()] = valLi.getText()
+        return data
+
+    def getHistoricalPrices(self, symbol, startdate, enddate):
+        """
+        Get historical prices for the given ticker symbol.
+        Date format is 'YYYY-MM-DD'
+
+        Returns a nested list.
+        """
+        try:
+            url = 'http://www.google.com/finance/historical?q=%s&startdate=%s&enddate=%s&output=csv' % (symbol, startdate, enddate)
+            try:
+                page = self.__request(url)
+            except ufException as ufExcep:
+                ##if symol is not right, will get 400
+                if Errors.NETWORK_400_ERROR == ufExcep.getCode:
+                    raise ufException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
+                raise ufExcep
+
+            days = page.readlines()
+            values = [day.split(',') for day in days]
+            # sample values:[['Date', 'Open', 'High', 'Low', 'Close', 'Volume'], \
+            #              ['2009-12-31', '112.77', '112.80', '111.39', '111.44', '90637900']...]
+            data = []
+            for value in values[1:]:
+                date = convertGoogCSVDate(value[0])
+                data.append(StockDailyType(date, value[1], value[2], value[3], value[4], value[5], None))
+
+            dateValues = sorted(data, key=itemgetter(0))
+            return dateValues
+
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
+        #sample output
+        #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose=None))...]
+

@@ -30,7 +30,8 @@ setup(name='ultrafinance',
         'xlwt>=0.7.2',
         'xlrd>=0.7.1',
         'matplotlib>=0.99',
-        'numpy>=1.5.1'
+        'numpy>=1.5.1',
+        'BeautifulSoup>=3.2.0'
       ],
       cmdclass = {'test': TestCommand, 'clean': CleanCommand }
 )

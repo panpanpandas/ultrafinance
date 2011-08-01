@@ -11,8 +11,11 @@ class Errors(object):
     UNKNOWN_ERROR = 1
 
     NETWORK_ERROR = 100
+    NETWORK_400_ERROR = 101
 
     INDEX_RANGE_ERROR = 200
+
+    STOCK_SYMBOL_ERROR = 300
 
 
 class ufException(Exception):

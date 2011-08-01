@@ -4,9 +4,12 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 import sys
+from datetime import datetime
 
 import logging
 LOG = logging.getLogger(__name__)
+
+googCSVDateformat = "%d-%b-%y"
 
 def import_class(path, fileName, className=None):
     ''' dynamically import class '''
@@ -28,3 +31,7 @@ def deCapitalize(inputString):
 def splitByComma(inputString):
     ''' split string by comma '''
     return [name.strip() for name in inputString.split(',')]
+
+def convertGoogCSVDate(googCSVDate):
+    ''' convert date 25-Jul-2010 to 2010-07-25'''
+    return datetime.strptime(googCSVDate, googCSVDateformat).date()

@@ -10,6 +10,7 @@ sample usage:
 529.46
 '''
 import urllib
+import traceback
 from operator import itemgetter
 from ultrafinance.lib.dataType import StockDailyType
 from ultrafinance.lib.errors import ufException, Errors
@@ -24,8 +25,8 @@ class YahooFinance(object):
             return urllib.urlopen(url).read().strip().strip('"')
         except IOError:
             raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
-        except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request %s" % excep)
+        except BaseException:
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request %s" % traceback.format_exc())
 
     def get_all(self, symbol):
         """
