@@ -102,7 +102,7 @@ class GoogleFinance(object):
             fieldValues = {}
             for field in fields:
                 cPage = copy.copy(page)
-                fieldContents = findPatthen(cPage, [('id', re.compile(r"(\w+)%s(\w+)" % timeInterval) ), ('id', 'fs-table'), ('text', re.compile(r"^%s" % field))])
+                fieldContents = findPatthen(cPage, [('id', re.compile(r"(\w+)%s(\w+)" % timeInterval) ), ('id', 'fs-table'), ('text', re.compile(r"^%s$" % field))])
 
                 if 1 != len(fieldContents):
                     #raise ufException(Errors.STOCK_PARSING_ERROR, "Parse data error for symbol %s" % symbol)

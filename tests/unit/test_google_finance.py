@@ -38,5 +38,6 @@ class testGoogleFinance(unittest.TestCase):
 
     def testGetFinancials(self):
         googleFinance = GoogleFinance()
-        ret = googleFinance.getFinancials('NASDAQ:EBAY', ['Total Revenue', 'Diluted Normalized EPS'])
+        ret = googleFinance.getFinancials('NASDAQ:EBAY', ['Net Income', 'Total Revenue', 'Diluted Normalized EPS'])
         print ret
+        assert 0
