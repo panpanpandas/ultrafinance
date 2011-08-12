@@ -16,6 +16,7 @@ class Errors(object):
     INDEX_RANGE_ERROR = 200
 
     STOCK_SYMBOL_ERROR = 300
+    STOCK_PARSING_ERROR = 301
 
 
 class ufException(Exception):

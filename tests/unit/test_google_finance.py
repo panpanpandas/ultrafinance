@@ -35,3 +35,8 @@ class testGoogleFinance(unittest.TestCase):
     def testGetHistoricalPrices_badSymbol(self):
         googleFinance = GoogleFinance()
         self.assertRaises(ufException, googleFinance.getHistoricalPrices, *['AFSDFASDFASDFS', '20110101', '20110110'])
+
+    def testGetFinancials(self):
+        googleFinance = GoogleFinance()
+        ret = googleFinance.getFinancials('NASDAQ:EBAY', ['Total Revenue', 'Diluted Normalized EPS'])
+        print ret

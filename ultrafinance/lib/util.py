@@ -4,6 +4,7 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 import sys
+from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 
 import logging
@@ -35,3 +36,21 @@ def splitByComma(inputString):
 def convertGoogCSVDate(googCSVDate):
     ''' convert date 25-Jul-2010 to 2010-07-25'''
     return datetime.strptime(googCSVDate, googCSVDateformat).date()
+
+def findPatthen(page, pList):
+    datas = [BeautifulSoup(page)]
+    index = 0
+    for key, pattern in pList:
+        newDatas = []
+        for data in datas:
+            if 'id' == key:
+                newDatas.extend(data.findAll(id=pattern, recursive=True))
+            if 'text' == key:
+                newDatas.extend(data.findAll(text=pattern, recursive=True))
+
+        datas = newDatas
+        index += 1
+        if not datas:
+            break
+
+    return datas
