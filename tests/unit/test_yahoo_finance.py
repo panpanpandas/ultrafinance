@@ -19,5 +19,5 @@ class testYahooFinance(unittest.TestCase):
 
     def testGetHistoricalPrices(self):
         yahooFinance = YahooFinance()
-        data = yahooFinance.get_historical_prices('^STI', '20110101', '20110110')
+        data = yahooFinance.getHistoricalPrices('^STI', '20110101', '20110110')
         assert len(data)

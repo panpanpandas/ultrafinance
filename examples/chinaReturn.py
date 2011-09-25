@@ -25,7 +25,7 @@ benchmarkValues = {}
 def buildBenchmarkValues():
     print "Building BenchmarkValues"
     for key in benchmarks.values():
-        benchmarkValues[key] = YahooFinance().get_historical_prices(key, '19010101', '20130101')
+        benchmarkValues[key] = YahooFinance().getHistoricalPrices(key, '19010101', '20130101')
         time.sleep(1)
 
     print "BenchmarkValues %s built" % benchmarkValues.keys()

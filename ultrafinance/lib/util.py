@@ -6,6 +6,7 @@ Created on Dec 18, 2010
 import sys
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
+import time
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -54,3 +55,11 @@ def findPatthen(page, pList):
             break
 
     return datas
+
+def string2EpochTime(stingTime, format='%Y%m%d'):
+    ''' convert string time to epoch time '''
+    return int(time.mktime(datetime.strptime(stingTime, '%Y%m%d').timetuple()))
+
+def string2datetime(stringTime, format='%Y%m%d'):
+    ''' convert string time to epoch time'''
+    return datetime.strptime(stingTime, '%Y%m%d')

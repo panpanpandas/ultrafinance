@@ -36,7 +36,7 @@ class StockMeasurement():
             return
 
         if not self.__benchmarkValues:
-            self.__benchmarkValues = YahooFinance().get_historical_prices(self.__benchmark, self.__dateValues[0].date, self.__dateValues[-1].date)
+            self.__benchmarkValues = YahooFinance().getHistoricalPrices(self.__benchmark, self.__dateValues[0].date, self.__dateValues[-1].date)
 
         tradeSuspended = False
         if 0 in map(lambda x: float(x.adjClose), self.__dateValues):

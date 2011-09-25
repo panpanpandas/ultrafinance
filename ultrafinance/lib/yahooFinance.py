@@ -117,7 +117,7 @@ class YahooFinance(object):
     def get_short_ratio(self, symbol):
         return self.__request(symbol, 's7')
 
-    def get_historical_prices(self, symbol, start_date, end_date):
+    def getHistoricalPrices(self, symbol, start_date, end_date):
         """
         Get historical prices for the given ticker symbol.
         Date format is 'YYYY-MM-DD'
@@ -151,6 +151,6 @@ class YahooFinance(object):
         except IOError:
             raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.get_historical_prices %s" % excep)
+            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.getHistoricalPrices %s" % excep)
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose='111.6'))...]

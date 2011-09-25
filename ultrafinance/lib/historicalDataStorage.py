@@ -60,7 +60,7 @@ class HistoricalDataStorage():
 
             #get data
             yahooFinance = YahooFinance()
-            allData = yahooFinance.get_historical_prices(stock, self.__startDate, self.__endDate)
+            allData = yahooFinance.getHistoricalPrices(stock, self.__startDate, self.__endDate)
             for col, field in enumerate(['date', 'open', 'high', 'low', 'close', 'volume', 'adjClose']):
                 ws.write(0, col, field)
 

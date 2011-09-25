@@ -40,4 +40,8 @@ class testGoogleFinance(unittest.TestCase):
         googleFinance = GoogleFinance()
         ret = googleFinance.getFinancials('NASDAQ:EBAY', ['Net Income', 'Total Revenue', 'Diluted Normalized EPS'])
         print ret
-        assert 0
+
+    def testGetTickPrices(self):
+        googleFinance = GoogleFinance()
+        ret = googleFinance.getTickPrices('EBAY', startdate='20110101', enddate='20110110', intervalMins=1)
+        print ret
