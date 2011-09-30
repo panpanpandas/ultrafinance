@@ -18,6 +18,9 @@ class Errors(object):
     STOCK_SYMBOL_ERROR = 300
     STOCK_PARSING_ERROR = 301
 
+    HBASE_CREATE_ERROR=401
+    HBASE_UPDATE_ERROR=402
+
 
 class ufException(Exception):
     """ Ultra-Finance exception """

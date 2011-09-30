@@ -31,7 +31,8 @@ setup(name='ultrafinance',
         'xlrd>=0.7.1',
         'matplotlib>=0.99',
         'numpy>=1.5.1',
-        'BeautifulSoup>=3.2.0'
+        'BeautifulSoup>=3.2.0',
+        'hbase-thrift>=0.20.4'
       ],
       cmdclass = {'test': TestCommand, 'clean': CleanCommand }
 )
