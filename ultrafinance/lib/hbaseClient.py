@@ -52,10 +52,13 @@ class HBaseClient:
             raise ufException(Errors.UNKNOWN_ERROR,
                               "Error when getting column descriptors table %s" % tName)
 
-    def updateRows(self, tName, rowName, mutations):
+    def updateRow(self, tName, rowName, mutations, timestamp=None):
         ''' add row to table '''
         try:
-            self.__client.mutateRow(tName, rowName, mutations)
+            if timestamp is None:
+                self.__client.mutateRow(tName, rowName, mutations)
+            else:
+                self.__client.mutateRowTs(tName, rowName, mutations, timestamp)
         except Exception as excp:
             raise ufException(Errors.HBASE_UPDATE_ERROR,
                               "Error when updating table %s - rowName %s - mutations %s: %s" % \
