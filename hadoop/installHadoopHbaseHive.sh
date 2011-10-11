@@ -115,11 +115,12 @@ function echoHbaseUsage {
     echo "To start hbase: $HBASE_HOME/bin/start-hbase.sh"
     echo "To stop hbase: $HBASE_HOME/bin/stop-hbase.sh"
     echo "To start hbase shell: $HBASE_HOME/bin/hbase shell"
-    echo "Sample create: create 'test', 'cf'"
-    echo "Sample insert: put 'test', 'row1', 'cf:a', 'value1'"
-    echo "Sampel list: scan 'test'"
-    echo "Sampel query: get 'test', 'row1'"
-    echo "Sample delete: disable 'test'; drop 'test'"
+    echo "Create: create 'test', 'cf'"
+    echo "Insert: put 'test', 'row1', 'cf:a', 'value1'"
+    echo "List: scan 'test'"
+    echo "Query: get 'test', 'row1'"
+    echo "Delete: disable 'test'; drop 'test'"
+    echo "bin/hbase-daemon.sh start thrift"
     echo "======================Done: HBase Usage====================================="
 }
 
