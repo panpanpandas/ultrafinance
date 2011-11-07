@@ -9,7 +9,7 @@ import traceback
 from operator import itemgetter
 from ultrafinance.lib.util import convertGoogCSVDate, findPatthen
 from ultrafinance.lib.dataType import StockDailyType
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 import copy
 from ultrafinance.lib.util import string2EpochTime
 
@@ -22,11 +22,11 @@ class GoogleFinance(object):
         try:
             return urllib2.urlopen(url)
         except IOError:
-            raise ufException(Errors.NETWORK_ERROR, "Can't connect to Google server")
+            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Google server")
         except urllib2.HTTPError:
-            raise ufException(Errors.NETWORK_400_ERROR, "400 error when connect to Google server")
+            raise UfException(Errors.NETWORK_400_ERROR, "400 error when connect to Google server")
         except Exception:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.__request %s" % traceback.format_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.__request %s" % traceback.format_exc())
 
     def getAll(self, symbol):
         """
@@ -39,7 +39,7 @@ class GoogleFinance(object):
         soup = BeautifulSoup(page)
         snapData=soup.find(id='snap-data')
         if snapData is None:
-            raise ufException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
+            raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
         data = {}
         for li in snapData.findAll('li'):
             keyLi, valLi = li('span')
@@ -57,10 +57,10 @@ class GoogleFinance(object):
             url = 'http://www.google.com/finance/historical?q=%s&startdate=%s&enddate=%s&output=csv' % (symbol, startdate, enddate)
             try:
                 page = self.__request(url)
-            except ufException as ufExcep:
+            except UfException as ufExcep:
                 ##if symol is not right, will get 400
                 if Errors.NETWORK_400_ERROR == ufExcep.getCode:
-                    raise ufException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
+                    raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
                 raise ufExcep
 
             days = page.readlines()
@@ -76,7 +76,7 @@ class GoogleFinance(object):
             return dateValues
 
         except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose=None))...]
 
@@ -91,10 +91,10 @@ class GoogleFinance(object):
             url = 'http://www.google.com/finance?q=%s&fstype=ii' % symbol
             try:
                 page = self.__request(url).read()
-            except ufException as ufExcep:
+            except UfException as ufExcep:
                 ##if symol is not right, will get 400
                 if Errors.NETWORK_400_ERROR == ufExcep.getCode:
-                    raise ufException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
+                    raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
                 raise ufExcep
 
             timeInterval = 'annual' if annual else 'interim'
@@ -121,7 +121,7 @@ class GoogleFinance(object):
 
             return fieldValues
         except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
 
 
     def getTickPrices(self, symbol, startdate, enddate, intervalMins=60):
@@ -143,10 +143,10 @@ class GoogleFinance(object):
             url = 'http://www.google.com/finance/getprices?q=%s&i=%s&p=%sd&f=d,o,h,l,c,v&ts=%s' % (symbol, interval, period, startdate)
             try:
                 page = self.__request(url)
-            except ufException as ufExcep:
+            except UfException as ufExcep:
                 ##if symol is not right, will get 400
                 if Errors.NETWORK_400_ERROR == ufExcep.getCode:
-                    raise ufException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
+                    raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
                 raise ufExcep
 
             days = page.readlines()[7:] # first 7 line is document
@@ -160,6 +160,6 @@ class GoogleFinance(object):
             return data
 
         except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
         #sample output
         #[stockDaylyData(date='1316784600', open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose=None))...]

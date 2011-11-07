@@ -8,7 +8,7 @@ from xlwt import Workbook
 import time
 import traceback
 
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 from ultrafinance.lib.yahooFinance import YahooFinance
 
 import logging
@@ -27,7 +27,7 @@ class HistoricalDataStorage():
         print "BuildExls %s, div %s" % (stocks, div)
 
         if div < 1:
-            raise ufException(Errors.INDEX_RANGE_ERROR, "div need to be at least 1, %s are given" % div)
+            raise UfException(Errors.INDEX_RANGE_ERROR, "div need to be at least 1, %s are given" % div)
 
         for i in range(div):
             workbook = Workbook()
@@ -68,8 +68,8 @@ class HistoricalDataStorage():
                 for col, field in enumerate(['date', 'open', 'high', 'low', 'close', 'volume', 'adjClose']):
                     ws.write(row+1, col, getattr(data, field) )
 
-        except ufException as excp:
+        except UfException as excp:
             raise excp
         except Exception:
-            raise ufException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error  %s"
+            raise UfException(Errors.UNKNOWN_ERROR, "historicalStorage.__buildExl got unknown error  %s"
                               % traceback.print_exc())

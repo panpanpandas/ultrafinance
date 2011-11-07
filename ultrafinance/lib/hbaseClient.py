@@ -11,7 +11,7 @@ from thrift.protocol import TBinaryProtocol
 from hbase import ttypes
 from hbase.Hbase import Client, ColumnDescriptor, Mutation
 
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class HBaseClient:
         try:
             self.__client.createTable(tName, ColumnDescriptors)
         except ttypes.AlreadyExists as excp:
-            raise ufException(Errors.HBASE_CREATE_ERROR,
+            raise UfException(Errors.HBASE_CREATE_ERROR,
                               "AlreadyExists Error when creating table %s with cols: %s): %s" % \
                               (tName, [col.name for col in ColumnDescriptors], excp.message))
 
@@ -49,7 +49,7 @@ class HBaseClient:
         try:
             return self.__client.getColumnDescriptors(tName)
         except:
-            raise ufException(Errors.UNKNOWN_ERROR,
+            raise UfException(Errors.UNKNOWN_ERROR,
                               "Error when getting column descriptors table %s" % tName)
 
     def updateRow(self, tName, rowName, mutations, timestamp=None):
@@ -60,7 +60,7 @@ class HBaseClient:
             else:
                 self.__client.mutateRowTs(tName, rowName, mutations, timestamp)
         except Exception as excp:
-            raise ufException(Errors.HBASE_UPDATE_ERROR,
+            raise UfException(Errors.HBASE_UPDATE_ERROR,
                               "Error when updating table %s - rowName %s - mutations %s: %s" % \
                               (tName, rowName, mutations, excp))
 

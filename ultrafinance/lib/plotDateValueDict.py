@@ -5,7 +5,7 @@ Created on Jan 3, 2011
 '''
 from matplotlib import pyplot
 from datetime import datetime
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class PlotDateValueDict(object):
 
             pyplot.show()
 
-        except ufException as excep:
+        except UfException as excep:
             raise excep
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "plotDateValueDict.plot got unknown error %s" % excep)
+            raise UfException(Errors.UNKNOWN_ERROR, "plotDateValueDict.plot got unknown error %s" % excep)

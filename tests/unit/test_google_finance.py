@@ -5,7 +5,7 @@ Created on July 30, 2011
 '''
 import unittest
 from ultrafinance.lib.googleFinance import GoogleFinance
-from ultrafinance.lib.errors import ufException
+from ultrafinance.lib.errors import UfException
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class testGoogleFinance(unittest.TestCase):
 
     def tearDown(self):
         pass
-
+    """
     def testGetHistoricalPrices(self):
         googleFinance = GoogleFinance()
         data = googleFinance.getHistoricalPrices('NASDAQ:EBAY', '20110101', '20110110')
@@ -40,7 +40,7 @@ class testGoogleFinance(unittest.TestCase):
         googleFinance = GoogleFinance()
         ret = googleFinance.getFinancials('NASDAQ:EBAY', ['Net Income', 'Total Revenue', 'Diluted Normalized EPS'])
         print ret
-
+    """
     def testGetTickPrices(self):
         googleFinance = GoogleFinance()
         ret = googleFinance.getTickPrices('EBAY', startdate='20110101', enddate='20110110', intervalMins=1)

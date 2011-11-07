@@ -13,7 +13,7 @@ import urllib
 import traceback
 from operator import itemgetter
 from ultrafinance.lib.dataType import StockDailyType
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -24,9 +24,9 @@ class YahooFinance(object):
             url = 'http://finance.yahoo.com/d/quotes.csv?s=%s&f=%s' % (symbol, stat)
             return urllib.urlopen(url).read().strip().strip('"')
         except IOError:
-            raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
+            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
         except BaseException:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request %s" % traceback.format_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.__request %s" % traceback.format_exc())
 
     def get_all(self, symbol):
         """
@@ -149,8 +149,8 @@ class YahooFinance(object):
             return dateValues
 
         except IOError:
-            raise ufException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
+            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Yahoo server")
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.getHistoricalPrices %s" % excep)
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in YahooFinance.getHistoricalPrices %s" % excep)
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose='111.6'))...]

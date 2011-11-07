@@ -21,8 +21,16 @@ class Errors(object):
     HBASE_CREATE_ERROR=401
     HBASE_UPDATE_ERROR=402
 
+    #type eroor
+    SIDE_TYPE_ERROR=500
+    ORDER_TYPE_ERROR=501
+    TRANSITION_TYPE_ERROR=502
 
-class ufException(Exception):
+    #tickFeeder
+    FEEDER_INVALID_ERROR = 600
+
+
+class UfException(Exception):
     """ Ultra-Finance exception """
     def __init__(self, error, errorMsg):
         """ constructor  """

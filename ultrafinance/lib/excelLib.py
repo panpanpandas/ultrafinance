@@ -4,7 +4,7 @@ Created on Jan 30, 2011
 @author: ppa
 '''
 from xlrd import open_workbook
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -51,10 +51,10 @@ class ExcelLib():
 
     def readRow(self, rowNumber, startCol=0, endCol=-1):
         if abs(rowNumber) >= self.sheet.nrows:
-            raise ufException(Errors.INDEX_RANGE_ERROR,
+            raise UfException(Errors.INDEX_RANGE_ERROR,
                               "Excellib.readRow: row number too big: row %s, max %s" % (rowNumber, self.sheet.nrows) )
         if max(abs(startCol), abs(endCol)) > self.sheet.ncols:
-            raise ufException(Errors.INDEX_RANGE_ERROR,
+            raise UfException(Errors.INDEX_RANGE_ERROR,
                               "Excellib.readRow: col number too big: col %s, max %s" % (max(abs(startCol), abs(endCol)), self.sheet.ncols) )
         if -1 == endCol:
             endCol = self.sheet.ncols
@@ -63,10 +63,10 @@ class ExcelLib():
 
     def readCol(self, colNumber, startRow=0, endRow=-1):
         if abs(colNumber) > self.sheet.ncols:
-            raise ufException(Errors.INDEX_RANGE_ERROR,
+            raise UfException(Errors.INDEX_RANGE_ERROR,
                               "Excellib.readCol: col number too big: col %s, max %s" % (colNumber, self.sheet.ncols) )
         if max(abs(startRow), abs(endRow)) > self.sheet.nrows:
-            raise ufException(Errors.INDEX_RANGE_ERROR,
+            raise UfException(Errors.INDEX_RANGE_ERROR,
                               "Excellib.readCol: row number too big: row %s, max %s" % (max(abs(startRow), abs(endRow)), self.sheet.nrows) )
         if -1 == endRow:
             endRow = self.sheet.nrows
@@ -78,4 +78,4 @@ class ExcelLib():
         try:
             return self.sheet.cell(rowNumber, colNumber).value
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "Unknown Error in Excellib.readCell %s" % excep)
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in Excellib.readCell %s" % excep)

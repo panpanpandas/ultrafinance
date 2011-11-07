@@ -5,7 +5,7 @@ Created on Feb 20, 2011
 '''
 from matplotlib import pyplot
 import math
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -34,10 +34,10 @@ class PlotPortfolio(object):
             pyplot.ylabel('Returns')
             pyplot.xlabel('Deviations')
 
-        except ufException as excep:
+        except UfException as excep:
             raise excep
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "plotPortfolio.plot got unknown error %s" % excep)
+            raise UfException(Errors.UNKNOWN_ERROR, "plotPortfolio.plot got unknown error %s" % excep)
 
     def show(self):
         '''

@@ -7,7 +7,7 @@ import copy
 import numpy
 
 from ultrafinance.lib.yahooFinance import YahooFinance
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class StockMeasurement():
             (self.__beta, self.__alpha) = numpy.polyfit(x, y, 1)
             self.__regressioned = True
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "stockMeasurement.linearRegression got unknown error %s" % excep)
+            raise UfException(Errors.UNKNOWN_ERROR, "stockMeasurement.linearRegression got unknown error %s" % excep)
 
     def marketReturnRate(self):
         if not self.__regressioned:

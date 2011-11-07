@@ -3,7 +3,7 @@ Created on Feb 26, 2011
 
 @author: ppa
 '''
-from ultrafinance.lib.errors import ufException, Errors
+from ultrafinance.lib.errors import UfException, Errors
 import traceback
 
 import logging
@@ -19,7 +19,7 @@ class TradingStrategyFactory():
         try:
             return self.strategy(dateValues, *args)
 
-        except ufException as excep:
+        except UfException as excep:
             raise excep
         except BaseException as excep:
-            raise ufException(Errors.UNKNOWN_ERROR, "tradingStrategyFactory.calculateReturn got unknown error %s" % traceback.print_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "tradingStrategyFactory.calculateReturn got unknown error %s" % traceback.print_exc())
