@@ -62,4 +62,4 @@ def string2EpochTime(stingTime, format='%Y%m%d'):
 
 def string2datetime(stringTime, format='%Y%m%d'):
     ''' convert string time to epoch time'''
-    return datetime.strptime(stingTime, '%Y%m%d')
+    return datetime.strptime(stringTime, '%Y%m%d')

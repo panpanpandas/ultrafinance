@@ -29,6 +29,9 @@ class Errors(object):
     #tickFeeder
     FEEDER_INVALID_ERROR = 600
 
+    #account error
+    TRANSITION_INVALID_ERROR = 700
+
 
 class UfException(Exception):
     """ Ultra-Finance exception """
