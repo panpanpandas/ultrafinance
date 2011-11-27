@@ -19,16 +19,16 @@ class GoogleDAM(BaseDAM):
 
     def readQuotes(self, start, end):
         ''' read quotes from google Financial'''
-        if self.__symbol is None:
+        if self.symbol is None:
             LOG.debug('Symbol is None')
             return []
 
-        return self.__gf.getQuotes(self.__symbol, start, end)
+        return self.__gf.getQuotes(self.symbol, start, end)
 
     def readTicks(self, start, end):
         ''' read ticks from google Financial'''
-        if self.__symbol is None:
+        if self.symbol is None:
             LOG.debug('Symbol is None')
             return []
 
-        return self.__gf.getTicks(self.__symbol, start, end)
+        return self.__gf.getTicks(self.symbol, start, end)
