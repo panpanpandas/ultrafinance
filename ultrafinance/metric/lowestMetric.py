@@ -1,5 +1,5 @@
 '''
-Created on Nov 7, 2011
+Created on Nov 8, 2011
 
 @author: ppa
 '''
@@ -7,25 +7,25 @@ from ultrafinance.metric.baseMetric import BaseMetric
 
 import time
 
-class HighestMetric(BaseMetric):
-    ''' Highest metric class '''
+class LowestMetric(BaseMetric):
+    ''' Lowest metric class '''
 
     def __init__(self):
         ''' constructor '''
-        self.__highest = 0
+        self.__lowest = 0
         self.__time = None
 
-    def getHighest(self):
+    def getLowest(self):
         ''' get highest '''
-        return self.__highest
+        return self.__lowest
 
     def record(self, account):
         ''' keep record of the account '''
         totalValue = account.getTotalValue()
-        if totalValue > self.__highest:
-            self.__highest = totalValue
+        if totalValue < self.__lowest:
+            self.__lowest = totalValue
             self.__time = time.ctime()
 
     def printResult(self):
         ''' print result '''
-        print "Highest account value %.2f at %s" % (self.__highest, self.__time)
+        print "Lowest account value %.2f at %s" % (self.__lowest, self.__time)

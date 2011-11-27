@@ -1,1 +1,1 @@
-''' tradingCenter '''
+''' strategies '''

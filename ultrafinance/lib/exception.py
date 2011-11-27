@@ -9,9 +9,6 @@ class Errors(object):
     """ class hosts error code constants """
     # general errors
     UNKNOWN_ERROR = 1
-    FILE_NOT_EXIST = 2
-    FILE_EXIST = 3
-    UNDEFINED_METHOD = 4
 
     NETWORK_ERROR = 100
     NETWORK_400_ERROR = 101
@@ -35,10 +32,6 @@ class Errors(object):
     #account error
     TRANSITION_INVALID_ERROR = 700
 
-    #excelLib error
-    SHEET_NAME_EXIST = 800
-    SHEET_NAME_INVALID = 801
-    INVALID_EXCEL_MODE = 802
 
 class UfException(Exception):
     """ Ultra-Finance exception """
