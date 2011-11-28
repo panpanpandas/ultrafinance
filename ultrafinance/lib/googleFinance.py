@@ -37,13 +37,14 @@ class GoogleFinance(object):
         page = self.__request(url)
 
         soup = BeautifulSoup(page)
-        snapData=soup.find(id='snap-data')
+        snapData=soup.find("table", { "class" : "snap-data" })
         if snapData is None:
             raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
         data = {}
-        for li in snapData.findAll('li'):
-            keyLi, valLi = li('span')
-            data[keyLi.getText()] = valLi.getText()
+        for row in snapData.findAll('tr'):
+            keyTd, valTd = row.findAll('td')
+            data[keyTd.getText()] = valTd.getText()
+
         return data
 
     def getHistoricalPrices(self, symbol, startdate, enddate):

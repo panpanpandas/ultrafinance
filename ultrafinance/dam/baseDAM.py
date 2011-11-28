@@ -14,19 +14,17 @@ class BaseDAM:
         ''' constructor '''
         self.__symbol = None
 
-    @abc.abstractmethod
     def readQuotes(self, start, end):
         ''' read quotes '''
-        return
+        raise UfException(Errors.UNDEFINED_METHOD, "readQuotes method is not defined")
 
     def writeQuotes(self, quotes):
         ''' write quotes '''
         raise UfException(Errors.UNDEFINED_METHOD, "writeQuotes method is not defined")
 
-    @abc.abstractmethod
     def readTicks(self, start, end):
         ''' read ticks '''
-        return
+        raise UfException(Errors.UNDEFINED_METHOD, "readTicks method is not defined")
 
     def writeTicks(self, ticks):
         ''' read quotes '''
