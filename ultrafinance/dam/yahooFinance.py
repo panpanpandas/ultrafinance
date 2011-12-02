@@ -12,7 +12,7 @@ sample usage:
 import urllib
 import traceback
 from operator import itemgetter
-from ultrafinance.lib.dataType import StockDailyType
+from ultrafinance.model import Quote
 from ultrafinance.lib.errors import UfException, Errors
 
 import logging
@@ -83,7 +83,7 @@ class YahooFinance(object):
             #              ['2009-12-31', '112.77', '112.80', '111.39', '111.44', '90637900', '109.7']...]
             data = []
             for value in values[1:]:
-                data.append(StockDailyType(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
+                data.append(Quote(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
 
             dateValues = sorted(data, key=itemgetter(0))
             return dateValues

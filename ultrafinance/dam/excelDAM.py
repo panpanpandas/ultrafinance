@@ -5,7 +5,7 @@ Created on Nov 9, 2011
 '''
 from ultrafinance.dam.baseDAM import BaseDAM
 from ultrafinance.dam.excelLib import ExcelLib
-from ultrafinance.model import TICK_FIELDS, QUOTE_FIELDS
+from ultrafinance.model import TICK_FIELDS, QUOTE_FIELDS, Quote, Tick
 from ultrafinance.lib.errors import UfException, Errors
 
 from os import path
@@ -61,7 +61,7 @@ class ExcelDAM(BaseDAM):
 
         return ret
 
-    def __writeData(self, targetPath, fields, values):
+    def __writeData(self, targetPath, fields, rows):
         ''' write data '''
         if path.exists(targetPath):
             LOG.error("Target file exists: %s" % path.abspath(targetPath) )
@@ -69,24 +69,30 @@ class ExcelDAM(BaseDAM):
 
         with ExcelLib(fileName = targetPath, mode = ExcelLib.WRITE_MODE) as excel:
             excel.writeRow(0, fields)
-            for index, value in enumerate(values):
-                excel.writeRow(index+1, value)
+            for index, row in enumerate(rows):
+                excel.writeRow(index+1, row)
 
     def readQuotes(self, start, end):
         ''' read quotes '''
-        return self.__readData(self.targetPath(ExcelDAM.QUOTE), start, end)
+        quotes = self.__readData(self.targetPath(ExcelDAM.QUOTE), start, end)
+        return [Quote(*quote) for quote in quotes]
 
     def writeQuotes(self, quotes):
         ''' write quotes '''
-        self.__writeData(self.targetPath(ExcelDAM.QUOTE), QUOTE_FIELDS, quotes)
+        self.__writeData(self.targetPath(ExcelDAM.QUOTE),
+                         QUOTE_FIELDS,
+                         [[getattr(quote, field) for field in QUOTE_FIELDS] for quote in quotes])
 
     def readTicks(self, start, end):
         ''' read ticks '''
-        return self.__readData(self.targetPath(ExcelDAM.TICK), start, end)
+        ticks =  self.__readData(self.targetPath(ExcelDAM.TICK), start, end)
+        return [Tick(*tick) for tick in ticks]
 
     def writeTicks(self, ticks):
         ''' read quotes '''
-        self.__writeData(self.targetPath(ExcelDAM.TICK), TICK_FIELDS, ticks)
+        self.__writeData(self.targetPath(ExcelDAM.TICK),
+                         TICK_FIELDS,
+                         [[getattr(tick, field) for field in TICK_FIELDS] for tick in ticks])
 
     def setDir(self, path):
         ''' set dir '''

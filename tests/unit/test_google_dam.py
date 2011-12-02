@@ -27,6 +27,6 @@ class testGoogleDam(unittest.TestCase):
     def testReadTicks(self):
         dam = GoogleDAM()
         dam.setSymbol('EBAY')
-        data = dam.readTicks('20111120', '20111117')
+        data = dam.readTicks('20111120', '20111201')
         print data
         self.assertNotEquals(len(data), 0)

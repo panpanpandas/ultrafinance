@@ -38,7 +38,7 @@ class DecimalViewer:
         print 'DecimalViewer: Subject %s has data %d' % (subject.name, subject.getData())
 
 class testObservable(unittest.TestCase):
-    def setup(self):
+    def setUp(self):
         pass
 
     def tearDown(self):

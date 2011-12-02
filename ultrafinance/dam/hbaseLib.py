@@ -13,10 +13,11 @@ from ultrafinance.lib.errors import UfException, Errors
 import logging
 LOG = logging.getLogger(__name__)
 
-class HBaseClient:
+class HBaseLib:
     ''' Hbase client '''
-    def __init__(self):
+    def __init__(self, timeout = 10):
         transport = TSocket.TSocket('localhost', 9090)
+        transport.setTimeout(timeout * 1000)
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)
 
@@ -90,7 +91,7 @@ class HBaseClient:
 
 # testing
 if __name__ == '__main__':
-    h = HBaseClient()
+    h = HBaseLib()
 
     #delete all exiting tables
     for tName in h.getTableNames():
@@ -102,17 +103,16 @@ if __name__ == '__main__':
     #create table
     tName = 'testTable'
 
-
     h.createTable(tName, [ColumnDescriptor(name='col1', maxVersions=5), ColumnDescriptor(name='col2', maxVersions=5)])
     print h.getTableNames()
     assert h.getTableNames()
 
-    print "column families in %s" %(tName)
+    print "column families in %s" % tName
     print h.getColumnDescriptors(tName)
 
     #updateRow
-    h.updateRows(tName, "bar", [Mutation(column="col1:bar", value='12345'), Mutation(column="col2:", value="67890")])
-    h.updateRows(tName, "foo", [Mutation(column="col1:foo", value='12345')])
+    h.updateRow(tName, "bar", [Mutation(column="col1:bar", value='12345'), Mutation(column="col2:", value="67890")])
+    h.updateRow(tName, "foo", [Mutation(column="col1:foo", value='12345')])
     print h.getRow(tName, 'bar')
     print h.getRow(tName, 'foo')
 

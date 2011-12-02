@@ -120,7 +120,7 @@ function echoHbaseUsage {
     echo "List: scan 'test'"
     echo "Query: get 'test', 'row1'"
     echo "Delete: disable 'test'; drop 'test'"
-    echo "bin/hbase-daemon.sh start thrift"
+    echo "$HBASE_HOME/bin/hbase-daemon.sh start thrift"
     echo "======================Done: HBase Usage====================================="
 }
 

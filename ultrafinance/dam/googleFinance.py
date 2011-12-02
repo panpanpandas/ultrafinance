@@ -8,7 +8,7 @@ from BeautifulSoup import BeautifulSoup
 import traceback
 from operator import itemgetter
 from ultrafinance.lib.util import convertGoogCSVDate, findPatthen
-from ultrafinance.lib.dataType import StockDailyType
+from ultrafinance.model import Quote, Tick
 from ultrafinance.lib.errors import UfException, Errors
 import copy
 from ultrafinance.lib.util import string2EpochTime
@@ -71,7 +71,7 @@ class GoogleFinance(object):
             data = []
             for value in values[1:]:
                 date = convertGoogCSVDate(value[0])
-                data.append(StockDailyType(date, value[1], value[2], value[3], value[4], value[5], None))
+                data.append(Quote(date, value[1], value[2], value[3], value[4], value[5], None))
 
             dateValues = sorted(data, key=itemgetter(0))
             return dateValues
@@ -156,11 +156,11 @@ class GoogleFinance(object):
 
             data = []
             for value in values:
-                data.append(StockDailyType(value[0][1:], value[4], value[2], value[3], value[1], value[5], None))
+                data.append(Tick(value[0][1:], value[4], value[2], value[3], value[1], value[5]))
 
             return data
 
         except BaseException:
-            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
+            raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getTicks %s" % traceback.format_exc())
         #sample output
         #[stockDaylyData(date='1316784600', open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose=None))...]

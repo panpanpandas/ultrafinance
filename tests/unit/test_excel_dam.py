@@ -6,6 +6,7 @@ Created on Nov 27, 2011
 import unittest
 
 import os
+from ultrafinance.model import Tick, Quote
 from ultrafinance.dam.excelDAM import ExcelDAM
 
 class testExcelDAM(unittest.TestCase):
@@ -26,10 +27,12 @@ class testExcelDAM(unittest.TestCase):
             if os.path.exists(file):
                 os.remove(file)
 
-        writeDam.writeQuotes([['1320676200', '32.59', '32.59', '32.58', '32.58', '65213'],
-                              ['1320676201', '32.59', '32.59', '32.58', '32.58', '65214']])
-        writeDam.writeTicks([['1320676200', '32.59', '32.59', '32.58', '32.58', '65213'],
-                              ['1320676201', '32.59', '32.59', '32.58', '32.58', '65214']])
+        quote1 = Quote('1320676200', '32.58', '32.58', '32.57', '32.57', '65212', None)
+        quote2 = Quote('1320676201', '32.59', '32.59', '32.58', '32.58', '65213', None)
+        tick1 = Tick('1320676200', '32.58', '32.58', '32.57', '32.57', '65212')
+        tick2 = Tick('1320676201', '32.59', '32.59', '32.58', '32.58', '65213')
+        writeDam.writeQuotes([quote1, quote2])
+        writeDam.writeTicks([tick1, tick2])
 
     def testReadExcel(self):
         self.testWriteExcel()
