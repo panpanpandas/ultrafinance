@@ -23,6 +23,8 @@ class SymbolCrawler(object):
         self.isTick = False
         self.start = None
         self.end = None
+        self.failed = []
+        self.succeeded = []
 
     def getOptions(self):
         ''' crawling data and save to hbase '''
@@ -91,15 +93,24 @@ class SymbolCrawler(object):
                 self.hbaseDAM.writeTicks(ticks)
         except BaseException as excp:
             print "Error while processing %s: %s" % (symbol, excp)
+            self.failed.append(symbol)
         else:
             print "Processed %s" % symbol
+            self.succeeded.append(symbol)
 
     def getSaveSymbols(self):
         ''' get and save data '''
         for symbol in self.symbols:
             self.__getSaveOneSymbol(symbol)
 
+    def printFailedSucceeded(self):
+        ''' print out which ones fails'''
+        print "Succeeded: %s" % self.succeeded
+        print "Failed: %s" % self.failed
+
 if __name__ == '__main__':
     crawler = SymbolCrawler()
     crawler.getOptions()
     crawler.getSaveSymbols()
+    crawler.printFailedSucceeded()
+
