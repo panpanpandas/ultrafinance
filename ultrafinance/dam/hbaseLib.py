@@ -15,8 +15,8 @@ LOG = logging.getLogger(__name__)
 
 class HBaseLib:
     ''' Hbase client '''
-    def __init__(self, timeout = 10):
-        transport = TSocket.TSocket('localhost', 9090)
+    def __init__(self, ip='localhost', port=9090, timeout = 10):
+        transport = TSocket.TSocket(ip, int(port))
         transport.setTimeout(timeout * 1000)
         transport = TTransport.TBufferedTransport(transport)
         protocol = TBinaryProtocol.TBinaryProtocol(transport)

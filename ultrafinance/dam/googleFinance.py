@@ -22,7 +22,7 @@ class GoogleFinance(object):
         try:
             return urllib2.urlopen(url)
         except IOError:
-            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Google server")
+            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Google server at %s" % url)
         except urllib2.HTTPError:
             raise UfException(Errors.NETWORK_400_ERROR, "400 error when connect to Google server")
         except Exception:
@@ -71,7 +71,13 @@ class GoogleFinance(object):
             data = []
             for value in values[1:]:
                 date = convertGoogCSVDate(value[0])
-                data.append(Quote(date, value[1], value[2], value[3], value[4], value[5], None))
+                data.append(Quote(date,
+                                  value[1].strip(),
+                                  value[2].strip(),
+                                  value[3].strip(),
+                                  value[4].strip(),
+                                  value[5].strip(),
+                                  None))
 
             dateValues = sorted(data, key=itemgetter(0))
             return dateValues
@@ -125,7 +131,7 @@ class GoogleFinance(object):
             raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
 
 
-    def getTicks(self, symbol, start, end, intervalMins=60):
+    def getTicks(self, symbol, start, end):
         """
         Get tick prices for the given ticker symbol.
         @symbol: stock symbol
@@ -133,15 +139,18 @@ class GoogleFinance(object):
         @start: start date(YYYYMMDD)
         @end: end date(YYYYMMDD)
 
+        start and end is disabled since only 15 days data will show
+
         @Returns a nested list.
         """
         #TODO, parameter checking
         try:
-            interval = int(intervalMins) * 60 + 1 # plus one so that the time will show as 'a1316784600' instead of '1'
-            start = string2EpochTime(start)
-            end = string2EpochTime(end)
-            period = end - start
-            url = 'http://www.google.com/finance/getprices?q=%s&i=%s&p=%sd&f=d,o,h,l,c,v&ts=%s' % (symbol, interval, period, start)
+            #start = string2EpochTime(start)
+            #end = string2EpochTime(end)
+            #period = end - start
+            period = 15
+            #url = 'http://www.google.com/finance/getprices?q=%s&i=%s&p=%sd&f=d,o,h,l,c,v&ts=%s' % (symbol, interval, period, start)
+            url = 'http://www.google.com/finance/getprices?q=%s&i=61&p=%sd&f=d,o,h,l,c,v' % (symbol, period)
             try:
                 page = self.__request(url)
             except UfException as ufExcep:
@@ -156,7 +165,12 @@ class GoogleFinance(object):
 
             data = []
             for value in values:
-                data.append(Tick(value[0][1:], value[4], value[2], value[3], value[1], value[5]))
+                data.append(Tick(value[0][1:].strip(),
+                                 value[4].strip(),
+                                 value[2].strip(),
+                                 value[3].strip(),
+                                 value[1].strip(),
+                                 value[5].strip()))
 
             return data
 

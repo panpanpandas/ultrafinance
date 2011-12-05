@@ -13,10 +13,10 @@ class HBaseDAM(BaseDAM):
     QUOTE = 'quote'
     TICK = 'tick'
 
-    def __init__(self):
+    def __init__(self, ip="localhost", port=9090):
         ''' constructor '''
         super(HBaseDAM, self).__init__()
-        self.__hbase = HBaseLib()
+        self.__hbase = HBaseLib(ip, port)
 
     def tableName(self, kind):
         return "%s-%s" % (self.symbol, kind)

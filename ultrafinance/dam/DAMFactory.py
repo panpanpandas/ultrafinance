@@ -16,7 +16,7 @@ class DAMFactory:
                'hbase': HBaseDAM}
 
     @staticmethod
-    def createDAO(self, name):
+    def createDAM(name):
         return DAMFactory.daoDict.get(name)()
 
     @staticmethod

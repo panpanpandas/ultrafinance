@@ -19,6 +19,9 @@ class testPyConfig(unittest.TestCase):
         print keyValues
         self.assertNotEquals(0, len(keyValues))
 
+        if not keyValues['field3']:
+            print "field3 is None"
+
     def testGetOption(self):
         option = self.config.getOption("log", "file")
         print option

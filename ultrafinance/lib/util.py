@@ -35,8 +35,9 @@ def splitByComma(inputString):
     return [name.strip() for name in inputString.split(',')]
 
 def convertGoogCSVDate(googCSVDate):
-    ''' convert date 25-Jul-2010 to 2010-07-25'''
-    return datetime.strptime(googCSVDate, googCSVDateformat).date()
+    ''' convert date 25-Jul-2010 to 20100725'''
+    d = str(datetime.strptime(googCSVDate, googCSVDateformat).date() )
+    return d.replace("-", "")
 
 def findPatthen(page, pList):
     datas = [BeautifulSoup(page)]
