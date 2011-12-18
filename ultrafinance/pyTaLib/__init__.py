@@ -1,8 +1,5 @@
 ''' ultraFinance TA-Lib implementation'''
-
-def sum():
-    ''' Summation '''
-    pass
+from collections import deque
 
 def min():
     ''' Lowest value over a specified period '''
@@ -10,14 +7,6 @@ def min():
 
 def max():
     ''' Highest value over a specified period '''
-    pass
-
-def sma():
-    ''' Simple Moving Average '''
-    pass
-
-def ma():
-    ''' All Moving Average '''
     pass
 
 def macd():
@@ -31,3 +20,17 @@ def stddev():
 def beta():
     ''' beta '''
     pass
+
+''' refer to http://rosettacode.org/wiki/Averages/Simple_moving_average#Python '''
+class Sma(object):
+    def __init__(self, period):
+        assert period == int(period) and period > 0, "Period must be an integer > 0"
+        self.__period = period
+        self.__stream = deque()
+
+    def __call__(self, n):
+        self.__stream.append(n)
+        if len(self.__stream) > self.__period:
+            self.__stream.popleft()
+
+        return sum(self.__stream) / float(len(self.__stream) )
