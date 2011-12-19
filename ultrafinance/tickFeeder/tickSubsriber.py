@@ -35,7 +35,7 @@ class TickSubsriber:
     @abc.abstractmethod
     def subRules(self):
         ''' call back from framework
-            return (securityIds, rules)
+            return (symbolRe, rules)
         '''
         return
 

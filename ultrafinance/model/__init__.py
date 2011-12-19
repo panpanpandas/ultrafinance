@@ -41,20 +41,24 @@ class Order:
     ''' order class'''
     OPEN = 'open'
     FILLED = 'filled'
+    CANCELED = 'canceled'
 
-    def __init__(self, side, symbol, price, share, orderId = None, status = None):
+    def __init__(self, side, symbol, price, share, orderId = None,
+                 status = Order.OPEN, filledTime = None, executedTime = None):
         ''' constructor '''
         self.__side = Side.validate(side)
         self.symbol = symbol
         self.price = price
         self.share = share
+        self.filledTime = filledTime
+        self.executedTime = executedTime
 
         self.setOrderId(orderId)
         self.setSataus(status)
 
     def setStatus(self, status):
         ''' set status '''
-        if status not in [Order.OPEN, Order.FILLED]:
+        if status not in [Order.OPEN, Order.FILLED, Order.CANCELED]:
             raise UfException(Errors.ORDER_TYPE_ERROR, 'Order status error: %s is not accepted' % status)
 
         self.__status = status
