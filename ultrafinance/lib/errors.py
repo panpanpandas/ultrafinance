@@ -33,12 +33,15 @@ class Errors(object):
     FEEDER_INVALID_ERROR = 600
 
     #account error
-    TRANSITION_INVALID_ERROR = 700
+    ORDER_INVALID_ERROR = 700
 
     #excelLib error
     SHEET_NAME_EXIST = 800
     SHEET_NAME_INVALID = 801
     INVALID_EXCEL_MODE = 802
+
+    #trading error
+    INVALID_ACCOUNT = 901
 
 class UfException(Exception):
     """ Ultra-Finance exception """

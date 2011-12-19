@@ -46,11 +46,11 @@ class Account:
     def execute(self, order):
         ''' execute order'''
         if not self.validate(order):
-            raise UfException(Errors.TRANSITION_INVALID_ERROR,
+            raise UfException(Errors.ORDER_INVALID_ERROR,
                               ''' Transition is invalid: symbol %s, share %s, price %s'''\
                               % (order.symbol, order.share, order.price) )
 
-        value = self.__getTransitionValue(order)
+        value = self.__getOrderValue(order)
         if Side.BUY == order.side:
             self.__cash = self.__cash - value - self.__commision
             self.__addHolding(order.symbol, order.share, order.price)

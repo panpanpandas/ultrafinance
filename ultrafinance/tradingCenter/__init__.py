@@ -9,6 +9,7 @@ from ultrafinance.tradingCenter.account import Account
 import uuid
 import re
 import copy
+import time
 
 import logging
 LOG = logging.getLogger(__name__)
@@ -124,6 +125,33 @@ class TradingCenter(object):
         ''' override function, will subscribe to all symbols '''
         return ('*', None)
 
-    def consume(self, ticks):
-        ''' TODO: consume tick '''
-        pass
+    def consume(self, tickDict):
+        ''' consume tick '''
+        for symbol, tick in tickDict.iteritems():
+            if symbol in self.__openOrders:
+                for index, order in enumerate(self.__openOrders[symbol]):
+                    if self.isOrderMet(tick, order):
+                        account = self.getAccount(order.accountId)
+                        if not account:
+                            raise UfException(Errors.INVALID_ACCOUNT,
+                                              ''' Account is invalid: accountId %s''' % order.accountId )
+                        else:
+                            account.execute(order)
+                            order.status = Order.FILLED
+                            order.filledTime = time.time()
+
+                            del self.__openOrders[symbol][index]
+                            self.__closedOrders.append(order)
+
+
+    def isOrderMet(self, tick, order):
+        ''' whether order can be execute or not '''
+        if Side.BUY == order.side and float(tick.price) > order.price:
+            return True
+        elif Side.SELL == order.side and float(tick.price) < order.price:
+            return True
+        else:
+            return False
+
+
+
