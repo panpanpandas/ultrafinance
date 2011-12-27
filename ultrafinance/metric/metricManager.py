@@ -11,11 +11,11 @@ class MetricManager:
         ''' constructor '''
         self.__metrics = {} # id: subscriber
 
-    def getSubById(self, subId):
+    def getMetricById(self, subId):
         ''' get subscriber by Id '''
         return self.__subs.get(subId)
 
-    def getSubsbyName(self, name):
+    def getMetrixbyName(self, name):
         ''' get subscribers by name '''
         subs = []
 
@@ -25,7 +25,7 @@ class MetricManager:
 
         return subs
 
-    def addSub(self, sub):
+    def addMetric(self, sub):
         ''' add subscriber '''
         if sub.subId not in self.__subs:
             self.__subs[sub.subId] = sub

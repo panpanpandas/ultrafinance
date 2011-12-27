@@ -13,13 +13,14 @@ LOG = logging.getLogger(__name__)
 class Account:
     ''' account '''
 
-    def __init__(self, cash, commission):
+    def __init__(self, cash, commision):
         ''' constructor '''
         self.__id = self.__generateId()
         self.__holdings = {}
         self.__cash = cash
-        self.__commission = commission
+        self.__commision = commision
         self.__orderHisotry = None
+        self.metrix = []
 
     def __generateId(self):
         ''' generate id '''
@@ -45,6 +46,7 @@ class Account:
 
     def execute(self, order):
         ''' execute order'''
+        LOG.deug("execute order: %s" % order)
         if not self.validate(order):
             raise UfException(Errors.ORDER_INVALID_ERROR,
                               ''' Transition is invalid: symbol %s, share %s, price %s'''\
@@ -103,7 +105,7 @@ class Account:
 
     def __getOrderValue(self, order):
         ''' get value of order '''
-        return order.price * order.share
+        return float(order.price) * float(order.share)
 
     def __getId(self):
         ''' get id '''

@@ -5,7 +5,7 @@ Created on Nov 9, 2011
 '''
 from ultrafinance.dam.baseDAM import BaseDAM
 from ultrafinance.dam.hbaseLib import HBaseLib
-from ultrafinance.model import TICK_FIELDS, QUOTE_FIELDS
+from ultrafinance.model import Quote, Tick, TICK_FIELDS, QUOTE_FIELDS
 from hbase.Hbase import Mutation, ColumnDescriptor
 
 class HBaseDAM(BaseDAM):
@@ -24,12 +24,12 @@ class HBaseDAM(BaseDAM):
     def __rowResultToQuote(self, row):
         ''' convert rowResult from Hbase to Quote'''
         keyValues = row.columns
-        return Quote(*[keyValues["%s:%s" % (HBaseDAM.QUOTE, field)] for field in QUOTE_FIELDS])
+        return Quote(*[keyValues["%s:%s" % (HBaseDAM.QUOTE, field)].value for field in QUOTE_FIELDS])
 
     def __rowResultToTick(self, row):
         ''' convert rowResult from Hbase to Tick'''
         keyValues = row.columns
-        return Tick(*[keyValues["%s:%s" % (HBaseDAM.TICK, field)] for field in TICK_FIELDS])
+        return Tick(*[keyValues["%s:%s" % (HBaseDAM.TICK, field)].value for field in TICK_FIELDS])
 
     def readQuotes(self, start, end):
         ''' read quotes '''
@@ -69,6 +69,7 @@ class HBaseDAM(BaseDAM):
 if __name__ == '__main__':
     from ultrafinance.model import Quote, Tick
     dam = HBaseDAM()
+    dam.setSymbol("test")
     quotes = [Quote(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213', None]),
               Quote(*['1320676201', '32.60', '32.60', '32.59', '32.59', '65214', None])]
     ticks = [Tick(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213']),

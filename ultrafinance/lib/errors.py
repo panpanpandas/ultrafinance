@@ -17,6 +17,7 @@ class Errors(object):
     NETWORK_400_ERROR = 101
 
     INDEX_RANGE_ERROR = 200
+    INVALID_DAM_NAME = 201
 
     STOCK_SYMBOL_ERROR = 300
     STOCK_PARSING_ERROR = 301
@@ -31,6 +32,9 @@ class Errors(object):
 
     #tickFeeder
     FEEDER_INVALID_ERROR = 600
+    SYMBOL_EXIST = 601
+    INVALID_TYPE = 602
+    SYMBOL_NOT_IN_SOURCE = 604
 
     #account error
     ORDER_INVALID_ERROR = 700
@@ -42,6 +46,13 @@ class Errors(object):
 
     #trading error
     INVALID_ACCOUNT = 901
+
+    #metric
+    INVALID_METRIC_NAME = 1001
+
+    #strategy
+    INVALID_STRATEGY_NAME = 1200
+    NONE_ACCOUNT_ID = 1201
 
 class UfException(Exception):
     """ Ultra-Finance exception """

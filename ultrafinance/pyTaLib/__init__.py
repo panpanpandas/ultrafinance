@@ -23,6 +23,7 @@ def beta():
 
 ''' refer to http://rosettacode.org/wiki/Averages/Simple_moving_average#Python '''
 class Sma(object):
+    ''' simple moving average '''
     def __init__(self, period):
         assert period == int(period) and period > 0, "Period must be an integer > 0"
         self.__period = period

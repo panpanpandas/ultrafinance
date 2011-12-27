@@ -6,6 +6,7 @@ Created on Dec 18, 2011
 from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.tradingCenter.account import Account
+from ultrafinance.tickFeeder.tickSubsriber import TickSubsriber
 import uuid
 import re
 import copy
@@ -14,10 +15,11 @@ import time
 import logging
 LOG = logging.getLogger(__name__)
 
-class TradingCenter(object):
+class TradingCenter(TickSubsriber):
     ''' trading center '''
     def __init__(self):
         ''' constructor '''
+        super(TradingCenter, self).__init__("tradingCenter")
         self.__accounts = {}
         self.__openOrders = {}
         self.__closedOrders = {}
@@ -59,12 +61,24 @@ class TradingCenter(object):
             for index, order in enumerate(orders):
                 if orderId == order.orderId:
                     order.status = Order.CANCELED #change order state
-                    self.__deadOrders[order.orderId] = order
+                    self.__closedOrders[order.orderId] = order
 
                     del orders[index]
                     #if no open orders left for that symbol, remove it
                     if not len(orders):
                         del self.__openOrders[symbol]
+
+    def cancelAllOpenOrders(self, orderId):
+        ''' cancel all open order '''
+        for symbol, orders in self.__openOrders.items():
+            for index, order in enumerate(orders):
+                order.status = Order.CANCELED #change order state
+                self.__closedOrders[order.orderId] = order
+
+                del orders[index]
+                #if no open orders left for that symbol, remove it
+                if not len(orders):
+                    del self.__openOrders[symbol]
 
     def createAccount(self, cash, commission=0):
         ''' create account '''
@@ -74,7 +88,8 @@ class TradingCenter(object):
 
     def getAccount(self, accountId):
         ''' get account '''
-        return copy(self.__accounts.get(accountId) )
+        print "account is %s" % self.__accounts
+        return copy.deepcopy((self.__accounts.get(accountId) ) )
 
     def getAccounts(self, expression):
         ''' get account '''
@@ -82,8 +97,8 @@ class TradingCenter(object):
         pair = re.compile(expression)
 
         for accountId, account in self.__accounts.items():
-            if pair.match(accountId):
-                accounts.append[copy(account)]
+            if pair.match(str(accountId) ):
+                accounts.append(copy.deepcopy(account) )
 
         return accounts
 
@@ -123,11 +138,12 @@ class TradingCenter(object):
 
     def subRules(self):
         ''' override function, will subscribe to all symbols '''
-        return ('*', None)
+        return ('.*', None)
 
     def consume(self, tickDict):
         ''' consume tick '''
         for symbol, tick in tickDict.iteritems():
+            print "trading center get symbol %s with tick %s" % (symbol, tick)
             if symbol in self.__openOrders:
                 for index, order in enumerate(self.__openOrders[symbol]):
                     if self.isOrderMet(tick, order):
@@ -143,15 +159,19 @@ class TradingCenter(object):
                             del self.__openOrders[symbol][index]
                             self.__closedOrders.append(order)
 
+    def addMetrixToAccount(self, metrix, accountId):
+        ''' add a list of metric to accountId '''
+        account = self.__accounts.get(accountId)
+        if account:
+            account.metrix.extend(metrix)
 
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
-        if Side.BUY == order.side and float(tick.price) > order.price:
+        if Side.BUY == order.side and float(tick.close) > order.price:
             return True
         elif Side.SELL == order.side and float(tick.price) < order.price:
             return True
         else:
             return False
-
 
 

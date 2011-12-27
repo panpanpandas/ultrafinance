@@ -3,6 +3,7 @@ Created on Nov 6, 2011
 
 @author: ppa
 '''
+import json
 from collections import namedtuple
 from ultrafinance.lib.errors import UfException, Errors
 
@@ -15,19 +16,19 @@ Tick = namedtuple('Tick', ' '.join(TICK_FIELDS))
 Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))
 DateValue = namedtuple('DateValue', 'date, value')
 
-class Side:
+class Side(object):
     ''' side class '''
     SELL = 'sell'
     BUY = 'buy'
 
     @staticmethod
-    def validate(self, side):
-        if side not in [Transition.BUY, Transition.SELL]:
+    def validate(side):
+        if side not in [Side.BUY, Side.SELL]:
             raise UfException(Errors.SIDE_TYPE_ERROR, 'Side error: %s is not accepted' % side)
 
         return side
 
-class Transition:
+class Transition(object):
     ''' transition class'''
     def __init__(self, side, symbol, price, share, fee):
         ''' constructor '''
@@ -37,16 +38,19 @@ class Transition:
         self.share = share
         self.fee = fee
 
-class Order:
+class Order(object):
     ''' order class'''
     OPEN = 'open'
     FILLED = 'filled'
     CANCELED = 'canceled'
 
-    def __init__(self, side, symbol, price, share, orderId = None,
-                 status = Order.OPEN, filledTime = None, executedTime = None):
+    def __init__(self, accountId, side, symbol, price, share, orderId = None,
+                 status = OPEN, filledTime = None, executedTime = None):
         ''' constructor '''
         self.__side = Side.validate(side)
+        self.__orderId = None
+        self.__status = None
+        self.accountId = accountId
         self.symbol = symbol
         self.price = price
         self.share = share
@@ -54,7 +58,7 @@ class Order:
         self.executedTime = executedTime
 
         self.setOrderId(orderId)
-        self.setSataus(status)
+        self.setStatus(status)
 
     def setStatus(self, status):
         ''' set status '''
@@ -65,7 +69,7 @@ class Order:
 
     def setOrderId(self, orderId):
         ''' set order id, should be only set once '''
-        if self.orderId is not None:
+        if self.__orderId is not None:
             raise UfException(Errors.ORDER_TYPE_ERROR, 'OrderId already set: %s' % self.orderId)
 
         self.__orderId = orderId
@@ -78,5 +82,19 @@ class Order:
         ''' get status '''
         return self.__status
 
+    def getSide(self):
+        ''' get side '''
+        return self.__side
+
+    def setSide(self, side):
+        ''' set side '''
+        self.__side = Side.validate(side)
+
+    def __str__(self):
+        ''' override buildin function '''
+        return json.dumps({'accountId': self.accountId, 'side': self.__side, 'symbol': self.symbol, 'price': self.price,
+                           'orderId': self.orderId, 'status': self.status})
+
+    side = property(getSide, setSide)
     orderId = property(getOrderId, setOrderId)
     status = property(getStatus, setStatus)

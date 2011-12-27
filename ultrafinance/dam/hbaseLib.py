@@ -73,9 +73,9 @@ class HBaseLib:
     def scanTable(self, tName, columns, startRow="", endRow=None):
         ''' scan a table '''
         if endRow is None:
-            scanner = self.__client.scannerOpen(tName, startRow, columns)
+            scanner = self.__client.scannerOpen(tName, str(startRow), columns)
         else:
-            scanner = self.__client.scannerOpenWithStop(tName, startRow, endRow, columns)
+            scanner = self.__client.scannerOpenWithStop(tName, startRow, str(endRow), columns)
         ret = []
 
         row = self.__client.scannerGet(scanner)

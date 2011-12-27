@@ -1,1 +1,1 @@
-''' strategies '''
+''' strategy '''
