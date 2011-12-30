@@ -88,8 +88,11 @@ class BackTester(object):
 
     def printResult(self):
         ''' print result'''
-        for account in self.__tradingCenter.getAccounts('.*'):
-            print account.orderHistory
+        for account in self.__tradingCenter.getCopyAccounts('.*'):
+            account.setLastSymbolPrice(self.__tradingCenter.lastSymbolPrice)
+            print "account %s" % account
+            print [str(order) for order in account.orderHistory]
+
 
 if __name__ == "__main__":
     backTester = BackTester()

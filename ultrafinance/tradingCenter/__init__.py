@@ -23,6 +23,7 @@ class TradingCenter(TickSubsriber):
         self.__accounts = {}
         self.__openOrders = {}
         self.__closedOrders = {}
+        self.__lastSymbolPrice = {}
 
     def placeOrder(self, order):
         ''' place an order '''
@@ -38,6 +39,7 @@ class TradingCenter(TickSubsriber):
                 self.__openOrders[order.symbol] = []
             self.__openOrders[order.symbol].append(order)
 
+            print "Order placed %s" % order
             return order.orderId
 
         else:
@@ -49,7 +51,7 @@ class TradingCenter(TickSubsriber):
 
     def validateOrder(self, order):
         ''' validate an order '''
-        account = self.getAccount(order.accountId)
+        account = self.__getAccount(order.accountId)
         if account and account.validate(order):
             return True
 
@@ -86,21 +88,32 @@ class TradingCenter(TickSubsriber):
         self.__accounts[account.accountId] = account
         return account.accountId
 
-    def getAccount(self, accountId):
-        ''' get account '''
-        print "account is %s" % self.__accounts
-        return copy.deepcopy((self.__accounts.get(accountId) ) )
+    def getCopyAccount(self, accountId):
+        ''' get copy of account '''
+        return copy.deepcopy(self.__getAccount(accountId) )
 
-    def getAccounts(self, expression):
+    def getCopyAccounts(self, expression):
+        ''' get copy of accounts '''
+        accounts = self.__getAccounts(expression)
+        return copy.deepcopy(accounts)
+
+    def __getAccount(self, accountId):
         ''' get account '''
+        return self.__accounts.get(accountId)
+
+    def __getAccounts(self, expression):
+        ''' get accounts '''
         accounts = []
         pair = re.compile(expression)
 
+        print self.__accounts
         for accountId, account in self.__accounts.items():
+            print accountId
             if pair.match(str(accountId) ):
-                accounts.append(copy.deepcopy(account) )
+                accounts.append(account)
 
         return accounts
+
 
     def getOpenOrdersBySymbol(self, symbol):
         ''' get open orders by symbol '''
@@ -144,20 +157,22 @@ class TradingCenter(TickSubsriber):
         ''' consume tick '''
         for symbol, tick in tickDict.iteritems():
             print "trading center get symbol %s with tick %s" % (symbol, tick)
+            self.__lastSymbolPrice[symbol] = tick.close
             if symbol in self.__openOrders:
                 for index, order in enumerate(self.__openOrders[symbol]):
                     if self.isOrderMet(tick, order):
-                        account = self.getAccount(order.accountId)
+                        account = self.__getAccount(order.accountId)
                         if not account:
                             raise UfException(Errors.INVALID_ACCOUNT,
                                               ''' Account is invalid: accountId %s''' % order.accountId )
                         else:
+                            print "executing order %s" % order
                             account.execute(order)
                             order.status = Order.FILLED
                             order.filledTime = time.time()
 
                             del self.__openOrders[symbol][index]
-                            self.__closedOrders.append(order)
+                            self.__closedOrders[order.orderId] = order
 
     def addMetrixToAccount(self, metrix, accountId):
         ''' add a list of metric to accountId '''
@@ -167,11 +182,15 @@ class TradingCenter(TickSubsriber):
 
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
-        if Side.BUY == order.side and float(tick.close) > order.price:
+        if Side.BUY == order.side and float(tick.close) > float(order.price):
             return True
-        elif Side.SELL == order.side and float(tick.price) < order.price:
+        elif Side.SELL == order.side and float(tick.price) < float(order.price):
             return True
         else:
             return False
 
+    def getLastSymbolPrice(self):
+        ''' return __lastSymbolPrice '''
+        return self.__lastSymbolPrice
 
+    lastSymbolPrice = property(getLastSymbolPrice)

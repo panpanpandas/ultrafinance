@@ -92,8 +92,8 @@ class Order(object):
 
     def __str__(self):
         ''' override buildin function '''
-        return json.dumps({'accountId': self.accountId, 'side': self.__side, 'symbol': self.symbol, 'price': self.price,
-                           'orderId': self.orderId, 'status': self.status})
+        return json.dumps({'accountId': str(self.accountId), 'side': self.__side, 'symbol': self.symbol, 'price': self.price,
+                           'orderId': str(self.orderId), 'status': self.status})
 
     side = property(getSide, setSide)
     orderId = property(getOrderId, setOrderId)

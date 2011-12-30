@@ -38,6 +38,7 @@ class Errors(object):
 
     #account error
     ORDER_INVALID_ERROR = 700
+    MISSING_SYMBOL = 701
 
     #excelLib error
     SHEET_NAME_EXIST = 800
