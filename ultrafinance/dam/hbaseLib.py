@@ -11,7 +11,7 @@ from hbase.Hbase import Client, ColumnDescriptor, Mutation
 from ultrafinance.lib.errors import UfException, Errors
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class HBaseLib:
     ''' Hbase client '''

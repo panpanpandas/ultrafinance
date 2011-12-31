@@ -11,7 +11,7 @@ from ultrafinance.lib.errors import UfException, Errors
 from os import path
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class ExcelDAM(BaseDAM):
     ''' Excel DAO '''

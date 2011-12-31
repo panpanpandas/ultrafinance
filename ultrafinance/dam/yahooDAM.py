@@ -7,7 +7,7 @@ from ultrafinance.dam.baseDAM import BaseDAM
 from ultrafinance.dam.yahooFinance import YahooFinance
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class YahooDAM(BaseDAM):
     ''' Yahoo DAM '''

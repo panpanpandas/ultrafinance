@@ -8,9 +8,6 @@ import unittest
 import os
 from ultrafinance.lib.plotPortfolio import PlotPortfolio
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testPlotPortfolio(unittest.TestCase):
 
     def setUp(self):

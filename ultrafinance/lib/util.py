@@ -9,7 +9,7 @@ from datetime import datetime
 import time
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 googCSVDateformat = "%d-%b-%y"
 

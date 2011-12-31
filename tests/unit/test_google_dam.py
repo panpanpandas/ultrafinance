@@ -6,9 +6,6 @@ Created on Nov 27, 2011
 import unittest
 from ultrafinance.dam.googleDAM import GoogleDAM
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testGoogleDam(unittest.TestCase):
 
     def setUp(self):

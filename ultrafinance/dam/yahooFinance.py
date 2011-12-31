@@ -16,7 +16,7 @@ from ultrafinance.model import Quote
 from ultrafinance.lib.errors import UfException, Errors
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class YahooFinance(object):
     def __request(self, symbol, stat):

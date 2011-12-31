@@ -9,9 +9,6 @@ from ultrafinance.lib.tradingStrategy.automaticInvestmentPlan import *
 
 from lib.dataType import DateValueType
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testTradingStrategyFatory(unittest.TestCase):
 
     def setUp(self):

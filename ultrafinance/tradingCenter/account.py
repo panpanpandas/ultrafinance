@@ -8,7 +8,7 @@ from ultrafinance.lib.errors import Errors, UfException
 import uuid
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class Account(object):
     ''' account '''
@@ -48,7 +48,6 @@ class Account(object):
     def execute(self, order):
         ''' execute order'''
         LOG.debug("execute order: %s" % order)
-        print "=======here=============="
         if not self.validate(order):
             raise UfException(Errors.ORDER_INVALID_ERROR,
                               ''' Transition is invalid: symbol %s, share %s, price %s'''\
@@ -62,8 +61,6 @@ class Account(object):
             self.__cash = self.__cash + value - self.__commision
             self.__reduceHoding(order.symbol, order.share)
 
-        print "append order to orderHistory %s" % order
-        print "orderHistory %s" % self.__orderHisotry
         self.__orderHisotry.append(order)
 
     def validate(self, order):

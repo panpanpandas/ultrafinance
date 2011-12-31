@@ -16,7 +16,8 @@ from ultrafinance.dam.DAMFactory import DAMFactory
 #from ultrafinance.strategies.movStrategy import MovStrategy
 
 import logging
-LOG = logging.getLogger(__name__)
+import logging.config
+LOG = logging.getLogger()
 
 class BackTester(object):
     CASH = 1000000 #  a million to start
@@ -27,17 +28,17 @@ class BackTester(object):
         self.__config = PyConfig()
         self.__strategyFactory = StrategyFactory()
         self.__metricFactory = MetricFactory()
-        self.__metricName = ["lowest", "highest"]
+        #self.__metricName = ["lowest", "highest"]
         self.__tickFeeder = TickFeeder()
         self.__strategies = []
         self.__dam = None
 
     def setup(self):
         ''' set up metrics '''
-        self.__config.setSource("backtest_mov.ini")
-
-        self.setupDam()
+        self.__config.setSource("backtest_period.ini")
         self.setupLog()
+        self.setupTradingCenter()
+        self.setupDam()
         self.setupStrategies()
         self.setupMetrix()
         self.setupTickFeeder()
@@ -51,20 +52,23 @@ class BackTester(object):
     def setupTradingCenter(self):
         self.__tradingCenter.start = 0
         self.__tradingCenter.end = None
+        metricNames = [name.strip() for name in self.__config.getOption('app_main', "metricNames").split(',') ]
+        self.__tradingCenter.setMetricNames(metricNames)
 
     def setupMetrix(self):
         ''' setup  metrix '''
+        metricNames = self.__config.getOption('app_main', "metricNames").split(',')
         for strategy in self.__strategies:
             accountId = self.__tradingCenter.createAccount(BackTester.CASH)
             # associate accoutnId with strategy
             strategy.accountId = accountId
             # associate metrix with account
-            self.__tradingCenter.addMetrixToAccount([self.__metricFactory.createMetric(name) for name in self.__metricName],
+            self.__tradingCenter.addMetrixToAccount([self.__metricFactory.createMetric(name.strip()) for name in metricNames],
                                                     accountId)
 
-
     def setupLog(self):
-        pass
+        ''' setup logging '''
+        logging.config.fileConfig(self.__config.getFullPath())
 
     def setupStrategies(self):
         ''' set up strategies '''
@@ -88,10 +92,13 @@ class BackTester(object):
 
     def printResult(self):
         ''' print result'''
-        for account in self.__tradingCenter.getCopyAccounts('.*'):
-            account.setLastSymbolPrice(self.__tradingCenter.lastSymbolPrice)
-            print "account %s" % account
-            print [str(order) for order in account.orderHistory]
+        for accountId, metrix in self.__tradingCenter.getMetrix().items():
+            account = self.__tradingCenter.getCopyAccount(accountId)
+            LOG.debug("account %s" % account)
+            LOG.debug([str(order) for order in account.orderHistory])
+            print "metrix %s" % metrix
+            for metric in metrix:
+                metric.printResult()
 
 
 if __name__ == "__main__":

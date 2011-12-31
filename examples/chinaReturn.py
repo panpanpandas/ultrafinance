@@ -14,7 +14,7 @@ from ultrafinance.lib.dataType import StockDailyType
 from ultrafinance.lib.excelLib import ExcelLib
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 benchmarks = {'DEFAULT': '^GSPC',
               'L': '^STI',

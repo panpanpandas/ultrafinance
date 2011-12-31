@@ -7,7 +7,7 @@ from ultrafinance.dam.baseDAM import BaseDAM
 from ultrafinance.dam.googleFinance import GoogleFinance
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class GoogleDAM(BaseDAM):
     ''' Google DAO '''

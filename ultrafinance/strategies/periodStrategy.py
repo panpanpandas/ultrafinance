@@ -8,7 +8,7 @@ from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.strategies.baseStrategy import BaseStrategy
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class PeriodStrategy(BaseStrategy):
     ''' trading center '''
@@ -34,14 +34,6 @@ class PeriodStrategy(BaseStrategy):
 
     def consume(self, tickDict):
         ''' consume ticks '''
-        #should only have one symbol in dict
-        for symbol, tick in tickDict.iteritems():
-            print "period strategy get symbol %s with tick %s" % (symbol, tick)
-
-        if self.accountId is None:
-            raise UfException(Errors.NONE_ACCOUNT_ID,
-                              "Account id is none")
-
         assert self.symbol in tickDict.keys()
         tick = tickDict[self.symbol]
 

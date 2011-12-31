@@ -8,7 +8,7 @@ from os import path
 from ultrafinance.lib.errors import UfException, Errors
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class PyConfig(object):
     ''' class that handles configuration '''
@@ -16,6 +16,7 @@ class PyConfig(object):
         ''' Constructor '''
         self.__dir = None
         self.__parser = None
+        self.__fullPath = None
         self.setDir(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__file__))) ), 'conf') )
 
     def setDir(self, dirPath):
@@ -33,6 +34,7 @@ class PyConfig(object):
         else:
             self.__parser = ConfigParser.SafeConfigParser()
             self.__parser.read(fullPath)
+            self.__fullPath = fullPath
 
     def getSection(self, section):
         ''' load all configuration '''
@@ -50,6 +52,10 @@ class PyConfig(object):
             return self.__parser.get(section, option)
         else:
             return None
+
+    def getFullPath(self):
+        ''' get full path of config '''
+        return self.__fullPath
 
 if __name__ == '__main__':
     print PyConfig().getOption('app_main', 'feeder')

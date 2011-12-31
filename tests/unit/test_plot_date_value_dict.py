@@ -9,9 +9,6 @@ import os
 from ultrafinance.lib.plotDateValueDict import PlotDateValueDict
 from ultrafinance.lib.dataType import DateValueType
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testPlotDateValueDict(unittest.TestCase):
     def setUp(self):
         pass

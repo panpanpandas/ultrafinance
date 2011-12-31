@@ -6,6 +6,8 @@ Created on Nov 7, 2011
 from ultrafinance.metric.baseMetric import BaseMetric
 
 import time
+import logging
+LOG = logging.getLogger()
 
 class HighestMetric(BaseMetric):
     ''' Highest metric class '''
@@ -28,4 +30,4 @@ class HighestMetric(BaseMetric):
 
     def printResult(self):
         ''' print result '''
-        print "Highest account value %.2f at %s" % (self.__highest, self.__time)
+        LOG.debug("Highest account value %.2f at %s" % (self.__highest, self.__time) )

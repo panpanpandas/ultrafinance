@@ -6,9 +6,6 @@ Created on Nov 28, 2011
 import unittest
 from ultrafinance.dam.yahooDAM import YahooDAM
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testYahooDAM(unittest.TestCase):
 
     def setUp(self):

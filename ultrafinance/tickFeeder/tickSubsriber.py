@@ -6,7 +6,7 @@ Created on Nov 6, 2011
 import abc
 import uuid
 
-class TickSubsriber:
+class TickSubsriber(object):
     ''' tick subscriber '''
     __metaclass__ = abc.ABCMeta
 
@@ -27,10 +27,24 @@ class TickSubsriber:
         ''' get name '''
         return self.__name
 
+    def preConsume(self, ticks):
+        ''' override function '''
+        pass
+
     @abc.abstractmethod
     def consume(self, ticks):
         ''' consume ticks '''
         return
+
+    def postConsume(self, ticks):
+        ''' consume ticks '''
+        return
+
+    def consumeWrapper(self, ticks):
+        ''' consume sequence '''
+        self.preConsume(ticks)
+        self.consume(ticks)
+        self.postConsume(ticks)
 
     @abc.abstractmethod
     def subRules(self):

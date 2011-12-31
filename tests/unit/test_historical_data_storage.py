@@ -8,9 +8,6 @@ import unittest
 import os
 from ultrafinance.lib.historicalDataStorage import HistoricalDataStorage
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testHistoricalDataStorage(unittest.TestCase):
 
     def setUp(self):

@@ -7,23 +7,30 @@ from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.tradingCenter.account import Account
 from ultrafinance.tickFeeder.tickSubsriber import TickSubsriber
+from ultrafinance.metric.metricFactory import MetricFactory
 import uuid
 import re
 import copy
 import time
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class TradingCenter(TickSubsriber):
-    ''' trading center '''
+    '''
+    trading center
+    Note: set metricNames before adding accounts
+    '''
     def __init__(self):
         ''' constructor '''
         super(TradingCenter, self).__init__("tradingCenter")
         self.__accounts = {}
+        self.__metrix = {}
+        self.__metricNames = []
         self.__openOrders = {}
         self.__closedOrders = {}
         self.__lastSymbolPrice = {}
+        self.__metricFactory = MetricFactory()
 
     def placeOrder(self, order):
         ''' place an order '''
@@ -39,7 +46,7 @@ class TradingCenter(TickSubsriber):
                 self.__openOrders[order.symbol] = []
             self.__openOrders[order.symbol].append(order)
 
-            print "Order placed %s" % order
+            LOG.debug("Order placed %s" % order)
             return order.orderId
 
         else:
@@ -86,6 +93,11 @@ class TradingCenter(TickSubsriber):
         ''' create account '''
         account = Account(cash, commission)
         self.__accounts[account.accountId] = account
+
+        self.__metrix[account.accountId] = []
+        for metricName in self.__metricNames:
+            self.__metrix[account.accountId].append(self.__metricFactory.createMetric(metricName) )
+
         return account.accountId
 
     def getCopyAccount(self, accountId):
@@ -106,9 +118,7 @@ class TradingCenter(TickSubsriber):
         accounts = []
         pair = re.compile(expression)
 
-        print self.__accounts
         for accountId, account in self.__accounts.items():
-            print accountId
             if pair.match(str(accountId) ):
                 accounts.append(account)
 
@@ -156,7 +166,7 @@ class TradingCenter(TickSubsriber):
     def consume(self, tickDict):
         ''' consume tick '''
         for symbol, tick in tickDict.iteritems():
-            print "trading center get symbol %s with tick %s" % (symbol, tick)
+            LOG.debug("trading center get symbol %s with tick %s" % (symbol, tick.time) )
             self.__lastSymbolPrice[symbol] = tick.close
             if symbol in self.__openOrders:
                 for index, order in enumerate(self.__openOrders[symbol]):
@@ -166,13 +176,31 @@ class TradingCenter(TickSubsriber):
                             raise UfException(Errors.INVALID_ACCOUNT,
                                               ''' Account is invalid: accountId %s''' % order.accountId )
                         else:
-                            print "executing order %s" % order
+                            LOG.debug("executing order %s" % order)
                             account.execute(order)
                             order.status = Order.FILLED
                             order.filledTime = time.time()
 
                             del self.__openOrders[symbol][index]
                             self.__closedOrders[order.orderId] = order
+
+    def postConsume(self, tickDict):
+        ''' calculate metrix for each account '''
+        LOG.debug("postConsume in tradingCenter")
+        for accountId, metrix in self.__metrix.items():
+            account = self.__getAccount(accountId)
+            account.setLastSymbolPrice(self.__lastSymbolPrice)
+
+            for metric in metrix:
+                metric.record(account)
+
+    def setMetricNames(self, metricNames):
+        ''' set metricNames '''
+        self.__metricNames = metricNames
+
+    def getMetrix(self):
+        ''' get metrix '''
+        return self.__metrix
 
     def addMetrixToAccount(self, metrix, accountId):
         ''' add a list of metric to accountId '''

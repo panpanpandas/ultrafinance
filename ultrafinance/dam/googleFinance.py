@@ -15,7 +15,7 @@ from ultrafinance.lib.util import string2EpochTime
 
 import re
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class GoogleFinance(object):
     def __request(self, url):

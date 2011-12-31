@@ -6,9 +6,6 @@ Created on May 6, 2011
 import unittest
 from ultrafinance.dam.yahooFinance import YahooFinance
 
-import logging
-LOG = logging.getLogger(__name__)
-
 class testYahooFinance(unittest.TestCase):
 
     def setUp(self):
