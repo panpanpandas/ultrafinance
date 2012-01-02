@@ -40,7 +40,7 @@ class TickSubsriber(object):
         ''' consume ticks '''
         return
 
-    def consumeWrapper(self, ticks):
+    def runConsume(self, ticks):
         ''' consume sequence '''
         self.preConsume(ticks)
         self.consume(ticks)

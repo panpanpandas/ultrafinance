@@ -57,14 +57,9 @@ class BackTester(object):
 
     def setupMetrix(self):
         ''' setup  metrix '''
-        metricNames = self.__config.getOption('app_main', "metricNames").split(',')
         for strategy in self.__strategies:
-            accountId = self.__tradingCenter.createAccount(BackTester.CASH)
-            # associate accoutnId with strategy
+            accountId = self.__tradingCenter.createAccountWithMetrix(BackTester.CASH)
             strategy.accountId = accountId
-            # associate metrix with account
-            self.__tradingCenter.addMetrixToAccount([self.__metricFactory.createMetric(name.strip()) for name in metricNames],
-                                                    accountId)
 
     def setupLog(self):
         ''' setup logging '''

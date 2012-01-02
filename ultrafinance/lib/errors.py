@@ -50,6 +50,8 @@ class Errors(object):
 
     #metric
     INVALID_METRIC_NAME = 1001
+    ACCOUNT_ALEADY_SET = 1002
+    ACCOUNT_NOT_SET = 1003
 
     #strategy
     INVALID_STRATEGY_NAME = 1200

@@ -32,7 +32,7 @@ class SymbolCrawler(object):
         parser.add_option("-f", "--symbolFile", dest="symbolFile", type="string",
                           help="file that contains symbols for each line")
         parser.add_option("-t", "--dataType", dest="dataType",
-                          default='price', type="string",
+                          default='tick', type="string",
                           help="data type that will be stored, e.g. quote|tick|all")
         parser.add_option("-s", "--start", dest="start",
                           default='19800101', type="string",

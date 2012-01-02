@@ -24,6 +24,7 @@ class TradingCenter(TickSubsriber):
     def __init__(self):
         ''' constructor '''
         super(TradingCenter, self).__init__("tradingCenter")
+        self.__curTime = None
         self.__accounts = {}
         self.__metrix = {}
         self.__metricNames = []
@@ -89,14 +90,16 @@ class TradingCenter(TickSubsriber):
                 if not len(orders):
                     del self.__openOrders[symbol]
 
-    def createAccount(self, cash, commission=0):
+    def createAccountWithMetrix(self, cash, commission=0):
         ''' create account '''
         account = Account(cash, commission)
         self.__accounts[account.accountId] = account
 
         self.__metrix[account.accountId] = []
         for metricName in self.__metricNames:
-            self.__metrix[account.accountId].append(self.__metricFactory.createMetric(metricName) )
+            metric = self.__metricFactory.createMetric(metricName)
+            metric.setAccount(account)
+            self.__metrix[account.accountId].append(metric)
 
         return account.accountId
 
@@ -123,7 +126,6 @@ class TradingCenter(TickSubsriber):
                 accounts.append(account)
 
         return accounts
-
 
     def getOpenOrdersBySymbol(self, symbol):
         ''' get open orders by symbol '''
@@ -165,6 +167,9 @@ class TradingCenter(TickSubsriber):
 
     def consume(self, tickDict):
         ''' consume tick '''
+        if tickDict:
+            self.__curTime = tickDict.values()[0].time
+
         for symbol, tick in tickDict.iteritems():
             LOG.debug("trading center get symbol %s with tick %s" % (symbol, tick.time) )
             self.__lastSymbolPrice[symbol] = tick.close
@@ -192,7 +197,7 @@ class TradingCenter(TickSubsriber):
             account.setLastSymbolPrice(self.__lastSymbolPrice)
 
             for metric in metrix:
-                metric.record(account)
+                metric.record(self.__curTime)
 
     def setMetricNames(self, metricNames):
         ''' set metricNames '''

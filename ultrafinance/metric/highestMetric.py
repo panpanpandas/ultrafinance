@@ -5,7 +5,6 @@ Created on Nov 7, 2011
 '''
 from ultrafinance.metric.baseMetric import BaseMetric
 
-import time
 import logging
 LOG = logging.getLogger()
 
@@ -14,6 +13,7 @@ class HighestMetric(BaseMetric):
 
     def __init__(self):
         ''' constructor '''
+        super(HighestMetric, self).__init__()
         self.__highest = 0
         self.__time = None
 
@@ -21,12 +21,12 @@ class HighestMetric(BaseMetric):
         ''' get highest '''
         return self.__highest
 
-    def record(self, account):
+    def record(self, curTime):
         ''' keep record of the account '''
-        totalValue = account.getTotalValue()
+        totalValue = self.account.getTotalValue()
         if totalValue > self.__highest:
             self.__highest = totalValue
-            self.__time = time.ctime()
+            self.__time = curTime
 
     def printResult(self):
         ''' print result '''

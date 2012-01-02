@@ -140,6 +140,11 @@ class Account(object):
         ''' set lastSymbolPrice'''
         self.__lastSymbolPrice = lastSymbolPrice
 
+    def getLastSymbolPriceTime(self):
+        ''' get time for last symbolPrice '''
+        if self.__lastSymbolPrice:
+            return self.__lastSymbolPrice.values[0]
+
     def __str__(self):
         ''' override string function '''
         totalValue = 0.0
