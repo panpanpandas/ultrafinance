@@ -3,7 +3,7 @@ Created on Dec 25, 2011
 
 @author: ppa
 '''
-from ultrafinance.tickFeeder.tickSubsriber import TickSubsriber
+from ultrafinance.backTest.tickSubscriber import TickSubsriber
 from ultrafinance.lib.errors import Errors, UfException
 
 import logging

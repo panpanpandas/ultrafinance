@@ -5,9 +5,9 @@ Created on Dec 18, 2011
 '''
 from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.tradingCenter.account import Account
-from ultrafinance.tickFeeder.tickSubsriber import TickSubsriber
-from ultrafinance.metric.metricFactory import MetricFactory
+from ultrafinance.backTest.account import Account
+from ultrafinance.backTest.tickSubscriber import TickSubsriber
+from ultrafinance.backTest.metric.metricFactory import MetricFactory
 import uuid
 import re
 import copy

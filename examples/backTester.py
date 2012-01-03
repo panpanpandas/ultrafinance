@@ -5,12 +5,11 @@ Created on Dec 3, 2011
 '''
 
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.metric.metricFactory import MetricFactory
-from ultrafinance.strategies.strategyFactory import StrategyFactory
-from ultrafinance.tradingCenter import TradingCenter
-from ultrafinance.tickFeeder import TickFeeder
-from ultrafinance.tickFeeder.subManager import SubManager
-from ultrafinance.config.pyConfig import PyConfig
+from ultrafinance.backTest.metric.metricFactory import MetricFactory
+from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
+from ultrafinance.backTest.tradingCenter import TradingCenter
+from ultrafinance.backTest.tickFeeder import TickFeeder
+from ultrafinance.configLib.pyConfig import PyConfig
 from ultrafinance.dam.DAMFactory import DAMFactory
 
 #from ultrafinance.strategies.movStrategy import MovStrategy

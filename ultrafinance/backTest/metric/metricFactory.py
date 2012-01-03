@@ -4,9 +4,9 @@ Created on Dec 26, 2011
 @author: ppa
 '''
 
-from ultrafinance.metric.highestMetric import HighestMetric
-from ultrafinance.metric.lowestMetric import LowestMetric
-from ultrafinance.metric.sharpeRatioMetric import SharpeRatioMetric
+from ultrafinance.backTest.metric.highestMetric import HighestMetric
+from ultrafinance.backTest.metric.lowestMetric import LowestMetric
+from ultrafinance.backTest.metric.sharpeRatioMetric import SharpeRatioMetric
 
 from ultrafinance.lib.errors import Errors, UfException
 

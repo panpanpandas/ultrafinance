@@ -4,7 +4,7 @@ Created on Dec 26, 2011
 @author: ppa
 '''
 
-from ultrafinance.strategies.periodStrategy import PeriodStrategy
+from ultrafinance.backTest.tickSubscriber.strategies.periodStrategy import PeriodStrategy
 
 from ultrafinance.lib.errors import Errors, UfException
 

@@ -7,7 +7,6 @@ import json
 from collections import namedtuple
 from ultrafinance.lib.errors import UfException, Errors
 
-
 # namedtuple are used to handle data getting from csv or internet
 TICK_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume']
 QUOTE_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume', 'adjClose']
@@ -27,16 +26,6 @@ class Side(object):
             raise UfException(Errors.SIDE_TYPE_ERROR, 'Side error: %s is not accepted' % side)
 
         return side
-
-class Transition(object):
-    ''' transition class'''
-    def __init__(self, side, symbol, price, share, fee):
-        ''' constructor '''
-        self.side = Side.validate(side)
-        self.symbol = symbol
-        self.price = price
-        self.share = share
-        self.fee = fee
 
 class Order(object):
     ''' order class'''

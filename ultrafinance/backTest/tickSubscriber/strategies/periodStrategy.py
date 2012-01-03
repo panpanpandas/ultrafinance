@@ -5,7 +5,7 @@ Created on Dec 25, 2011
 '''
 from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.strategies.baseStrategy import BaseStrategy
+from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
 
 import logging
 LOG = logging.getLogger()

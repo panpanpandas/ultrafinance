@@ -4,7 +4,7 @@ Created on Jan 10, 2012
 @author: ppa
 Note: this one only works for quote and calculate yearly sharp ratio
 '''
-from ultrafinance.metric.baseMetric import BaseMetric
+from ultrafinance.backTest.metric.baseMetric import BaseMetric
 from ultrafinance.pyTaLib import stddev, mean
 from ultrafinance.lib.errors import Errors, UfException
 

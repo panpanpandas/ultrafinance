@@ -4,7 +4,7 @@ Created on Dec 18, 2011
 @author: ppa
 '''
 import unittest
-from ultrafinance.tradingCenter import TradingCenter
+from ultrafinance.backTest.tradingCenter import TradingCenter
 
 class testTradingCenter(unittest.TestCase):
     def setUp(self):

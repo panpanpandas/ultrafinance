@@ -3,7 +3,7 @@ Created on Nov 8, 2011
 
 @author: ppa
 '''
-from ultrafinance.metric.baseMetric import BaseMetric
+from ultrafinance.backTest.metric.baseMetric import BaseMetric
 
 import logging
 LOG = logging.getLogger()
