@@ -1,5 +1,7 @@
 ''' ultraFinance TA-Lib implementation'''
 from collections import deque
+import numpy
+
 
 def min():
     ''' Lowest value over a specified period '''
@@ -13,9 +15,14 @@ def macd():
     ''' Moving Average Convergence/Divergence '''
     pass
 
-def stddev():
+
+def mean(array):
+    ''' average '''
+    return numpy.mean(array, axis=0)
+
+def stddev(array):
     ''' Standard Deviation '''
-    pass
+    return numpy.std(array, axis=0)
 
 def beta():
     ''' beta '''

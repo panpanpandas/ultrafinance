@@ -6,13 +6,15 @@ Created on Dec 26, 2011
 
 from ultrafinance.metric.highestMetric import HighestMetric
 from ultrafinance.metric.lowestMetric import LowestMetric
+from ultrafinance.metric.sharpeRatioMetric import SharpeRatioMetric
 
 from ultrafinance.lib.errors import Errors, UfException
 
 class MetricFactory:
     ''' DAO factory '''
     metricDict = {'highest': HighestMetric,
-                  'lowest': LowestMetric}
+                  'lowest': LowestMetric,
+                  'sharpratio': SharpeRatioMetric}
 
     @staticmethod
     def createMetric(name):

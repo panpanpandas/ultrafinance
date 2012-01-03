@@ -91,7 +91,6 @@ class BackTester(object):
             account = self.__tradingCenter.getCopyAccount(accountId)
             LOG.debug("account %s" % account)
             LOG.debug([str(order) for order in account.orderHistory])
-            print "metrix %s" % metrix
             for metric in metrix:
                 metric.printResult()
 
