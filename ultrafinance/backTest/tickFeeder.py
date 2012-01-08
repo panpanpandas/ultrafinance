@@ -118,7 +118,7 @@ class TickFeeder(object):
                         ticks[symbol] = timeTicksDict[time][symbol]
 
                 thread = self.pubTicks(ticks, sub)
-                thread.join(timeout = self.__threadTimeout)
+                thread.join(timeout = self.__threadTimeout * 1000)
                 if thread.isAlive():
                     LOG.error("thread timeout for subId %s at time %s" % (sub.subId, time))
                     attrs['fail'] += 1

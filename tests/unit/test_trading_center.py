@@ -13,10 +13,21 @@ class testTradingCenter(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def testGetAccounts(self):
+    def testGetCopyAccounts(self):
         tradingCenter = TradingCenter()
-        tradingCenter.createAccount(100000, 0)
-        tradingCenter.createAccount(200000, 0)
-        accounts = tradingCenter.getAccounts('.*')
-        print accounts
+        tradingCenter.createAccountWithMetrix(100000, 0)
+        tradingCenter.createAccountWithMetrix(200000, 0)
+
+        accounts = tradingCenter.getCopyAccounts('.*')
+        print [str(account) for account in accounts]
         self.assertEquals(2, len(accounts))
+
+
+    def testGetCopyAccount(self):
+        tradingCenter = TradingCenter()
+        accountId1 = tradingCenter.createAccountWithMetrix(100000, 0)
+
+        account = tradingCenter.getCopyAccount(accountId1)
+        print account
+        self.assertEquals(100000, account.cash)
+

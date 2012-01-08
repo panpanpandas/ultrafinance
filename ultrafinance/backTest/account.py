@@ -78,11 +78,11 @@ class Account(object):
             if order.symbol not in self.__holdings:
                 LOG.error('Transition fails validation: symbol %s not in holdings' % order.symbol)
                 return False
-            if order.share < self.__holdings[order.symbol]:
+            if order.share > self.__holdings[order.symbol][0]:
                 LOG.error('Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol]) )
                 return False
-            if self.__commision < self.__cash:
-                LOG.error('Transition fails validation: cash %s is not enough for commision %s' % (self.__cash, self.__commision) )
+            if self.__commision > self.__cash:
+                LOG.error('Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision) )
                 return False
             else:
                 return True

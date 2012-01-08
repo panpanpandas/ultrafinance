@@ -102,9 +102,9 @@ if __name__ == '__main__':
     h = HBaseLib()
 
     #delete all exiting tables
-    #for tName in h.getTableNames():
-    #    print "deleting %s" % tName
-    #    h.deleteTable(tName)
+    for tName in h.getTableNames():
+        print "disable %s" % tName
+        h.disableTable(tName)
 
     #assert not h.getTableNames()
 

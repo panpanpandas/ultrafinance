@@ -45,7 +45,6 @@ class BaseStrategy(TickSubsriber):
                                                     '.'.join(symbols))
         cols = symbols
         cols.extend(OUTPUT_FIELDS)
-        LOG.debug(cols)
         self.__hbaseSaver.resetCols(cols)
 
     def __saveOutput(self, tickDict):
@@ -60,7 +59,7 @@ class BaseStrategy(TickSubsriber):
 
         for symbol, tick in tickDict.iteritems():
             if self.configDict.get('outputsaver'):
-                self.__hbaseSaver.write(tick.time, symbol, tick.close)
+                self.__hbaseSaver.write(tick.time, symbol, str(tick))
 
     def placeOrder(self, order):
         ''' place order and keep record'''
