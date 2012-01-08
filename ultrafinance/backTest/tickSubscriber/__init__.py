@@ -5,6 +5,7 @@ Created on Nov 6, 2011
 '''
 import abc
 import uuid
+import threading
 
 class TickSubsriber(object):
     ''' tick subscriber '''
@@ -14,6 +15,7 @@ class TickSubsriber(object):
         ''' constructor '''
         self.__id = self.__generateId()
         self.__name = name
+        self.__threadLock = threading.Lock()
 
     def __generateId(self):
         ''' generate id '''
@@ -42,9 +44,10 @@ class TickSubsriber(object):
 
     def runConsume(self, ticks):
         ''' consume sequence '''
-        self.preConsume(ticks)
-        self.consume(ticks)
-        self.postConsume(ticks)
+        with self.__threadLock:
+            self.preConsume(ticks)
+            self.consume(ticks)
+            self.postConsume(ticks)
 
     @abc.abstractmethod
     def subRules(self):

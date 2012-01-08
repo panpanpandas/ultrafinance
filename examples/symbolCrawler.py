@@ -5,7 +5,6 @@ Created on Dec 4, 2011
 '''
 
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.metric.metricManager import MetricManager
 from ultrafinance.dam.DAMFactory import DAMFactory
 
 from os import path

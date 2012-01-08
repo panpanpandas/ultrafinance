@@ -8,7 +8,7 @@ from threading import Thread
 import re
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger()
 
 class TickFeeder(object):
     ''' constructor
@@ -21,7 +21,7 @@ class TickFeeder(object):
     TICK_TYPE = 'tick'
     TYPES = [QUOTE_TYPE, TICK_TYPE]
 
-    def __init__(self, threadTimeout = 0.5, threadMaxFail = 10):
+    def __init__(self, threadTimeout = 2, threadMaxFail = 10):
         self.__subs = {} # securityIds: sub
         self.__source = {}
         self.__inputType = None
@@ -88,6 +88,7 @@ class TickFeeder(object):
 
         timeTicksDict = {}
         for symbol, dam in self.__source.items():
+            LOG.debug('Indexing ticks for %s' % symbol)
             ticks = []
             if TickFeeder.TICK_TYPE == self.__inputType:
                 ticks = dam.readTicks(self.start, self.end)
@@ -124,7 +125,7 @@ class TickFeeder(object):
 
                 if attrs['fail'] > self.__threadMaxFail:
                     LOG.error("subId %s fails for too many times" % sub.subId)
-                    self.unregister(sub.subId)
+                    self.unregister(sub)
 
     def pubTicks(self, ticks, sub):
         ''' publish ticks to sub '''

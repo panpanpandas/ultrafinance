@@ -35,6 +35,14 @@ class HBaseLib:
 
         self.__client.deleteTable(tName)
 
+    def disableTable(self, tName):
+        ''' disable table '''
+        self.__client.disableTable(tName)
+
+    def enableTable(self, tName):
+        ''' enable table '''
+        self.__client.enableTable(tName)
+
     def createTable(self, tName, ColumnDescriptors):
         try:
             self.__client.createTable(tName, ColumnDescriptors)
@@ -94,11 +102,11 @@ if __name__ == '__main__':
     h = HBaseLib()
 
     #delete all exiting tables
-    for tName in h.getTableNames():
-        print "deleting %s" % tName
-        h.deleteTable(tName)
+    #for tName in h.getTableNames():
+    #    print "deleting %s" % tName
+    #    h.deleteTable(tName)
 
-    assert not h.getTableNames()
+    #assert not h.getTableNames()
 
     #create table
     tName = 'testTable'

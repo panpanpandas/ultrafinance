@@ -20,7 +20,7 @@ class PeriodStrategy(BaseStrategy):
         assert int(configDict['period']) >= 1
         self.perAmount = 1000 # buy $100p per period
         self.period = int(configDict['period'])
-        self.symbol = configDict['symbolRe']
+        self.symbol = configDict['symbolre']
         self.counter = 0
 
     def increaseAndCheckCounter(self):
@@ -38,10 +38,10 @@ class PeriodStrategy(BaseStrategy):
         tick = tickDict[self.symbol]
 
         if self.increaseAndCheckCounter():
-            self.tradingCenter.placeOrder(Order(accountId = self.accountId,
-                                                side = Side.BUY,
-                                                symbol = self.symbol,
-                                                price = tick.close,
-                                                share = self.perAmount/float(tick.close) ))
+            self.placeOrder(Order(accountId = self.accountId,
+                                  side = Side.BUY,
+                                  symbol = self.symbol,
+                                  price = tick.close,
+                                  share = self.perAmount/float(tick.close) ))
 
 

@@ -191,7 +191,6 @@ class TradingCenter(TickSubsriber):
 
     def postConsume(self, tickDict):
         ''' calculate metrix for each account '''
-        LOG.debug("postConsume in tradingCenter")
         for accountId, metrix in self.__metrix.items():
             account = self.__getAccount(accountId)
             account.setLastSymbolPrice(self.__lastSymbolPrice)

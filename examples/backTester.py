@@ -18,6 +18,7 @@ import logging
 import logging.config
 LOG = logging.getLogger()
 
+
 class BackTester(object):
     CASH = 1000000 #  a million to start
 
@@ -46,7 +47,7 @@ class BackTester(object):
         ''' set up Dam'''
         damFactory = DAMFactory()
         self.__dam = damFactory.createDAM('hbase')
-        self.__dam.setSymbol('EBAY')
+        self.__dam.setSymbol(self.__config.getOption('app_main', "inputSymbol"))
 
     def setupTradingCenter(self):
         self.__tradingCenter.start = 0
@@ -66,7 +67,10 @@ class BackTester(object):
 
     def setupStrategies(self):
         ''' set up strategies '''
-        strategy = self.__strategyFactory.createStrategy("period", {'symbolRe': "EBAY", "period": 30})
+        #strategy = self.__strategyFactory.createStrategy("period", {'symbolRe': "EBAY", "period": 30})
+        strategy = self.__strategyFactory.createStrategy(self.__config.getOption('strategy', 'name'),
+                                                         self.__config.getSection('strategy'))
+
         strategy.tradingCenter = self.__tradingCenter
         self.__strategies.append(strategy)
 

@@ -57,6 +57,10 @@ class Errors(object):
     #strategy
     INVALID_STRATEGY_NAME = 1200
     NONE_ACCOUNT_ID = 1201
+    NONE_TRADING_CENTER = 1202
+
+    #outputSaver
+    TABLENAME_NOT_SET = 1300
 
 class UfException(Exception):
     """ Ultra-Finance exception """
