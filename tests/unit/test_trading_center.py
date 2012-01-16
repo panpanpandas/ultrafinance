@@ -30,4 +30,3 @@ class testTradingCenter(unittest.TestCase):
         account = tradingCenter.getCopyAccount(accountId1)
         print account
         self.assertEquals(100000, account.cash)
-

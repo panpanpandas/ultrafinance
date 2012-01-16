@@ -4,8 +4,8 @@ Created on Nov 6, 2011
 @author: ppa
 '''
 from ultrafinance.lib.errors import UfException, Errors
+from ultrafinance.backTest.btUtil import findInListbyRe
 from threading import Thread
-import re
 
 import logging
 LOG = logging.getLogger()
@@ -32,33 +32,18 @@ class TickFeeder(object):
 
     def validate(self, sub):
         ''' validate subscriber '''
-        #sub = self.__subManger.getSubById(subId)
-        # only one subscriber should be found
-        #if sub is None:
-        #    raise UfException(Errors.FEEDER_INVALID_ERROR,
-        #                      'subscriber are not found for subId %s' % subId)
-
         symbolRe, rules = sub.subRules()
-        #check whether securityIds exist
 
         symbols = self.getSymbolsByRe(symbolRe)
-        for symbol in symbols:
-            if symbol not in self.__source.keys():
-                raise UfException(Errors.SYMBOL_NOT_IN_SOURCE,
-                                  "symbol %s for subId %s is not in source" % (symbol, sub.subId))
+        if not symbols:
+            raise UfException(Errors.SYMBOL_NOT_IN_SOURCE,
+                              "can't find any symbol with re %s in source %s" % (symbolRe, self.__source.keys()))
 
         return symbols, sub
 
     def getSymbolsByRe(self, symbolRe):
         ''' get symbols by regular expression'''
-        symbols = []
-        pair = re.compile(symbolRe)
-
-        for symbol in self.__source.keys():
-            result = pair.match(symbol)
-            if result:
-                symbols.append(result.group(0))
-
+        symbols = findInListbyRe(self.__source.keys(), symbolRe)
         return symbols
 
     def addSource(self, dam):
