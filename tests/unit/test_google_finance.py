@@ -44,5 +44,5 @@ class testGoogleFinance(unittest.TestCase):
 
     def testGetTicks(self):
         googleFinance = GoogleFinance()
-        ret = googleFinance.getTicks('EBAY', start='20110101', end='20110110', intervalMins=1)
+        ret = googleFinance.getTicks('EBAY', start='20110101', end='20110110')
         print ret

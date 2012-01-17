@@ -5,7 +5,7 @@ Created on July 30, 2011
 please refer to http://code.activestate.com/recipes/131499-observer-pattern/
 '''
 import unittest
-from ultrafinance.lib.designPattern.observable import Observable
+from ultrafinance.designPattern.observable import Observable
 
 class Data(Observable):
     def __init__(self, name=''):
