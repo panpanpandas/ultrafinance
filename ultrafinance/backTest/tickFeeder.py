@@ -24,7 +24,7 @@ class TickFeeder(object):
     def __init__(self, threadTimeout = 2, threadMaxFail = 10):
         self.__subs = {} # securityIds: sub
         self.__source = {}
-        self.__inputType = None
+        self.__inputType = TickFeeder.QUOTE_TYPE
         self.__threadTimeout = threadTimeout
         self.__threadMaxFail = threadMaxFail
         self.start = 0

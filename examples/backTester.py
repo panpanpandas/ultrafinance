@@ -18,7 +18,6 @@ import logging
 import logging.config
 LOG = logging.getLogger()
 
-
 class BackTester(object):
     CASH = 1000000 #  a million to start
 

@@ -33,10 +33,18 @@ class TradingCenter(TickSubsriber):
         self.__lastSymbolPrice = {}
         self.__metricFactory = MetricFactory()
 
+    def validateOrder(self, order):
+        ''' validate an order '''
+        account = self.__getAccount(order.accountId)
+        if account and account.validate(order):
+            return True
+
+        return False
+
     def placeOrder(self, order):
         ''' place an order '''
-        if order.orderId is not None:
-            raise UfException(Errors.ORDER_TYPE_ERROR, 'OrderId already set: %s' % self.orderId)
+        if order.orderId:
+            raise UfException(Errors.ORDER_TYPE_ERROR, 'OrderId already set: %s' % order.orderId)
 
         if self.validateOrder(order):
             # generate a unique order id
@@ -57,14 +65,6 @@ class TradingCenter(TickSubsriber):
         ''' generate id '''
         return uuid.uuid4()
 
-    def validateOrder(self, order):
-        ''' validate an order '''
-        account = self.__getAccount(order.accountId)
-        if account and account.validate(order):
-            return True
-
-        return False
-
     def cancelOrder(self, orderId):
         ''' cancel an order '''
         for symbol, orders in self.__openOrders.items():
@@ -78,17 +78,14 @@ class TradingCenter(TickSubsriber):
                     if not len(orders):
                         del self.__openOrders[symbol]
 
-    def cancelAllOpenOrders(self, orderId):
+    def cancelAllOpenOrders(self):
         ''' cancel all open order '''
         for symbol, orders in self.__openOrders.items():
-            for index, order in enumerate(orders):
+            for order in orders:
                 order.status = Order.CANCELED #change order state
                 self.__closedOrders[order.orderId] = order
 
-                del orders[index]
-                #if no open orders left for that symbol, remove it
-                if not len(orders):
-                    del self.__openOrders[symbol]
+        del self.__openOrders[symbol]
 
     def createAccountWithMetrix(self, cash, commission=0):
         ''' create account '''
@@ -134,17 +131,14 @@ class TradingCenter(TickSubsriber):
         else:
             return []
 
-    def getOpenOrdersByOrderId(self, expression):
+    def getOpenOrderByOrderId(self, orderId):
         ''' get open order by orderId '''
-        orders = []
-        pair = re.compile(expression)
-
         for openOrders in self.__openOrders.values():
             for order in openOrders:
-                if pair.match(order.orderId):
-                    orders.append(order)
+                if orderId == order.orderId:
+                    return order
 
-        return orders
+        return None
 
     def getClosedOrder(self, orderId):
         ''' get closed orders'''
@@ -206,17 +200,11 @@ class TradingCenter(TickSubsriber):
         ''' get metrix '''
         return self.__metrix
 
-    def addMetrixToAccount(self, metrix, accountId):
-        ''' add a list of metric to accountId '''
-        account = self.__accounts.get(accountId)
-        if account:
-            account.metrix.extend(metrix)
-
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
-        if Side.BUY == order.side and float(tick.close) > float(order.price):
+        if Side.BUY == order.side and float(tick.close) <= float(order.price):
             return True
-        elif Side.SELL == order.side and float(tick.price) < float(order.price):
+        elif Side.SELL == order.side and float(tick.close) >= float(order.price):
             return True
         else:
             return False
