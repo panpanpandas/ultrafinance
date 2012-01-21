@@ -17,7 +17,7 @@ class OutputSaver(object):
 
     def __init__(self):
         ''' constructor '''
-        self.tableName =  None
+        self.__tableName =  None
 
     @abc.abstractmethod
     def read(self, row, col):
@@ -29,20 +29,31 @@ class OutputSaver(object):
         ''' write value with row and col '''
         pass
 
+    def writeComplete(self):
+        ''' complete write operation '''
+        pass
+
+    def getTableName(self):
+        ''' return table name '''
+        return self.__tableName
+
+    def setTableName(self, tableName):
+        ''' set table name, table name can only be set once '''
+        if self.__tableName:
+            raise UfException(Errors.TABLENAME_ALREADY_SET,
+                              "table name %s already set" % self.__tableName)
+
+        self.__tableName = tableName
+
+    tableName = property(getTableName, setTableName)
+
 class HbaseSaver(OutputSaver):
     ''' hbase saver '''
     def __init__(self, ip="localhost", port=9090):
         ''' constructor '''
         super(HbaseSaver, self).__init__()
         self.__hbase = HBaseLib(ip, port)
-        self.__tableNameCache = []
-
-    def getTableNames(self):
-        ''' make a cache for table name '''
-        if not self.__tableNameCache:
-            self.__tableNameCache = self.__hbase.getTableNames()
-
-        return self.__tableNameCache
+        self.__writeCache = {}
 
     def resetCols(self, cols):
         ''' create cols '''
@@ -51,6 +62,7 @@ class HbaseSaver(OutputSaver):
 
         LOG.debug("create table %s with cols %s" % (self.tableName, cols))
         self.__hbase.createTable(self.tableName, [ColumnDescriptor(name=str(col), maxVersions=5) for col in cols])
+        self.__isResetCols = True
 
     def read(self, row, col):
         ''' read value with row and col '''
@@ -65,23 +77,51 @@ class HbaseSaver(OutputSaver):
 
     def write(self, row, col, value):
         ''' write value with row and col '''
+        self.__writeCache[(row, col)] = value
+
+    def writeComplete(self):
+        ''' complete write operation '''
         if not self.tableName:
             raise UfException(Errors.TABLENAME_NOT_SET,
                               "Table name not set")
 
-        if self.tableName not in self.__hbase.getTableNames():
-            self.__hbase.createTable(self.tableName, [ColumnDescriptor(name=col, maxVersions=5)])
+        # reset table with all cols first
+        cols = set()
+        for (row, col) in self.__writeCache.iterkeys():
+            cols.add(col)
 
-        self.__hbase.updateRow(self.tableName,
-                               row,
-                               [Mutation(column = "%s:" % col, value = str(value))])
+        self.resetCols(cols)
+
+        # write values
+        for (row, col), value in self.__writeCache.iteritems():
+            self.__hbase.updateRow(self.tableName,
+                                   row,
+                                   [Mutation(column = "%s:" % col, value = str(value))])
+
+class OutputSaverFactory(object):
+    ''' factory for output saver '''
+    HBASE = 'hbase'
+    def __init__(self):
+        ''' constructor '''
+        self.saverDict = {OutputSaverFactory.HBASE: HbaseSaver}
+
+    def createOutputSaver(self, name):
+        ''' create output saver '''
+        if name not in self.saverDict:
+            raise UfException(Errors.INVALID_SAVER_NAME,
+                              "Saver name is invalid %s" % name)
+
+        return self.saverDict[name]()
 
 if __name__ == '__main__':
-    h = HbaseSaver()
+    saverFactory = OutputSaverFactory()
+    h = saverFactory.createOutputSaver(OutputSaverFactory.HBASE)
+
     h.tableName = 'unittest_outputSaver'
-    h.resetCols(['accountValue', '1'])
-    for i in range(10):
+    #h.resetCols(['accountValue', '1'])
+    for i in range(5):
         h.write('time1', 'accountValue', 10000)
+        h.writeComplete()
         accountValue = h.read('time1', 'accountValue')
         print accountValue
         assert str(10000) == accountValue

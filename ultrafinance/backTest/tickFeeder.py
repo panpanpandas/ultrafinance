@@ -112,9 +112,15 @@ class TickFeeder(object):
                     LOG.error("subId %s fails for too many times" % sub.subId)
                     self.unregister(sub)
 
+
+    def complete(self):
+        ''' call when complete feeding ticks '''
+        for sub in self.__subs.iterkeys():
+            sub.complete()
+
     def pubTicks(self, ticks, sub):
         ''' publish ticks to sub '''
-        thread = Thread(target = sub.runConsume, args=(ticks, ))
+        thread = Thread(target = sub.doConsume, args=(ticks, ))
         thread.start()
         return thread
 

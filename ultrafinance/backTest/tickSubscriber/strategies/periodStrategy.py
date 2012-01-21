@@ -6,6 +6,7 @@ Created on Dec 25, 2011
 from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
+from ultrafinance.backTest.constant import CONF_PERIOD, CONF_SYMBOLRE
 
 import logging
 LOG = logging.getLogger()
@@ -17,10 +18,10 @@ class PeriodStrategy(BaseStrategy):
         super(PeriodStrategy, self).__init__("periodStrategy")
         self.configDict = configDict
 
-        assert int(configDict['period']) >= 1
+        assert int(configDict[CONF_PERIOD]) >= 1
         self.perAmount = 1000 # buy $100p per period
-        self.period = int(configDict['period'])
-        self.symbol = configDict['symbolre']
+        self.period = int(configDict[CONF_PERIOD])
+        self.symbol = configDict[CONF_SYMBOLRE]
         self.counter = 0
 
     def increaseAndCheckCounter(self):

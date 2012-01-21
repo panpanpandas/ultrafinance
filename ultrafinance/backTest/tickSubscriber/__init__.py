@@ -42,12 +42,16 @@ class TickSubsriber(object):
         ''' consume ticks '''
         return
 
-    def runConsume(self, ticks):
+    def doConsume(self, ticks):
         ''' consume sequence '''
         with self.__threadLock:
             self.preConsume(ticks)
             self.consume(ticks)
             self.postConsume(ticks)
+
+    def complete(self):
+        ''' complete operation '''
+        pass
 
     @abc.abstractmethod
     def subRules(self):

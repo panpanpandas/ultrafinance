@@ -61,6 +61,8 @@ class Errors(object):
 
     #outputSaver
     TABLENAME_NOT_SET = 1300
+    TABLENAME_ALREADY_SET = 1301
+    INVALID_SAVER_NAME = 1302
 
 class UfException(Exception):
     """ Ultra-Finance exception """
