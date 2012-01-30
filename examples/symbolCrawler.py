@@ -28,17 +28,17 @@ class SymbolCrawler(object):
     def getOptions(self):
         ''' crawling data and save to hbase '''
         parser = optparse.OptionParser("Usage: %prog [options]")
-        parser.add_option("-f", "--symbolFile", dest="symbolFile", type="string",
-                          help="file that contains symbols for each line")
-        parser.add_option("-t", "--dataType", dest="dataType",
-                          default='tick', type="string",
-                          help="data type that will be stored, e.g. quote|tick|all")
-        parser.add_option("-s", "--start", dest="start",
-                          default='19800101', type="string",
-                          help="start date")
-        parser.add_option("-e", "--end", dest="end",
-                          default=datetime.datetime.now().strftime("%Y%m%d"), type="string",
-                          help="end date")
+        parser.add_option("-f", "--symbolFile", dest = "symbolFile", type = "string",
+                          help = "file that contains symbols for each line")
+        parser.add_option("-t", "--dataType", dest = "dataType",
+                          default = 'tick', type = "string",
+                          help = "data type that will be stored, e.g. quote|tick|all")
+        parser.add_option("-s", "--start", dest = "start",
+                          default = '19800101', type = "string",
+                          help = "start date")
+        parser.add_option("-e", "--end", dest = "end",
+                          default = datetime.datetime.now().strftime("%Y%m%d"), type = "string",
+                          help = "end date")
 
 
         (options, args) = parser.parse_args()

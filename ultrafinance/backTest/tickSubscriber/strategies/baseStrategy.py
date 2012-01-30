@@ -3,22 +3,25 @@ Created on Dec 25, 2011
 
 @author: ppa
 '''
+import abc
 from ultrafinance.backTest.tickSubscriber import TickSubsriber
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.outputSaver import OutputSaverFactory
-from ultrafinance.backTest.btUtil import OUTPUT_PREFIX, OUTPUT_FIELDS
-from ultrafinance.backTest.constant import CONF_SYMBOLRE, CONF_SAVER
+from ultrafinance.backTest.btUtil import OUTPUT_PREFIX
+from ultrafinance.backTest.constant import CONF_SYMBOLRE, CONF_SAVER, EVENT_TICK_UPDATE
 
 import logging
 LOG = logging.getLogger()
 
 class BaseStrategy(TickSubsriber):
     ''' trading center '''
+    __meta__ = abc.ABCMeta
+
     def __init__(self, name):
         ''' constructor '''
         super(BaseStrategy, self).__init__(name)
         self.accountId = None
-        self.tradingCenter = None
+        self.tradingEngine = None
         self.configDict = {}
         self.__saver = None
         self.__firstTime = True
@@ -26,18 +29,18 @@ class BaseStrategy(TickSubsriber):
 
     def subRules(self):
         ''' override function '''
-        return (self.configDict[CONF_SYMBOLRE], None)
+        return ([self.configDict[CONF_SYMBOLRE] ], [EVENT_TICK_UPDATE])
 
-    def preConsume(self, tickDict):
-        ''' override function '''
+    def checkReady(self):
+        '''
+        whether strategy has been set up and ready to run
+        TODO: check trading engine
+        '''
         if self.accountId is None:
             raise UfException(Errors.NONE_ACCOUNT_ID,
                               "Account id is none")
-        if self.tradingCenter is None:
-            raise UfException(Errors.NONE_TRADING_CENTER,
-                              "trading center is not set")
 
-        self.__saveOutput(tickDict)
+        return True
 
     def __setupSaver(self, saverName, symbols):
         ''' setup Saver '''
@@ -61,16 +64,14 @@ class BaseStrategy(TickSubsriber):
             if self.__saver:
                 self.__saver.write(tick.time, symbol, str(tick))
 
-
     def placeOrder(self, order):
         ''' place order and keep record'''
-        orderId = self.tradingCenter.placeOrder(order)
+        orderId = self.tradingEngine.placeOrder(order)
 
         if self.__saver:
             self.__saver.write(self.__curTime, 'placedOrder', str(order))
 
         return orderId
-
 
     def complete(self):
         ''' complete operation '''

@@ -19,3 +19,10 @@ def findInListbyRe(itemList, reString):
             items.append(item)
 
     return items
+
+def validateTradeType(self):
+    ''' validate whether global type is set or not'''
+    types = [QUTOE, TICK]
+    if appGlobal[TRADE_TYPE] not in types:
+        raise UfException(Errors.INVALID_TYPE,
+                          'Type %s is not accepted, allow types: %s' % (appGlobal[TRADE_TYPE], types))

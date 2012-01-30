@@ -5,37 +5,37 @@ Created on Dec 18, 2011
 '''
 from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.backTest.account import Account
-from ultrafinance.backTest.tickSubscriber import TickSubsriber
-from ultrafinance.backTest.metric.metricFactory import MetricFactory
 import uuid
 import re
-import copy
 import time
 
 import logging
 LOG = logging.getLogger()
 
-class TradingCenter(TickSubsriber):
+class TradingCenter(object):
     '''
     trading center
     Note: set metricNames before adding accounts
     '''
     def __init__(self):
         ''' constructor '''
-        super(TradingCenter, self).__init__("tradingCenter")
-        self.__curTime = None
-        self.__accounts = {}
-        self.__metrix = {}
-        self.__metricNames = []
+        self.accountManager = None
         self.__openOrders = {}
         self.__closedOrders = {}
         self.__lastSymbolPrice = {}
-        self.__metricFactory = MetricFactory()
+        self.__updatedOrder = {}
+
+    def getUpdatedOrder(self):
+        ''' return orders with status changes '''
+        updatedOrder = {}
+        updatedOrder.update(self.__updatedOrder)
+        self.__updatedOrder.clear()
+
+        return updatedOrder
 
     def validateOrder(self, order):
         ''' validate an order '''
-        account = self.__getAccount(order.accountId)
+        account = self.accountManager.getAccount(order.accountId)
         if account and account.validate(order):
             return True
 
@@ -85,49 +85,12 @@ class TradingCenter(TickSubsriber):
                 order.status = Order.CANCELED #change order state
                 self.__closedOrders[order.orderId] = order
 
-        del self.__openOrders[symbol]
-
-    def createAccountWithMetrix(self, cash, commission=0):
-        ''' create account '''
-        account = Account(cash, commission)
-        self.__accounts[account.accountId] = account
-
-        self.__metrix[account.accountId] = []
-        for metricName in self.__metricNames:
-            metric = self.__metricFactory.createMetric(metricName)
-            metric.setAccount(account)
-            self.__metrix[account.accountId].append(metric)
-
-        return account.accountId
-
-    def getCopyAccount(self, accountId):
-        ''' get copy of account '''
-        return copy.deepcopy(self.__getAccount(accountId) )
-
-    def getCopyAccounts(self, expression):
-        ''' get copy of accounts '''
-        accounts = self.__getAccounts(expression)
-        return copy.deepcopy(accounts)
-
-    def __getAccount(self, accountId):
-        ''' get account '''
-        return self.__accounts.get(accountId)
-
-    def __getAccounts(self, expression):
-        ''' get accounts '''
-        accounts = []
-        pair = re.compile(expression)
-
-        for accountId, account in self.__accounts.items():
-            if pair.match(str(accountId) ):
-                accounts.append(account)
-
-        return accounts
+            del self.__openOrders[symbol]
 
     def getOpenOrdersBySymbol(self, symbol):
         ''' get open orders by symbol '''
         if symbol in self.__openOrders:
-            return self.__openOrders.get(symbol)
+            return self.__openOrders[symbol]
         else:
             return []
 
@@ -155,25 +118,22 @@ class TradingCenter(TickSubsriber):
 
         return orders
 
-    def subRules(self):
-        ''' override function, will subscribe to all symbols '''
-        return ('.*', None)
+    def consumeTicks(self, tickDict):
+        ''' consume ticks '''
+        self._checkAndExecuteOpenOrder(tickDict)
+        self.accountManager.updateAccountsWithTickDict(tickDict)
 
-    def consume(self, tickDict):
-        ''' consume tick '''
-        if tickDict:
-            self.__curTime = tickDict.values()[0].time
-
+    def _checkAndExecuteOpenOrder(self, tickDict):
+        ''' check and execute open order '''
         for symbol, tick in tickDict.iteritems():
-            LOG.debug("trading center get symbol %s with tick %s" % (symbol, tick.time) )
-            self.__lastSymbolPrice[symbol] = tick.close
+            LOG.debug("_executeOpenOrder symbol %s with tick %s" % (symbol, tick.time))
             if symbol in self.__openOrders:
                 for index, order in enumerate(self.__openOrders[symbol]):
                     if self.isOrderMet(tick, order):
-                        account = self.__getAccount(order.accountId)
+                        account = self.accountManager.getAccount(order.accountId)
                         if not account:
                             raise UfException(Errors.INVALID_ACCOUNT,
-                                              ''' Account is invalid: accountId %s''' % order.accountId )
+                                              ''' Account is invalid: accountId %s''' % order.accountId)
                         else:
                             LOG.debug("executing order %s" % order)
                             account.execute(order)
@@ -182,23 +142,7 @@ class TradingCenter(TickSubsriber):
 
                             del self.__openOrders[symbol][index]
                             self.__closedOrders[order.orderId] = order
-
-    def postConsume(self, tickDict):
-        ''' calculate metrix for each account '''
-        for accountId, metrix in self.__metrix.items():
-            account = self.__getAccount(accountId)
-            account.setLastSymbolPrice(self.__lastSymbolPrice)
-
-            for metric in metrix:
-                metric.record(self.__curTime)
-
-    def setMetricNames(self, metricNames):
-        ''' set metricNames '''
-        self.__metricNames = metricNames
-
-    def getMetrix(self):
-        ''' get metrix '''
-        return self.__metrix
+                            self.__updatedOrder[order.orderId] = order
 
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
@@ -209,8 +153,3 @@ class TradingCenter(TickSubsriber):
         else:
             return False
 
-    def getLastSymbolPrice(self):
-        ''' return __lastSymbolPrice '''
-        return self.__lastSymbolPrice
-
-    lastSymbolPrice = property(getLastSymbolPrice)

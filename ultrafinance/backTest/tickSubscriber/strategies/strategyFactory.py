@@ -8,17 +8,17 @@ from ultrafinance.backTest.tickSubscriber.strategies.periodStrategy import Perio
 
 from ultrafinance.lib.errors import Errors, UfException
 
-class StrategyFactory:
+class StrategyFactory(object):
     ''' Strategy factory '''
-    strategyDict = {'period': PeriodStrategy}
+    STRATEGY_DICT = {'period': PeriodStrategy}
 
     @staticmethod
     def createStrategy(name, configDict):
         ''' create a metric '''
-        if name not in StrategyFactory.strategyDict:
+        if name not in StrategyFactory.STRATEGY_DICT:
             raise UfException(Errors.INVALID_STRATEGY_NAME,
                               "Strategy name is invalid %s" % name)
-        return StrategyFactory.strategyDict[name](configDict)
+        return StrategyFactory.STRATEGY_DICT[name](configDict)
 
     @staticmethod
     def getAvailableTypes(self):

@@ -34,20 +34,9 @@ class TickSubsriber(object):
         pass
 
     @abc.abstractmethod
-    def consume(self, ticks):
+    def tickUpdate(self, ticks):
         ''' consume ticks '''
         return
-
-    def postConsume(self, ticks):
-        ''' consume ticks '''
-        return
-
-    def doConsume(self, ticks):
-        ''' consume sequence '''
-        with self.__threadLock:
-            self.preConsume(ticks)
-            self.consume(ticks)
-            self.postConsume(ticks)
 
     def complete(self):
         ''' complete operation '''

@@ -12,15 +12,19 @@ class BaseMetric(object):
 
     def __init__(self):
         ''' constructor '''
-        self.account = None
+        self.__account = None
 
     def setAccount(self, account):
         ''' set account '''
-        if not self.account:
-            self.account = account
+        if not self.__account:
+            self.__account = account
         else:
             raise UfException(Errors.ACCOUNT_ALEADY_SET,
                               "account should only be set once")
+
+    def getAccount(self):
+        ''' get account '''
+        return self.__account
 
     def record(self, curTime):
         ''' keep record of the account '''
@@ -31,4 +35,4 @@ class BaseMetric(object):
         ''' print result '''
         return
 
-
+    account = property(getAccount, setAccount)

@@ -20,8 +20,7 @@ class Account(object):
         self.__cash = cash
         self.__commision = commision
         self.__orderHisotry = []
-        self.__lastSymbolPrice = None
-        self.metrix = []
+        self.__lastTickDict = None
 
     def __generateId(self):
         ''' generate id '''
@@ -51,7 +50,7 @@ class Account(object):
         if not self.validate(order):
             raise UfException(Errors.ORDER_INVALID_ERROR,
                               ''' Transition is invalid: symbol %s, share %s, price %s'''\
-                              % (order.symbol, order.share, order.price) )
+                              % (order.symbol, order.share, order.price))
 
         value = self.__getOrderValue(order)
         if Side.BUY == order.side:
@@ -59,7 +58,7 @@ class Account(object):
             self.__addHolding(order.symbol, order.share, order.price)
         else:
             self.__cash = self.__cash + value - self.__commision
-            self.__reduceHoding(order.symbol, order.share)
+            self.__reduceHolding(order.symbol, order.share)
 
         self.__orderHisotry.append(order)
 
@@ -79,10 +78,10 @@ class Account(object):
                 LOG.error('Transition fails validation: symbol %s not in holdings' % order.symbol)
                 return False
             if order.share > self.__holdings[order.symbol][0]:
-                LOG.error('Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol]) )
+                LOG.error('Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol]))
                 return False
             if self.__commision > self.__cash:
-                LOG.error('Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision) )
+                LOG.error('Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision))
                 return False
             else:
                 return True
@@ -101,14 +100,15 @@ class Account(object):
 
     def getHoldingValue(self):
         ''' get value of holdings '''
-        missingSymbols = set(self.__holdings.keys()) - set(self.__lastSymbolPrice.keys() )
+        missingSymbols = set(self.__holdings.keys()) - set(self.__lastTickDict.keys())
         if missingSymbols:
             raise UfException(Errors.MISSING_SYMBOL,
                               "no all symbols in holdings have price: %s" % missingSymbols)
 
         value = 0.0
         for symbol, (share, price) in self.__holdings.items():
-            value += share * self.__lastSymbolPrice[symbol]
+            price = self.__lastTickDict[symbol].close
+            value += share * price
 
         return value
 
@@ -136,14 +136,13 @@ class Account(object):
         ''' get commission '''
         return self.__commision
 
-    def setLastSymbolPrice(self, lastSymbolPrice):
-        ''' set lastSymbolPrice'''
-        self.__lastSymbolPrice = lastSymbolPrice
+    def setLastTickDict(self, tickDict):
+        ''' set tickDict'''
+        self.__lastTickDict = tickDict
 
-    def getLastSymbolPriceTime(self):
+    def getLastTickDict(self):
         ''' get time for last symbolPrice '''
-        if self.__lastSymbolPrice:
-            return self.__lastSymbolPrice.values[0]
+        return self.__lastTickDict
 
     def __str__(self):
         ''' override string function '''

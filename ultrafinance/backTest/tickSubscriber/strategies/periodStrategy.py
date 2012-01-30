@@ -33,7 +33,7 @@ class PeriodStrategy(BaseStrategy):
         else:
             return False
 
-    def consume(self, tickDict):
+    def tickUpdate(self, tickDict):
         ''' consume ticks '''
         assert self.symbol in tickDict.keys()
         tick = tickDict[self.symbol]
@@ -43,6 +43,6 @@ class PeriodStrategy(BaseStrategy):
                                   side = Side.BUY,
                                   symbol = self.symbol,
                                   price = tick.close,
-                                  share = self.perAmount/float(tick.close) ))
+                                  share = self.perAmount / float(tick.close)))
 
 

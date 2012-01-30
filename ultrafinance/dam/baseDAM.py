@@ -6,7 +6,7 @@ Created on Nov 9, 2011
 import abc
 from ultrafinance.lib.errors import UfException, Errors
 
-class BaseDAM:
+class BaseDAM(object):
     ''' base class for DAO '''
     __metaclass__ = abc.ABCMeta
 
