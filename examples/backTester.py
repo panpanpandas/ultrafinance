@@ -5,6 +5,7 @@ Created on Dec 3, 2011
 '''
 
 from ultrafinance.lib.errors import Errors, UfException
+from ultrafinance.backTest.btUtil import OUTPUT_PREFIX
 from ultrafinance.backTest.metric.metricFactory import MetricFactory
 from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
 from ultrafinance.backTest.tradingCenter import TradingCenter
@@ -13,9 +14,10 @@ from ultrafinance.backTest.tradingEngine import TradingEngine
 from ultrafinance.backTest.accountManager import AccountManager
 from ultrafinance.ufConfig.pyConfig import PyConfig
 from ultrafinance.dam.DAMFactory import DAMFactory
+from ultrafinance.backTest.outputSaver import OutputSaverFactory
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CONF_APP_MAIN, \
-    CONF_METRIC_NAMES, CONF_INPUT_SYMBOL, CONF_INPUT_DAM, STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE
+    CONF_METRIC_NAMES, CONF_INPUT_SYMBOL, CONF_INPUT_DAM, STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, CONF_SAVER
 
 from threading import Thread
 import logging
@@ -35,6 +37,7 @@ class BackTester(object):
         self.__tickFeeder = TickFeeder()
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
+        self.__saver = None
 
     def setup(self):
         ''' setup '''
@@ -45,6 +48,7 @@ class BackTester(object):
         self.setupLog()
         self.setupTradingCenter()
         self.setupTickFeeder()
+        self.setupSaver()
         self.setupTradingEngine()
 
         #wire things together
@@ -53,6 +57,7 @@ class BackTester(object):
         self.__tradingEngine.tickProxy = self.__tickFeeder
         self.__tradingEngine.orderProxy = self.__tradingCenter
         self.__tradingCenter.accountManager = self.__accountManager
+        self.__tradingEngine.saver = self.__saver
 
     def setupLog(self):
         ''' setup logging '''
@@ -73,6 +78,14 @@ class BackTester(object):
         dam.setSymbol(self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_SYMBOL))
 
         return dam
+
+    def setupSaver(self):
+        ''' setup Saver '''
+        saverName = self.__config.getOption(CONF_APP_MAIN, CONF_SAVER)
+        symbol = self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_SYMBOL)
+        if saverName:
+            self.__saver = OutputSaverFactory().createOutputSaver(saverName)
+            self.__saver.tableName = "%s_%s" % (OUTPUT_PREFIX, symbol)
 
     def setupTradingEngine(self):
         ''' setup trading engine '''

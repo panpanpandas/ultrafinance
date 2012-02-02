@@ -6,7 +6,7 @@ Created on Nov 6, 2011
 
 from ultrafinance.lib.errors import UfException, Errors
 from ultrafinance.backTest.appGlobal import appGlobal
-from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE, EVENT_TICK_UPDATE, STOP_FLAG
+from ultrafinance.backTest.constant import EVENT_TICK_UPDATE, STOP_FLAG
 
 from threading import Thread
 from time import sleep
@@ -24,8 +24,10 @@ class TradingEngine(object):
         self.__subs = {} # {'event': {sub: {symbols: sub} }
         self.tickProxy = None
         self.orderProxy = None
+        self.saver = None
         self.__threadTimeout = threadTimeout
         self.__threadMaxFail = threadMaxFail
+        self.__curTime = ""
 
     def validateSub(self, sub):
         ''' validate subscriber '''
@@ -66,9 +68,11 @@ class TradingEngine(object):
 
                 LOG.debug('unregister %s with id %s' % (sub.name, sub.subId))
 
+
     #TODO: in real time trading, change this function
     def runListener(self):
         ''' execute func '''
+
         while True:
             if appGlobal[STOP_FLAG]:
                 self.complete()
@@ -83,6 +87,7 @@ class TradingEngine(object):
                     continue
 
                 if timeTicksTuple:
+                    self.__curTime = timeTicksTuple[0]
                     self._tickUpdate(timeTicksTuple)
 
                 if orderDict:
@@ -94,6 +99,10 @@ class TradingEngine(object):
             for sub in subDict.iterkeys():
                 sub.complete()
 
+        #write to saver
+        if self.saver:
+            self.saver.writeComplete()
+
     def consumeTicks(self, ticks, sub, event):
         ''' publish ticks to sub '''
         thread = Thread(target = getattr(sub, event), args = (ticks,))
@@ -104,14 +113,16 @@ class TradingEngine(object):
         ''' called by each strategy to place order '''
         self.orderProxy.placeOrder(order)
 
-        #TODO: record order
+        # record order
+        if self.saver:
+            self.saver.write(self.__curTime, 'placedOrder', order)
 
     def _orderUpdate(self, orderDict):
         '''
         order status changes
-        TODO: record the order and do callback on strategy
         '''
-        pass
+        if self.saver:
+            self.saver.write(self.__curTime, 'updatedOrder', [str(order) for order in orderDict.values()])
 
     def _tickUpdate(self, timeTicksTuple):
         ''' got tick update '''
@@ -137,3 +148,7 @@ class TradingEngine(object):
             if attrs['fail'] > self.__threadMaxFail:
                 LOG.error("subId %s fails for too many times" % sub.subId)
                 self.unregister(sub)
+
+        if self.saver:
+            for symbol in symbolTicksDict:
+                self.saver.write(self.__curTime, symbol, symbolTicksDict[symbol])

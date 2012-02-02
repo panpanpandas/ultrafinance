@@ -17,7 +17,7 @@ class OutputSaver(object):
 
     def __init__(self):
         ''' constructor '''
-        self.__tableName =  None
+        self.__tableName = None
 
     @abc.abstractmethod
     def read(self, row, col):
@@ -49,7 +49,7 @@ class OutputSaver(object):
 
 class HbaseSaver(OutputSaver):
     ''' hbase saver '''
-    def __init__(self, ip="localhost", port=9090):
+    def __init__(self, ip = "localhost", port = 9090):
         ''' constructor '''
         super(HbaseSaver, self).__init__()
         self.__hbase = HBaseLib(ip, port)
@@ -61,8 +61,7 @@ class HbaseSaver(OutputSaver):
             self.__hbase.deleteTable(self.tableName)
 
         LOG.debug("create table %s with cols %s" % (self.tableName, cols))
-        self.__hbase.createTable(self.tableName, [ColumnDescriptor(name=str(col), maxVersions=5) for col in cols])
-        self.__isResetCols = True
+        self.__hbase.createTable(self.tableName, [ColumnDescriptor(name = str(col), maxVersions = 5) for col in cols])
 
     def read(self, row, col):
         ''' read value with row and col '''
