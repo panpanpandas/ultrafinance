@@ -10,7 +10,7 @@ from ultrafinance.dam.hbaseDAM import HBaseDAM
 
 from ultrafinance.lib.errors import Errors, UfException
 
-class DAMFactory:
+class DAMFactory(object):
     ''' DAM factory '''
     DAM_DICT = {'yahoo': YahooDAM,
                'google': GoogleDAM,
@@ -26,6 +26,6 @@ class DAMFactory:
         return DAMFactory.DAM_DICT[damType]()
 
     @staticmethod
-    def getAvailableTypes(self):
+    def getAvailableTypes():
         ''' return all available types '''
         return DAMFactory.DAM_DICT.keys()

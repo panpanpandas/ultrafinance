@@ -101,6 +101,7 @@ class TradingEngine(object):
 
         #write to saver
         if self.saver:
+            LOG.debug("Writing state to saver")
             self.saver.writeComplete()
 
     def consumeTicks(self, ticks, sub, event):

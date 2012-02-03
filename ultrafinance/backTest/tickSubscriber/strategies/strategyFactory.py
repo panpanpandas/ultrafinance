@@ -21,6 +21,6 @@ class StrategyFactory(object):
         return StrategyFactory.STRATEGY_DICT[name](configDict)
 
     @staticmethod
-    def getAvailableTypes(self):
+    def getAvailableTypes():
         ''' return all available types '''
-        return StrategyFactory.metricDict.keys()
+        return StrategyFactory.STRATEGY_DICT.keys()

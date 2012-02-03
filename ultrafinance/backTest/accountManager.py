@@ -20,7 +20,7 @@ class AccountManager(object):
         ''' constructor '''
         self.__accounts = {}
         self.__metrix = {}
-        self.__metricFactory = MetricFactory()
+        self.saver = None
 
     def createAccountWithMetrix(self, metricNames, cash, commission = 0):
         ''' create account '''
@@ -29,7 +29,7 @@ class AccountManager(object):
 
         self.__metrix[account.accountId] = []
         for metricName in metricNames:
-            metric = self.__metricFactory.createMetric(metricName)
+            metric = MetricFactory.createMetric(metricName)
             metric.setAccount(account)
             self.__metrix[account.accountId].append(metric)
 
@@ -60,6 +60,10 @@ class AccountManager(object):
 
             for metric in metrix:
                 metric.record(curTime)
+
+            #record
+            if self.saver:
+                self.saver.write(curTime, "account-%s" % accountId, account.getTotalValue())
 
     def getMetrix(self):
         ''' get metrix '''

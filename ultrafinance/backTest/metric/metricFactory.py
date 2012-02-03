@@ -10,21 +10,21 @@ from ultrafinance.backTest.metric.sharpeRatioMetric import SharpeRatioMetric
 
 from ultrafinance.lib.errors import Errors, UfException
 
-class MetricFactory:
+class MetricFactory(object):
     ''' DAO factory '''
-    metricDict = {'highest': HighestMetric,
+    METRIC_DICT = {'highest': HighestMetric,
                   'lowest': LowestMetric,
                   'sharpratio': SharpeRatioMetric}
 
     @staticmethod
     def createMetric(name):
         ''' create a metric '''
-        if name not in MetricFactory.metricDict:
+        if name not in MetricFactory.METRIC_DICT:
             raise UfException(Errors.INVALID_METRIC_NAME,
                               "Metric name is invalid %s" % name)
-        return MetricFactory.metricDict[name]()
+        return MetricFactory.METRIC_DICT[name]()
 
     @staticmethod
-    def getAvailableTypes(self):
+    def getAvailableTypes():
         ''' return all available types '''
-        return MetricFactory.metricDict.keys()
+        return MetricFactory.METRIC_DICT.keys()

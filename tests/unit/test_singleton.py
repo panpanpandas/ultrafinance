@@ -45,7 +45,7 @@ class testSingleton(unittest.TestCase):
 
             class B(Singleton):
 
-                def __init__(self, arg1=5):
+                def __init__(self, arg1 = 5):
                     super(B, self).__init__()
                     self.arg1 = arg1
 
@@ -175,7 +175,7 @@ class testSingleton(unittest.TestCase):
 
                 def run(self):
                     try:
-                        fSleepTime =  self._fTargetTime - time.time()
+                        fSleepTime = self._fTargetTime - time.time()
                         if fSleepTime > 0:
                             time.sleep(fSleepTime)
                         Test_Singleton.getInstance()
@@ -216,7 +216,7 @@ class testSingleton(unittest.TestCase):
 
                 ignoreSubsequent = True
 
-                def __init__(self, a, b=1):
+                def __init__(self, a, b = 1):
                     pass
 
             a1 = A.getInstance(1)
@@ -224,7 +224,7 @@ class testSingleton(unittest.TestCase):
 
             class B(Singleton):
 
-                def __init__(self, a, b=1):
+                def __init__(self, a, b = 1):
                     pass
 
             b1 = B.getInstance(1)
@@ -232,11 +232,11 @@ class testSingleton(unittest.TestCase):
 
             class C(Singleton):
 
-                def __init__(self, a=1):
+                def __init__(self, a = 1):
                     pass
 
-            c1 = C.getInstance(a=1)
-            self.assertRaises(SingletonException, C.getInstance, a=2) # No ignoreSubsequent included
+            c1 = C.getInstance(a = 1)
+            self.assertRaises(SingletonException, C.getInstance, a = 2) # No ignoreSubsequent included
 
         def testInheritance(self):
             """
