@@ -8,6 +8,7 @@ from ultrafinance.lib.errors import UfException, Errors
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import EVENT_TICK_UPDATE, STOP_FLAG
 
+import json
 from threading import Thread
 from time import sleep
 
@@ -152,4 +153,4 @@ class TradingEngine(object):
 
         if self.saver:
             for symbol in symbolTicksDict:
-                self.saver.write(self.__curTime, symbol, symbolTicksDict[symbol])
+                self.saver.write(self.__curTime, symbol, str(symbolTicksDict[symbol]))

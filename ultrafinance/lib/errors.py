@@ -69,7 +69,7 @@ class UfException(Exception):
     """ Ultra-Finance exception """
     def __init__(self, error, errorMsg):
         """ constructor  """
-        Exception.__init__(self)
+        super(UfException, self).__init__()
         self.__error = error
         self.__errorMsg = errorMsg
 

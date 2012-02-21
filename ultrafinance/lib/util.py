@@ -13,22 +13,32 @@ LOG = logging.getLogger()
 
 googCSVDateformat = "%d-%b-%y"
 
-def import_class(path, fileName, className=None):
+def importClass(path, moduleName, className = None):
     ''' dynamically import class '''
     if not className:
-        className = capitalize(fileName)
+        className = capitalize(moduleName)
     sys.path.append(path)
 
-    mod = __import__(fileName)
+    mod = __import__(moduleName)
     return getattr(mod, className)
 
 def capitalize(inputString):
     ''' capitalize first letter '''
-    return inputString[0].upper() + inputString[1:] if len(inputString) > 1 else inputString[0].upper()
+    if not inputString:
+        return inputString
+    elif 1 == len(inputString):
+        return inputString[0].upper()
+    else:
+        return inputString[0].upper() + inputString[1:]
 
 def deCapitalize(inputString):
-    ''' de-capitalize first letter '''
-    return inputString[0].lower() + inputString[1:] if len(inputString) > 1 else inputString[0].lower()
+    ''' capitalize first letter '''
+    if not inputString:
+        return inputString
+    elif 1 == len(inputString):
+        return inputString[0].lower()
+    else:
+        return inputString[0].lower() + inputString[1:]
 
 def splitByComma(inputString):
     ''' split string by comma '''
@@ -36,7 +46,7 @@ def splitByComma(inputString):
 
 def convertGoogCSVDate(googCSVDate):
     ''' convert date 25-Jul-2010 to 20100725'''
-    d = str(datetime.strptime(googCSVDate, googCSVDateformat).date() )
+    d = str(datetime.strptime(googCSVDate, googCSVDateformat).date())
     return d.replace("-", "")
 
 def findPatthen(page, pList):
@@ -46,9 +56,9 @@ def findPatthen(page, pList):
         newDatas = []
         for data in datas:
             if 'id' == key:
-                newDatas.extend(data.findAll(id=pattern, recursive=True))
+                newDatas.extend(data.findAll(id = pattern, recursive = True))
             if 'text' == key:
-                newDatas.extend(data.findAll(text=pattern, recursive=True))
+                newDatas.extend(data.findAll(text = pattern, recursive = True))
 
         datas = newDatas
         index += 1
@@ -57,10 +67,10 @@ def findPatthen(page, pList):
 
     return datas
 
-def string2EpochTime(stingTime, format='%Y%m%d'):
+def string2EpochTime(stingTime, format = '%Y%m%d'):
     ''' convert string time to epoch time '''
     return int(time.mktime(datetime.strptime(stingTime, '%Y%m%d').timetuple()))
 
-def string2datetime(stringTime, format='%Y%m%d'):
+def string2datetime(stringTime, format = '%Y%m%d'):
     ''' convert string time to epoch time'''
     return datetime.strptime(stringTime, '%Y%m%d')

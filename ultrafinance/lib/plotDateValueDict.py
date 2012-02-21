@@ -52,6 +52,7 @@ class PlotDateValueDict(object):
                 ax.set_ylim(min([int(dateValue[1]) for dateValue in dateValues]) / 1.1, max([int(dateValue[1]) for dateValue in dateValues]) * 1.1)
                 #ax.set_ylim(0, 1000)
 
+            #pyplot.legend()
             pyplot.show()
 
         except UfException as excep:

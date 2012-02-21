@@ -11,9 +11,67 @@ from ultrafinance.lib.errors import UfException, Errors
 TICK_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume']
 QUOTE_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume', 'adjClose']
 
-Tick = namedtuple('Tick', ' '.join(TICK_FIELDS))
-Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))
-DateValue = namedtuple('DateValue', 'date, value')
+class Tick(object):
+    ''' tick class '''
+    def __init__(self, time, open, high, low, close, volume):
+        ''' constructor '''
+        self.time = time
+        self.open = float(open)
+        self.high = float(high)
+        self.low = float(low)
+        self.close = float(close)
+        self.volume = volume
+
+    def __str__(self):
+        ''' convert to string '''
+        return json.dumps({"time": self.time,
+                           "open": self.open,
+                           "high": self.high,
+                           "low": self.low,
+                           "close": self.close,
+                           "volume": self.volume})
+
+    @staticmethod
+    def fromStr(string):
+        ''' convert from string'''
+        d = json.loads(string)
+        return Tick(d['time'], d['open'], d['high'],
+                    d['low'], d['close'], d['volume'], d['adjClose'])
+
+
+class Quote(object):
+    ''' tick class '''
+    def __init__(self, time, open, high, low, close, volume, adjClose):
+        ''' constructor '''
+        self.time = time
+        self.open = float(open)
+        self.high = float(high)
+        self.low = float(low)
+        self.close = float(close)
+        self.volume = volume
+        self.adjClose = adjClose
+
+    def __str__(self):
+        ''' convert to string '''
+        return json.dumps({"time": self.time,
+                           "open": self.open,
+                           "high": self.high,
+                           "low": self.low,
+                           "close": self.close,
+                           "volume": self.volume,
+                           "adjClose": self.adjClose})
+
+    @staticmethod
+    def fromStr(string):
+        ''' convert from string'''
+        d = json.loads(string)
+        return Quote(d['time'], d['open'], d['high'],
+                     d['low'], d['close'], d['volume'], d['adjClose'])
+
+
+#Tick = namedtuple('Tick', ' '.join(TICK_FIELDS))
+#Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))
+#DateValue = namedtuple('DateValue', 'date, value')
 
 class Side(object):
     ''' side class '''

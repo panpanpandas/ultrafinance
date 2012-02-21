@@ -6,7 +6,6 @@ Created on Dec 3, 2011
 
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.btUtil import OUTPUT_PREFIX
-from ultrafinance.backTest.metric.metricFactory import MetricFactory
 from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
 from ultrafinance.backTest.tradingCenter import TradingCenter
 from ultrafinance.backTest.tickFeeder import TickFeeder
@@ -14,7 +13,7 @@ from ultrafinance.backTest.tradingEngine import TradingEngine
 from ultrafinance.backTest.accountManager import AccountManager
 from ultrafinance.ufConfig.pyConfig import PyConfig
 from ultrafinance.dam.DAMFactory import DAMFactory
-from ultrafinance.backTest.outputSaver import OutputSaverFactory
+from ultrafinance.backTest.stateSaver.stateSaverFactory import StateSaverFactory
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CONF_APP_MAIN, \
     CONF_METRIC_NAMES, CONF_INPUT_SYMBOL, CONF_INPUT_DAM, STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, CONF_SAVER
@@ -30,9 +29,6 @@ class BackTester(object):
 
     def __init__(self):
         self.__config = PyConfig()
-        self.__strategyFactory = StrategyFactory()
-        self.__metricFactory = MetricFactory()
-        self.__damFactory = DAMFactory()
         self.__accountManager = AccountManager()
         self.__tickFeeder = TickFeeder()
         self.__tradingCenter = TradingCenter()
@@ -58,6 +54,7 @@ class BackTester(object):
         self.__tradingEngine.orderProxy = self.__tradingCenter
         self.__tradingCenter.accountManager = self.__accountManager
         self.__tradingEngine.saver = self.__saver
+        self.__accountManager.saver = self.__saver
 
     def setupLog(self):
         ''' setup logging '''
@@ -74,7 +71,7 @@ class BackTester(object):
 
     def createDam(self):
         ''' setup Dam'''
-        dam = self.__damFactory.createDAM(self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_DAM))
+        dam = DAMFactory.createDAM(self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_DAM))
         dam.setSymbol(self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_SYMBOL))
 
         return dam
@@ -84,7 +81,7 @@ class BackTester(object):
         saverName = self.__config.getOption(CONF_APP_MAIN, CONF_SAVER)
         symbol = self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_SYMBOL)
         if saverName:
-            self.__saver = OutputSaverFactory().createOutputSaver(saverName)
+            self.__saver = StateSaverFactory.createStateSaver(saverName)
             self.__saver.tableName = "%s_%s" % (OUTPUT_PREFIX, symbol)
 
     def setupTradingEngine(self):
@@ -93,7 +90,7 @@ class BackTester(object):
 
     def setupStrategy(self):
         ''' setup tradingEngine'''
-        strategy = self.__strategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
+        strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
                                                          self.__config.getSection(CONF_STRATEGY))
 
         metricNames = [name.strip() for name in self.__config.getOption(CONF_APP_MAIN, CONF_METRIC_NAMES).split(',') ]
