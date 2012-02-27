@@ -37,7 +37,7 @@ class GoogleFinance(object):
         page = self.__request(url)
 
         soup = BeautifulSoup(page)
-        snapData=soup.find("table", { "class" : "snap-data" })
+        snapData = soup.find("table", { "class" : "snap-data" })
         if snapData is None:
             raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
         data = {}
@@ -79,7 +79,8 @@ class GoogleFinance(object):
                                   value[5].strip(),
                                   None))
 
-            dateValues = sorted(data, key=itemgetter(0))
+            #dateValues = sorted(data, key=itemgetter(0))
+            dateValues = sorted(data, key = lambda x: x.time)
             return dateValues
 
         except BaseException:
@@ -87,7 +88,7 @@ class GoogleFinance(object):
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose=None))...]
 
-    def getFinancials(self, symbol, fields=['Total Revenue'], annual=True):
+    def getFinancials(self, symbol, fields = ['Total Revenue'], annual = True):
         """
         get financials:
         google finance provide annual and quanter financials, if annual is true, we will use annual data
@@ -110,7 +111,7 @@ class GoogleFinance(object):
             fieldValues = {}
             for field in fields:
                 cPage = copy.copy(page)
-                fieldContents = findPatthen(cPage, [('id', re.compile(r"(\w+)%s(\w+)" % timeInterval) ), ('id', 'fs-table'), ('text', re.compile(r"^%s$" % field))])
+                fieldContents = findPatthen(cPage, [('id', re.compile(r"(\w+)%s(\w+)" % timeInterval)), ('id', 'fs-table'), ('text', re.compile(r"^%s$" % field))])
 
                 if 1 != len(fieldContents):
                     #raise ufException(Errors.STOCK_PARSING_ERROR, "Parse data error for symbol %s" % symbol)

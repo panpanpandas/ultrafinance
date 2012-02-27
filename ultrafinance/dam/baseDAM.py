@@ -38,4 +38,8 @@ class BaseDAM(object):
         ''' get symbol '''
         return self.__symbol
 
+    def commit(self):
+        ''' commit write changes '''
+        pass
+
     symbol = property(__getSymbol, setSymbol)

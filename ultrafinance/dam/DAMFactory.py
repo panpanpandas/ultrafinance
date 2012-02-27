@@ -7,6 +7,7 @@ from ultrafinance.dam.excelDAM import ExcelDAM
 from ultrafinance.dam.yahooDAM import YahooDAM
 from ultrafinance.dam.googleDAM import GoogleDAM
 from ultrafinance.dam.hbaseDAM import HBaseDAM
+from ultrafinance.dam.sqlDAM import SqlDAM
 
 from ultrafinance.lib.errors import Errors, UfException
 
@@ -15,7 +16,8 @@ class DAMFactory(object):
     DAM_DICT = {'yahoo': YahooDAM,
                'google': GoogleDAM,
                'excel': ExcelDAM,
-               'hbase': HBaseDAM}
+               'hbase': HBaseDAM,
+               'sql': SqlDAM}
 
     @staticmethod
     def createDAM(damType):

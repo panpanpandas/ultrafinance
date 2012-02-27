@@ -29,13 +29,13 @@ class QuoteSql(Base):
     def __init__(self, symbol, time, open, high, low, close, volume, adjClose):
         ''' constructor '''
         self.symbol = symbol
-        self.time = int(time)
-        self.open = float(open)
-        self.high = float(high)
-        self.low = float(low)
-        self.close = float(close)
-        self.volume = int(volume)
-        self.adjClose = float(adjClose) if adjClose else None
+        self.time = time
+        self.open = open
+        self.high = high
+        self.low = low
+        self.close = close
+        self.volume = volume
+        self.adjClose = adjClose
 
     def __repr__(self):
         return "<Quote('%s', '%s','%s', '%s', '%s','%s', '%s', '%s')>" \
@@ -56,12 +56,12 @@ class TickSql(Base):
     def __init__(self, symbol, time, open, high, low, close, volume):
         ''' constructor '''
         self.symbol = symbol
-        self.time = int(time)
-        self.open = float(open)
-        self.high = float(high)
-        self.low = float(low)
-        self.close = float(close)
-        self.volume = int(volume)
+        self.time = time
+        self.open = open
+        self.high = high
+        self.low = low
+        self.close = close
+        self.volume = volume
 
     def __repr__(self):
         return "<Tick('%s', '%s', '%s', '%s', '%s', '%s', '%s')>" \
@@ -70,10 +70,18 @@ class TickSql(Base):
 class SqlDAM(BaseDAM):
     ''' SQL DAO '''
 
-    def __init__(self, db = 'sqlite:////tmp/sqldam.sqlite', echo = False):
+    def __init__(self, echo = False):
         ''' constructor '''
         super(SqlDAM, self).__init__()
-        self.engine = create_engine(db, echo = echo)
+        self.echo = echo
+        self.db = None
+        self.session = None
+        self.engine = None
+        self.first = True
+
+    def setDb(self, db):
+        self.db = db
+        self.engine = create_engine(db, echo = self.echo)
         Session = sessionmaker(bind = self.engine)
         self.session = Session()
 
@@ -115,26 +123,20 @@ class SqlDAM(BaseDAM):
 
     def writeQuotes(self, quotes):
         ''' write quotes '''
-        Base.metadata.create_all(self.engine)
+        if self.first:
+            Base.metadata.create_all(self.engine, checkfirst = True)
+            self.first = False
+
         self.session.add_all([self.__quoteToSql(quote) for quote in quotes])
 
     def writeTicks(self, ticks):
         ''' write ticks '''
-        Base.metadata.create_all(self.engine)
+        if self.first:
+            Base.metadata.create_all(self.engine, checkfirst = True)
+            self.first = False
+
         self.session.add_all([self.__tickToSql(tick) for tick in ticks])
 
-
-if __name__ == '__main__':
-    dam = SqlDAM(echo = False)
-    dam.setSymbol("test")
-
-    quotes = [Quote(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213', None]),
-              Quote(*['1320676201', '32.60', '32.60', '32.59', '32.59', '65214', None])]
-    ticks = [Tick(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213']),
-              Tick(*['1320676201', '32.60', '32.60', '32.59', '32.59', '65214'])]
-
-    dam.writeQuotes(quotes)
-    dam.writeTicks(ticks)
-    print [str(quote) for quote in dam.readQuotes("0", None) ]
-    print [str(tick) for tick in dam.readTicks("0", "1320676201")]
-    print [str(tick) for tick in dam.readTicks("0", "1320676202")]
+    def commit(self):
+        ''' commit changes '''
+        self.session.commit()
