@@ -3,13 +3,12 @@ Created on Dec 4, 2011
 
 @author: ppa
 '''
-
-from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.dam.DAMFactory import DAMFactory
 
 import os
 from os import path
 import datetime
+from dateutil.relativedelta import relativedelta
 import optparse
 
 from threading import Thread
@@ -17,6 +16,7 @@ from threading import Lock
 
 BATCH_SIZE = 30
 THREAD_TIMEOUT = 5
+MAX_TRY = 3
 
 class SymbolCrawler(object):
     ''' collect quotes/ticks for a list of symbol '''
@@ -43,14 +43,11 @@ class SymbolCrawler(object):
         parser.add_option("-f", "--symbolFile", dest = "symbolFile", type = "string",
                           help = "file that contains symbols for each line")
         parser.add_option("-t", "--dataType", dest = "dataType",
-                          default = 'tick', type = "string",
+                          default = 'quote', type = "string",
                           help = "data type that will be stored, e.g. quote|tick|all")
         parser.add_option("-s", "--start", dest = "start",
-                          default = '19800101', type = "string",
-                          help = "start date")
-        parser.add_option("-e", "--end", dest = "end",
-                          default = datetime.datetime.now().strftime("%Y%m%d"), type = "string",
-                          help = "end date")
+                          default = 'month', type = "string",
+                          help = "start date | all or last month")
         parser.add_option("-o", "--outputDAM", dest = "outputDAM",
                           default = 'sql', type = "string",
                           help = "output dam, e.g. sql|hbase")
@@ -81,12 +78,17 @@ class SymbolCrawler(object):
             print "Please provide valid outputDAM %s" % options.outputDAM
             exit(4)
 
+        if options.start not in ['all', 'month']:
+            print "Please provide valid start option(all|month): %s" % options.outputDAM
+            exit(4)
+
         if "quote" == options.dataType:
             self.isQuote = True
         elif "tick" == options.dataType:
             self.isTick = True
         else:
             self.isQuote = self.isTick = True
+        print "Retrieving data type %s" % options.dataType
 
         # set google and output dam
         self.googleDAM = DAMFactory.createDAM("google")
@@ -98,20 +100,35 @@ class SymbolCrawler(object):
             self.outputDAM.setDb(sqlLocation)
 
         # set start date and end date
-        self.start = options.start
-        self.end = options.end
+        if 'all' == options.start:
+            self.start = '19800101'
+        else:
+            self.start = (datetime.datetime.now() + relativedelta(months = -1)).strftime("%Y%m%d")
+        self.end = datetime.datetime.now().strftime("%Y%m%d")
+        print "Retrieving data start from %s" % self.start
 
     def __getSaveOneSymbol(self, symbol):
         ''' get and save data for one symbol '''
         try:
             with self.readLock: #dam is not thread safe
-                self.googleDAM.setSymbol(symbol)
+                failCount = 0
+                #try several times since it may fail
+                while failCount < MAX_TRY:
+                    try:
+                        self.googleDAM.setSymbol(symbol)
 
-                if self.isQuote:
-                    quotes = self.googleDAM.readQuotes(self.start, self.end)
+                        if self.isQuote:
+                            quotes = self.googleDAM.readQuotes(self.start, self.end)
 
-                if self.isTick:
-                    ticks = self.googleDAM.readTicks(self.start, self.end)
+                        if self.isTick:
+                            ticks = self.googleDAM.readTicks(self.start, self.end)
+                    except BaseException as excp:
+                        failCount += 1
+                    else:
+                        break
+
+                if failCount >= MAX_TRY:
+                    raise BaseException("Can't retrive historical data")
 
             with self.writeLock: #dam is not thread safe
                 self.outputDAM.setSymbol(symbol)
@@ -151,7 +168,7 @@ class SymbolCrawler(object):
                 thread.join(THREAD_TIMEOUT) # no need to block, because thread should complete at last
 
             #can't start another thread to do commit because for sqlLite, only object for the same thread can be commited
-            if 0 == rounds % 2:
+            if 0 == rounds % 3:
                 self.outputDAM.commit()
 
             counter += size
