@@ -14,18 +14,20 @@ from ultrafinance.lib.errors import Errors, UfException
 class DAMFactory(object):
     ''' DAM factory '''
     DAM_DICT = {'yahoo': YahooDAM,
-               'google': GoogleDAM,
-               'excel': ExcelDAM,
-               'hbase': HBaseDAM,
-               'sql': SqlDAM}
+                'google': GoogleDAM,
+                'excel': ExcelDAM,
+                'hbase': HBaseDAM,
+                'sql': SqlDAM}
 
     @staticmethod
-    def createDAM(damType):
+    def createDAM(damType, settings = None):
         ''' create DAM '''
         if damType not in DAMFactory.DAM_DICT:
             raise UfException(Errors.INVALID_DAM_TYPE,
                               "DAM type is invalid %s" % damType)
-        return DAMFactory.DAM_DICT[damType]()
+        dam = DAMFactory.DAM_DICT[damType]()
+        dam.setup(settings)
+        return dam
 
     @staticmethod
     def getAvailableTypes():

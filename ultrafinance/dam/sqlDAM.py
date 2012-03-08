@@ -79,6 +79,11 @@ class SqlDAM(BaseDAM):
         self.engine = None
         self.first = True
 
+    def setup(self, setting):
+        ''' set up '''
+        if 'db' in setting:
+            self.setDb(setting['db'])
+
     def setDb(self, db):
         self.db = db
         self.engine = create_engine(db, echo = self.echo)

@@ -103,7 +103,7 @@ class TradingEngine(object):
         #write to saver
         if self.saver:
             LOG.debug("Writing state to saver")
-            self.saver.writeComplete()
+            self.saver.commit()
 
     def consumeTicks(self, ticks, sub, event):
         ''' publish ticks to sub '''

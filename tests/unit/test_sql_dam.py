@@ -26,12 +26,12 @@ class testSqlDAM(unittest.TestCase):
         quotes = [Quote(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213', None]),
                   Quote(*['1320676201', '32.60', '32.60', '32.59', '32.59', '65214', None])]
         ticks = [Tick(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213']),
-                  Tick(*['1320676201', '32.60', '32.60', '32.59', '32.59', '65214'])]
+                 Tick(*['1320676201', '32.60', '32.60', '32.59', '32.59', '65214'])]
 
         dam.writeQuotes(quotes)
         dam.writeTicks(ticks)
         dam.commit()
-        print [str(quote) for quote in dam.readQuotes("0", None) ]
-        print [str(tick) for tick in dam.readTicks("0", "1320676201")]
-        print [str(tick) for tick in dam.readTicks("0", "1320676202")]
+        print [str(quote) for quote in dam.readQuotes(0, None) ]
+        print [str(tick) for tick in dam.readTicks(0, "1320676201")]
+        print [str(tick) for tick in dam.readTicks(0, "1320676202")]
 

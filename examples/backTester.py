@@ -16,7 +16,9 @@ from ultrafinance.dam.DAMFactory import DAMFactory
 from ultrafinance.backTest.stateSaver.stateSaverFactory import StateSaverFactory
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CONF_APP_MAIN, \
-    CONF_METRIC_NAMES, CONF_INPUT_SYMBOL, CONF_INPUT_DAM, STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, CONF_SAVER
+    CONF_METRIC_NAMES, STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, \
+    CONF_INPUT_SECTION, CONF_DAM, CONF_SYMBOL, \
+    CONF_OUTPUT_SECTION, CONF_SAVER
 
 from threading import Thread
 import logging
@@ -71,18 +73,19 @@ class BackTester(object):
 
     def createDam(self):
         ''' setup Dam'''
-        dam = DAMFactory.createDAM(self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_DAM))
-        dam.setSymbol(self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_SYMBOL))
+        damName = self.__config.getOption(CONF_INPUT_SECTION, CONF_DAM)
+        setting = self.__config.getSection(CONF_INPUT_SECTION)
+        dam = DAMFactory.createDAM(damName, setting)
+        dam.setSymbol(self.__config.getOption(CONF_APP_MAIN, CONF_SYMBOL))
 
         return dam
 
     def setupSaver(self):
         ''' setup Saver '''
-        saverName = self.__config.getOption(CONF_APP_MAIN, CONF_SAVER)
-        symbol = self.__config.getOption(CONF_APP_MAIN, CONF_INPUT_SYMBOL)
+        saverName = self.__config.getOption(CONF_OUTPUT_SECTION, CONF_SAVER)
+        setting = self.__config.getSection(CONF_OUTPUT_SECTION)
         if saverName:
-            self.__saver = StateSaverFactory.createStateSaver(saverName)
-            self.__saver.tableName = "%s_%s" % (OUTPUT_PREFIX, symbol)
+            self.__saver = StateSaverFactory.createStateSaver(saverName, setting)
 
     def setupTradingEngine(self):
         ''' setup trading engine '''
@@ -91,7 +94,7 @@ class BackTester(object):
     def setupStrategy(self):
         ''' setup tradingEngine'''
         strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
-                                                         self.__config.getSection(CONF_STRATEGY))
+                                                  self.__config.getSection(CONF_STRATEGY))
 
         metricNames = [name.strip() for name in self.__config.getOption(CONF_APP_MAIN, CONF_METRIC_NAMES).split(',') ]
 

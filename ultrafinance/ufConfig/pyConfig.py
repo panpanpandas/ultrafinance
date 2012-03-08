@@ -17,7 +17,7 @@ class PyConfig(object):
         self.__dir = None
         self.__parser = None
         self.__fullPath = None
-        self.setDir(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__file__))) ), 'conf') )
+        self.setDir(path.join(path.dirname(path.dirname(path.dirname(path.abspath(__file__)))), 'conf'))
 
     def setDir(self, dirPath):
         ''' set dir of configuration '''
@@ -58,4 +58,7 @@ class PyConfig(object):
         return self.__fullPath
 
 if __name__ == '__main__':
-    print PyConfig().getOption('app_main', 'feeder')
+    config = PyConfig()
+    config.setSource('test.ini')
+    print config.getOption('app_main', 'feeder')
+    print config.getSection('app_main')

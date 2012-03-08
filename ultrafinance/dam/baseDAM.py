@@ -38,6 +38,10 @@ class BaseDAM(object):
         ''' get symbol '''
         return self.__symbol
 
+    def setup(self, settings):
+        ''' setup dam '''
+        pass
+
     def commit(self):
         ''' commit write changes '''
         pass

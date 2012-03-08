@@ -42,7 +42,7 @@ class HbaseSaver(StateSaver):
         ''' write value with row and col '''
         self.__writeCache[(row, col)] = value
 
-    def writeComplete(self):
+    def commit(self):
         ''' complete write operation '''
         if not self.tableName:
             raise UfException(Errors.TABLENAME_NOT_SET,
@@ -61,6 +61,9 @@ class HbaseSaver(StateSaver):
                                    row,
                                    [Mutation(column = "%s:" % col, value = str(value))])
 
+    def setup(self, setting):
+        ''' setup '''
+        pass
 
 if __name__ == '__main__':
     h = HbaseSaver()
@@ -68,7 +71,7 @@ if __name__ == '__main__':
     #h.resetCols(['accountValue', '1'])
     for i in range(5):
         h.write('time1', 'accountValue', 10000)
-        h.writeComplete()
+        h.commit()
         accountValue = h.read('time1', 'accountValue')
         print accountValue
         assert str(10000) == accountValue

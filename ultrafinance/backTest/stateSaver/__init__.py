@@ -29,8 +29,12 @@ class StateSaver(object):
         ''' write value with row and col '''
         pass
 
-    def writeComplete(self):
+    def commit(self):
         ''' complete write operation '''
+        pass
+
+    def setup(self, setting):
+        ''' setup '''
         pass
 
     def getTableName(self):
