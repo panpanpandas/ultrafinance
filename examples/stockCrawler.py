@@ -47,7 +47,7 @@ class SymbolCrawler(object):
                           help = "data type that will be stored, e.g. quote|tick|all")
         parser.add_option("-s", "--start", dest = "start",
                           default = 'month', type = "string",
-                          help = "start date | all or last month")
+                          help = "start date, all|month")
         parser.add_option("-o", "--outputDAM", dest = "outputDAM",
                           default = 'sql', type = "string",
                           help = "output dam, e.g. sql|hbase")
@@ -88,16 +88,17 @@ class SymbolCrawler(object):
             self.isTick = True
         else:
             self.isQuote = self.isTick = True
-        print "Retrieving data type %s" % options.dataType
-
-        # set google and output dam
-        self.googleDAM = DAMFactory.createDAM("google")
-        self.outputDAM = DAMFactory.createDAM(options.outputDAM)
+        print "Retrieving data type: %s" % options.dataType
 
         if 'sql' == options.outputDAM:
             sqlLocation = 'sqlite:///%s' % self.getOutputSql()
             print "Sqlite location: %s" % sqlLocation
-            self.outputDAM.setDb(sqlLocation)
+            setting = {'db': sqlLocation}
+
+
+        # set google and output dam
+        self.googleDAM = DAMFactory.createDAM("google")
+        self.outputDAM = DAMFactory.createDAM(options.outputDAM, setting)
 
         # set start date and end date
         if 'all' == options.start:
@@ -105,7 +106,10 @@ class SymbolCrawler(object):
         else:
             self.start = (datetime.datetime.now() + relativedelta(months = -1)).strftime("%Y%m%d")
         self.end = datetime.datetime.now().strftime("%Y%m%d")
-        print "Retrieving data start from %s" % self.start
+        if options.dataType in ["quote", "all"]:
+            print "Retrieving quotes start from %s" % self.start
+        else:
+            print "Retrieving ticks for last 15 days"
 
     def __getSaveOneSymbol(self, symbol):
         ''' get and save data for one symbol '''
