@@ -228,10 +228,10 @@ def TSI(df, r, s):
     return df
 
 #Accumulation/Distribution
-def AccDist(df, n):
+def ACCDIST(df, n):
     ad = (2 * df['Close'] - df['High'] - df['Low']) / (df['High'] - df['Low']) * df['Volume']
-    M = ad.diff(r1 - 1)
-    N = ad.shift(r1 - 1)
+    M = ad.diff(n - 1)
+    N = ad.shift(n - 1)
     ROC = M / N
     AD = Series(ROC, name = 'Acc/Dist_ROC_' + str(n))
     df = df.join(AD)
@@ -280,13 +280,13 @@ def OBV(df, n):
     return df
 
 #Force Index
-def Force(df, n):
+def FORCE(df, n):
     F = Series(df['Close'].diff(n) * df['Volume'].diff(n), name = 'Force_' + str(n))
     df = df.join(F)
     return df
 
 #Ease of Movement
-def EoM(df, n):
+def EOM(df, n):
     EoM = (df['High'].diff(1) + df['Low'].diff(1)) * (df['High'] - df['Low']) / (2 * df['Volume'])
     Eom_ma = Series(rolling_mean(EoM, n), name = 'EoM_' + str(n))
     df = df.join(Eom_ma)
@@ -300,7 +300,7 @@ def CCI(df, n):
     return df
 
 #Coppock Curve
-def Copp(df, n):
+def COPP(df, n):
     M = df['Close'].diff(int(n * 11 / 10) - 1)
     N = df['Close'].shift(int(n * 11 / 10) - 1)
     ROC1 = M / N
@@ -312,7 +312,7 @@ def Copp(df, n):
     return df
 
 #Keltner Channel
-def KelCh(df, n):
+def KELCH(df, n):
     KelChM = Series(rolling_mean((df['High'] + df['Low'] + df['Close']) / 3, n), name = 'KelChM_' + str(n))
     KelChU = Series(rolling_mean((4 * df['High'] - 2 * df['Low'] + df['Close']) / 3, n), name = 'KelChU_' + str(n))
     KelChD = Series(rolling_mean((-2 * df['High'] + 4 * df['Low'] + df['Close']) / 3, n), name = 'KelChD_' + str(n))
@@ -322,7 +322,7 @@ def KelCh(df, n):
     return df
 
 #Ultimate Oscillator
-def UltO(df):
+def ULTOSC(df):
     i = 0
     TR_l = [0]
     BP_l = [0]
@@ -337,7 +337,7 @@ def UltO(df):
     return df
 
 #Donchian Channel
-def DonCh(df, n):
+def DONCH(df, n):
     i = 0
     DC_l = []
     while i < n - 1:
@@ -354,6 +354,6 @@ def DonCh(df, n):
     return df
 
 #Standard Deviation
-def STD(df, n):
+def STDDEV(df, n):
     df = df.join(Series(rolling_std(df['Close'], n), name = 'STD_' + str(n)))
     return df
