@@ -3,6 +3,7 @@ Created on April 15, 2012
 
 @author: Bruno Franca
 '''
+import numpy
 from pandas import *
 from math import *
 
@@ -357,3 +358,29 @@ def DONCH(df, n):
 def STDDEV(df, n):
     df = df.join(Series(rolling_std(df['Close'], n), name = 'STD_' + str(n)))
     return df
+
+def mean(array):
+    ''' average '''
+    return numpy.mean(array, axis = 0)
+
+def stddev(array):
+    ''' Standard Deviation '''
+    return numpy.std(array, axis = 0)
+
+def sharpeRatio(array, interval):
+    ''' calculate sharpe ratio '''
+    #precheck
+    if (array is None or len(array) < interval + 1):
+        return -1
+
+    returns = []
+    pre = array[0]
+    for post in array[interval::interval]:
+        oneReturn = (float(post) - float(pre)) / pre
+        returns.append(oneReturn)
+        pre = post
+
+    std = stddev(returns)
+    m = mean(returns)
+    return mean(returns) / std
+

@@ -5,8 +5,6 @@ Created on Jan 29, 2011
 '''
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.account import Account
-from ultrafinance.backTest.metric.metricFactory import MetricFactory
-import re
 
 import logging
 LOG = logging.getLogger()
@@ -19,19 +17,14 @@ class AccountManager(object):
     def __init__(self):
         ''' constructor '''
         self.__accounts = {}
-        self.__metrix = {}
+        self.__accountPositions = {}
         self.saver = None
 
-    def createAccountWithMetrix(self, metricNames, cash, commission = 0):
+    def createAccount(self, cash, commission = 0):
         ''' create account '''
         account = Account(cash, commission)
         self.__accounts[account.accountId] = account
-
-        self.__metrix[account.accountId] = []
-        for metricName in metricNames:
-            metric = MetricFactory.createMetric(metricName)
-            metric.setAccount(account)
-            self.__metrix[account.accountId].append(metric)
+        self.__accountPositions[account.accountId] = [] # list contains tuple (time, position)
 
         return account.accountId
 
@@ -39,32 +32,23 @@ class AccountManager(object):
         ''' get account '''
         return self.__accounts.get(accountId)
 
-    def getAccounts(self, expression):
+    def getAccounts(self):
         ''' get accounts '''
-        accounts = []
-        pair = re.compile(expression)
+        return self.__accounts.values()
 
-        for accountId, account in self.__accounts.items():
-            if pair.match(str(accountId)):
-                accounts.append(account)
-
-        return accounts
-
-    def updateAccountsWithTickDict(self, tickDict):
-        ''' calculate metrix for each account '''
+    def updateAccountsPosition(self, tickDict):
+        ''' update account position based on new tick '''
         curTime = tickDict.values()[0].time
 
-        for accountId, metrix in self.__metrix.items():
-            account = self.getAccount(accountId)
+        for accountId, account in self.__accounts.items():
             account.setLastTickDict(tickDict)
+            position = account.getTotalValue()
 
-            for metric in metrix:
-                metric.record(curTime)
-
+            self.__accountPositions[accountId].append((curTime, position))
             #record
             if self.saver:
-                self.saver.write(curTime, "account-%s" % accountId, account.getTotalValue())
+                self.saver.write(curTime, "account-%s" % accountId, position)
 
-    def getMetrix(self):
-        ''' get metrix '''
-        return self.__metrix
+    def getAccountPostions(self, accountId):
+        ''' get account positions '''
+        return self.__accountPositions.get(accountId)

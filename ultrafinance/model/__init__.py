@@ -20,7 +20,7 @@ class Tick(object):
         self.high = float(high)
         self.low = float(low)
         self.close = float(close)
-        self.volume = volume
+        self.volume = int(volume)
 
     def __str__(self):
         ''' convert to string '''
@@ -48,7 +48,7 @@ class Quote(object):
         self.high = float(high)
         self.low = float(low)
         self.close = float(close)
-        self.volume = volume
+        self.volume = int(volume)
         self.adjClose = adjClose
 
     def __str__(self):

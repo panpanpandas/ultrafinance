@@ -5,7 +5,6 @@ Created on Dec 3, 2011
 '''
 
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.backTest.btUtil import OUTPUT_PREFIX
 from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
 from ultrafinance.backTest.tradingCenter import TradingCenter
 from ultrafinance.backTest.tickFeeder import TickFeeder
@@ -15,8 +14,9 @@ from ultrafinance.ufConfig.pyConfig import PyConfig
 from ultrafinance.dam.DAMFactory import DAMFactory
 from ultrafinance.backTest.stateSaver.stateSaverFactory import StateSaverFactory
 from ultrafinance.backTest.appGlobal import appGlobal
+from ultrafinance.backTest.metric import MetricCalculator
 from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CONF_APP_MAIN, \
-    CONF_METRIC_NAMES, STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, \
+    STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, \
     CONF_INPUT_SECTION, CONF_DAM, CONF_SYMBOL, \
     CONF_OUTPUT_SECTION, CONF_SAVER
 
@@ -27,7 +27,7 @@ LOG = logging.getLogger()
 
 class BackTester(object):
     ''' back testing '''
-    CASH = 1000000 #  a million to start
+    CASH = 100000 #  0.1 million to start
 
     def __init__(self):
         self.__config = PyConfig()
@@ -35,6 +35,7 @@ class BackTester(object):
         self.__tickFeeder = TickFeeder()
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
+        self.__mCalculator = MetricCalculator()
         self.__saver = None
 
     def setup(self):
@@ -96,10 +97,8 @@ class BackTester(object):
         strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
                                                   self.__config.getSection(CONF_STRATEGY))
 
-        metricNames = [name.strip() for name in self.__config.getOption(CONF_APP_MAIN, CONF_METRIC_NAMES).split(',') ]
-
         #associate account
-        accountId = self.__accountManager.createAccountWithMetrix(metricNames, BackTester.CASH)
+        accountId = self.__accountManager.createAccount(BackTester.CASH)
         strategy.accountId = accountId
 
         #register on trading engine
@@ -117,12 +116,12 @@ class BackTester(object):
 
     def printResult(self):
         ''' print result'''
-        for accountId, metrix in self.__accountManager.getMetrix().items():
-            account = self.__accountManager.getAccount(accountId)
+        for account in self.__accountManager.getAccounts():
+            accountId = account.accountId
             LOG.debug("account %s" % account)
             LOG.debug([str(order) for order in account.orderHistory])
-            for metric in metrix:
-                metric.printResult()
+            LOG.debug("account position %s" % self.__accountManager.getAccountPostions(accountId))
+            LOG.debug(self.__mCalculator.formatMetrics(self.__accountManager.getAccountPostions(accountId)))
 
 if __name__ == "__main__":
     backTester = BackTester()

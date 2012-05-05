@@ -121,7 +121,7 @@ class TradingCenter(object):
     def consumeTicks(self, tickDict):
         ''' consume ticks '''
         self._checkAndExecuteOpenOrder(tickDict)
-        self.accountManager.updateAccountsWithTickDict(tickDict)
+        self.accountManager.updateAccountsPosition(tickDict)
 
     def _checkAndExecuteOpenOrder(self, tickDict):
         ''' check and execute open order '''
