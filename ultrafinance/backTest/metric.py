@@ -30,10 +30,10 @@ class BasicMetric(BaseMetric):
 
     def __init__(self):
         super(BasicMetric, self).__init__()
-        self.result = {BasicMetric.MAX: (None, None),
-                       BasicMetric.MIN: (None, None),
-                       BasicMetric.STDDEV: None,
-                       BasicMetric.SRATIO: None}
+        self.result = {BasicMetric.MAX: (None, -1),
+                       BasicMetric.MIN: (None, -1),
+                       BasicMetric.STDDEV:-1,
+                       BasicMetric.SRATIO:-1}
 
     def calculate(self, timePositions):
         ''' calculate basic metrics '''

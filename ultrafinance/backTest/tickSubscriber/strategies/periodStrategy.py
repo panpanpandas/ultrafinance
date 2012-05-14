@@ -12,16 +12,17 @@ import logging
 LOG = logging.getLogger()
 
 class PeriodStrategy(BaseStrategy):
-    ''' trading center '''
+    ''' period strategy '''
     def __init__(self, configDict):
         ''' constructor '''
         super(PeriodStrategy, self).__init__("periodStrategy")
         self.configDict = configDict
 
         assert int(configDict[CONF_PERIOD]) >= 1
+
         self.perAmount = 1000 # buy $100p per period
         self.period = int(configDict[CONF_PERIOD])
-        self.symbol = configDict[CONF_SYMBOLRE]
+        self.symbols = None
         self.counter = 0
 
     def increaseAndCheckCounter(self):
@@ -35,13 +36,15 @@ class PeriodStrategy(BaseStrategy):
 
     def tickUpdate(self, tickDict):
         ''' consume ticks '''
-        assert self.symbol in tickDict.keys()
-        tick = tickDict[self.symbol]
+        assert self.symbols
+        assert self.symbols[0] in tickDict.keys()
+        symbol = self.symbols[0]
+        tick = tickDict[symbol]
 
         if self.increaseAndCheckCounter():
             self.placeOrder(Order(accountId = self.accountId,
                                   side = Side.BUY,
-                                  symbol = self.symbol,
+                                  symbol = symbol,
                                   price = tick.close,
                                   share = self.perAmount / float(tick.close)))
 

@@ -5,10 +5,8 @@ Created on Nov 6, 2011
 '''
 
 from ultrafinance.lib.errors import UfException, Errors
-from ultrafinance.backTest.appGlobal import appGlobal
-from ultrafinance.backTest.constant import EVENT_TICK_UPDATE, STOP_FLAG
+from ultrafinance.backTest.constant import EVENT_TICK_UPDATE
 
-import json
 from threading import Thread
 from time import sleep
 
@@ -29,6 +27,11 @@ class TradingEngine(object):
         self.__threadTimeout = threadTimeout
         self.__threadMaxFail = threadMaxFail
         self.__curTime = ""
+        self.__stop = False
+
+    def stop(self):
+        ''' set stop flag '''
+        self.__stop = True
 
     def validateSub(self, sub):
         ''' validate subscriber '''
@@ -39,7 +42,6 @@ class TradingEngine(object):
             raise UfException(Errors.SYMBOL_NOT_IN_SOURCE,
                                "can't find any symbol with re %s in source %s" % (symbolRe, self.__source.keys()))
         '''
-
         #TODO: validate rules
         return symbols, rules, sub
 
@@ -75,7 +77,8 @@ class TradingEngine(object):
         ''' execute func '''
 
         while True:
-            if appGlobal[STOP_FLAG]:
+            if self.__stop:
+                LOG.debug("Stopping trading engine")
                 self.complete()
                 break
 

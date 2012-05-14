@@ -59,6 +59,7 @@ class Errors(object):
     INVALID_STRATEGY_NAME = 1200
     NONE_ACCOUNT_ID = 1201
     NONE_TRADING_CENTER = 1202
+    INVALID_SYMBOLS = 1203
 
     #outputSaver
     TABLENAME_NOT_SET = 1300

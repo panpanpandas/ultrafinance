@@ -21,11 +21,13 @@ class BaseStrategy(TickSubsriber):
         self.accountId = None
         self.tradingEngine = None
         self.configDict = {}
+        self.symbols = []
         self.__curTime = ''
 
     def subRules(self):
         ''' override function '''
-        return ([self.configDict[CONF_SYMBOLRE] ], [EVENT_TICK_UPDATE])
+        #return ([self.configDict[CONF_SYMBOLRE] ], [EVENT_TICK_UPDATE])
+        return (self.symbols, [EVENT_TICK_UPDATE])
 
     def checkReady(self):
         '''
@@ -47,3 +49,11 @@ class BaseStrategy(TickSubsriber):
     def complete(self):
         ''' complete operation '''
         pass
+
+    def setSymbols(self, symbols):
+        '''set symbols '''
+        if list != type(symbols):
+            raise UfException(Errors.INVALID_SYMBOLS,
+                              "symbols %s is not a list" % symbols)
+
+        self.symbols = symbols

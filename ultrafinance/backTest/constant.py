@@ -12,9 +12,8 @@ CONF_STRATEGY = 'strategy'
 CONF_STRATEGY_NAME = 'name'
 
 CONF_APP_MAIN = 'app_main'
-CONF_METRIC_NAMES = 'metricNames'
-CONF_TRADE_TYPE = 'tradeType'
-CONF_SYMBOL = 'symbol'
+CONF_TRADE_TYPE = 'tradetype'
+CONF_SYMBOL_FILE = 'symbolfile'
 
 # input
 CONF_INPUT_SECTION = 'input'

@@ -17,13 +17,16 @@ class StateSaverFactory(Singleton):
                   'sql': SqlSaver}
 
     @staticmethod
-    def createStateSaver(name, setting):
+    def createStateSaver(name, setting, tableName = None):
         ''' create state saver '''
         if name not in StateSaverFactory.SAVER_DICT:
             raise UfException(Errors.INVALID_SAVER_NAME,
                               "Saver name is invalid %s" % name)
 
         saver = StateSaverFactory.SAVER_DICT[name]()
-        saver.tableName = 'output'
+        if not tableName:
+            saver.tableName = 'output'
+        else:
+            saver.tableName = tableName
         saver.setup(setting)
         return saver

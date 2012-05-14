@@ -7,7 +7,7 @@ from ultrafinance.lib.errors import UfException, Errors
 from threading import Thread
 
 from ultrafinance.backTest.appGlobal import appGlobal
-from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE, STOP_FLAG
+from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE
 
 import time
 import logging
@@ -15,7 +15,7 @@ LOG = logging.getLogger()
 
 class TickFeeder(object):
     ''' constructor
-        no tick operation should take more that 0.5 second
+        no tick operation should take more that 2 second
         threadMaxFails indicates how many times thread for a subscriber can timeout,
         if it exceeds, them unregister that subscriber
     '''
@@ -65,8 +65,6 @@ class TickFeeder(object):
         for timeStamp in sorted(timeTicksDict.iterkeys()):
             self._freshUpdatedTick(timeStamp, timeTicksDict[timeStamp])
             self._freshTradingCenter(timeTicksDict[timeStamp])
-
-        appGlobal[STOP_FLAG] = True
 
     def _freshUpdatedTick(self, timeStamp, symbolTicksDict):
         ''' update self.__updatedTick '''
