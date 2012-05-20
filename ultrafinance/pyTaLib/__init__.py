@@ -367,20 +367,17 @@ def stddev(array):
     ''' Standard Deviation '''
     return numpy.std(array, axis = 0)
 
-def sharpeRatio(array, interval):
+def sharpeRatio(array, periodInYear = 252):
     ''' calculate sharpe ratio '''
     #precheck
-    if (array is None or len(array) < interval + 1):
+    if (array is None or len(array) < 2 or periodInYear < 1):
         return -1
 
     returns = []
     pre = array[0]
-    for post in array[interval::interval]:
-        oneReturn = (float(post) - float(pre)) / pre
-        returns.append(oneReturn)
+    for post in array[1:]:
+        returns.append((float(post) - float(pre)) / pre)
         pre = post
 
-    std = stddev(returns)
-    m = mean(returns)
-    return mean(returns) / std
+    return sqrt(periodInYear) * stddev(returns) / mean(returns)
 

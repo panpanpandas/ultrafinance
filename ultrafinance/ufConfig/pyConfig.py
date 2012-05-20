@@ -57,6 +57,10 @@ class PyConfig(object):
         ''' get full path of config '''
         return self.__fullPath
 
+    def getDir(self):
+        ''' get directory '''
+        return self.__dir
+
 if __name__ == '__main__':
     config = PyConfig()
     config.setSource('test.ini')

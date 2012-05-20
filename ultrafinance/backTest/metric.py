@@ -26,7 +26,6 @@ class BasicMetric(BaseMetric):
     MIN = 'min'
     STDDEV = 'stddev'
     SRATIO = 'sRatio'
-    SINTERVAL = 22
 
     def __init__(self):
         super(BasicMetric, self).__init__()
@@ -44,8 +43,7 @@ class BasicMetric(BaseMetric):
                 self.result[BasicMetric.MIN] = timeStamp, position
 
         self.result[BasicMetric.STDDEV] = stddev([timePosition[1] for timePosition in timePositions])
-        self.result[BasicMetric.SRATIO] = sharpeRatio([timePosition[1] for timePosition in timePositions],
-                                                      BasicMetric.SINTERVAL)
+        self.result[BasicMetric.SRATIO] = sharpeRatio([timePosition[1] for timePosition in timePositions])
 
         return self.result
 
