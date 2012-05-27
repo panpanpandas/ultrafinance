@@ -25,7 +25,10 @@ class TickFeeder(object):
         self.__intervalTimeout = intervalTimeout
         self.start = 0
         self.end = None
+        self.__indexDam = None
         self.tradingCenter = None
+        self.indexHelper = None
+        self.hisotry = None
         self.__updatedTick = None
 
     def getUpdatedTick(self):
@@ -35,20 +38,26 @@ class TickFeeder(object):
 
         return timeTicksTuple
 
-    def indexTicks(self):
-        ''' generate timeTicksDict base on source DAM'''
-        LOG.debug('Start indexing ticks, it may take a while......')
+    def _getTicks(self, dam):
+        ''' get ticks from one dam'''
+        ticks = []
+        if TICK == appGlobal[TRADE_TYPE]:
+            ticks = dam.readTicks(self.start, self.end)
+        elif QUOTE == appGlobal[TRADE_TYPE]:
+            ticks = dam.readQuotes(self.start, self.end)
+        else:
+            raise UfException(Errors.INVALID_TYPE,
+                              'Type %s is not accepted' % appGlobal[TRADE_TYPE])
+
+        return ticks
+
+    def loadTicks(self):
+        ''' generate timeTicksDict based on source DAM'''
+        LOG.debug('Start loading ticks, it may take a while......')
         timeTicksDict = {}
         for symbol, dam in self.__source.items():
             LOG.debug('Indexing ticks for %s' % symbol)
-            ticks = []
-            if TICK == appGlobal[TRADE_TYPE]:
-                ticks = dam.readTicks(self.start, self.end)
-            elif QUOTE == appGlobal[TRADE_TYPE]:
-                ticks = dam.readQuotes(self.start, self.end)
-            else:
-                raise UfException(Errors.INVALID_TYPE,
-                                  'Type %s is not accepted' % appGlobal[TRADE_TYPE])
+            ticks = self._getTicks(dam)
 
             for tick in ticks:
                 if tick.time not in timeTicksDict:
@@ -58,13 +67,33 @@ class TickFeeder(object):
 
         return timeTicksDict
 
+    def loadIndex(self):
+        ''' generate timeTicksDict based on source DAM'''
+        LOG.debug('Start loading ticks, it may take a while......')
+        indexTicksDict = {}
+
+        LOG.debug('loading index...')
+        ticks = self._getTicks(self.__indexDam)
+
+        for tick in ticks:
+            indexTicksDict[tick.time] = tick
+
+        return indexTicksDict
+
     def execute(self):
         ''' execute func '''
-        timeTicksDict = self.indexTicks()
+        timeTicksDict = self.loadTicks()
+        indexTicksDict = self.loadIndex()
 
         for timeStamp in sorted(timeTicksDict.iterkeys()):
             self._freshUpdatedTick(timeStamp, timeTicksDict[timeStamp])
             self._freshTradingCenter(timeTicksDict[timeStamp])
+            self._freshIndexHelper(indexTicksDict.get(timeStamp))
+            self._updateHistory(timeStamp, timeTicksDict[timeStamp], indexTicksDict.get(timeStamp))
+
+    def _updateHistory(self, timeStamp, symbolTicksDict, indexTick):
+        ''' update history '''
+        self.hisotry.update(timeStamp, symbolTicksDict, indexTick)
 
     def _freshUpdatedTick(self, timeStamp, symbolTicksDict):
         ''' update self.__updatedTick '''
@@ -84,9 +113,17 @@ class TickFeeder(object):
         ''' feed trading center ticks '''
         self.tradingCenter.consumeTicks(symbolTicksDict)
 
+    def _freshIndexHelper(self, tick):
+        ''' update self.__updatedTick '''
+        self.indexHelper.appendTick(tick)
+
     def complete(self):
         ''' call when complete feeding ticks '''
         pass
+
+    def setIndexDam(self, dam):
+        ''' set index dam '''
+        self.__indexDam = dam
 
     def addSource(self, dam):
         ''' add a source '''

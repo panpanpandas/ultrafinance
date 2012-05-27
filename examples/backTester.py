@@ -15,9 +15,11 @@ from ultrafinance.dam.DAMFactory import DAMFactory
 from ultrafinance.backTest.stateSaver.stateSaverFactory import StateSaverFactory
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.metric import MetricCalculator
+from ultrafinance.backTest.indexHelper import IndexHelper
+from ultrafinance.backTest.history import History
 from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CONF_APP_MAIN, \
-    STOP_FLAG, TRADE_TYPE, CONF_TRADE_TYPE, CONF_INPUT_SECTION, CONF_DAM, CONF_SYMBOL_FILE, \
-    CONF_OUTPUT_SECTION, CONF_SAVER
+    TRADE_TYPE, CONF_TRADE_TYPE, CONF_INPUT_SECTION, CONF_DAM, CONF_SYMBOL_FILE, \
+    CONF_OUTPUT_SECTION, CONF_SAVER, CONF_INDEX
 import os
 
 from threading import Thread
@@ -77,6 +79,8 @@ class TestRunner(object):
         self.__tickFeeder = TickFeeder()
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
+        self.__indexHelper = IndexHelper()
+        self.__history = History()
         self.__saver = None
         self.__symbol = symbol
         self.__config = config
@@ -103,15 +107,23 @@ class TestRunner(object):
 
     def _setupTickFeeder(self):
         ''' setup tickFeeder'''
-        dam = self._createDam()
-        self.__tickFeeder.addSource(dam)
+        self.__tickFeeder.indexHelper = self.__indexHelper
+        self.__tickFeeder.hisotry = self.__history
+        #set source dam
+        sDam = self._createDam(self.__symbol)
+        self.__tickFeeder.addSource(sDam)
 
-    def _createDam(self):
+        #set index dam
+        iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
+        iDam = self._createDam(iSymbol)
+        self.__tickFeeder.setIndexDam(iDam)
+
+    def _createDam(self, symbol):
         ''' setup Dam'''
         damName = self.__config.getOption(CONF_INPUT_SECTION, CONF_DAM)
         setting = self.__config.getSection(CONF_INPUT_SECTION)
         dam = DAMFactory.createDAM(damName, setting)
-        dam.setSymbol(self.__symbol)
+        dam.setSymbol(symbol)
 
         return dam
 
@@ -130,6 +142,8 @@ class TestRunner(object):
         strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
                                                   self.__config.getSection(CONF_STRATEGY))
         strategy.setSymbols([self.__symbol])
+        strategy.indexHelper = self.__indexHelper
+        strategy.history = self.__history
 
         #associate account
         accountId = self.__accountManager.createAccount(BackTester.CASH)

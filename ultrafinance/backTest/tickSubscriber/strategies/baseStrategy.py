@@ -23,6 +23,8 @@ class BaseStrategy(TickSubsriber):
         self.configDict = {}
         self.symbols = []
         self.__curTime = ''
+        self.indexHelper = None
+        self.history = None
 
     def subRules(self):
         ''' override function '''

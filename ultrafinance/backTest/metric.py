@@ -4,7 +4,7 @@ Created on Apr 29, 2012
 @author: ppa
 '''
 import abc
-from ultrafinance.pyTaLib import stddev, sharpeRatio
+from ultrafinance.pyTaLib.indicator import stddev, sharpeRatio
 
 class BaseMetric(object):
     ''' base metric class '''
@@ -49,7 +49,7 @@ class BasicMetric(BaseMetric):
 
     def formatResult(self):
         ''' format result '''
-        return "Lowest point %.2f at %s; Highest point %.2f at %s; STDDEV is %s; Sharpe ratio is %s" % \
+        return "Lowest point %.2f at %s; Highest point %.2f at %s; STDDEV is %.2f; Sharpe ratio is %s" % \
             (self.result[BasicMetric.MIN][1], self.result[BasicMetric.MIN][0],
              self.result[BasicMetric.MAX][1], self.result[BasicMetric.MAX][0],
              self.result[BasicMetric.STDDEV],

@@ -151,8 +151,8 @@ class Account(object):
             totalValue = self.getTotalValue()
         except:
             pass
-        return str({'accountId': str(self.accountId), 'holdings': self.holdings, 'cash': self.cash,
-                    'totalValue': totalValue, 'holdingCost': self.getHoldingCost()})
+        return str({'accountId': str(self.accountId), 'holdings': self.holdings, 'cash': "%.2f" % self.cash,
+                    'totalValue': "%.2f" % totalValue, 'holdingCost': "%.2f" % self.getHoldingCost()})
 
     accountId = property(__getId)
     holdings = property(__getHoldings)
