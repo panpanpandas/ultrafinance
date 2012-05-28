@@ -30,6 +30,14 @@ class BaseDAM(object):
         ''' read quotes '''
         raise UfException(Errors.UNDEFINED_METHOD, "writeTicks method is not defined")
 
+    def readFundamental(self):
+        ''' read fundamental '''
+        raise UfException(Errors.UNDEFINED_METHOD, "readFundamental method is not defined")
+
+    def writeFundamental(self, keyTimeValueDict):
+        ''' write fundamental '''
+        raise UfException(Errors.UNDEFINED_METHOD, "writeFundamental method is not defined")
+
     def setSymbol(self, symbol):
         ''' set symbol '''
         self.__symbol = symbol

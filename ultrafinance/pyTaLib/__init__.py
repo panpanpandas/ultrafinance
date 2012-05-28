@@ -358,26 +358,3 @@ def DONCH(df, n):
 def STDDEV(df, n):
     df = df.join(Series(rolling_std(df['Close'], n), name = 'STD_' + str(n)))
     return df
-
-def mean(array):
-    ''' average '''
-    return numpy.mean(array, axis = 0)
-
-def stddev(array):
-    ''' Standard Deviation '''
-    return numpy.std(array, axis = 0)
-
-def sharpeRatio(array, periodInYear = 252):
-    ''' calculate sharpe ratio '''
-    #precheck
-    if (array is None or len(array) < 2 or periodInYear < 1):
-        return -1
-
-    returns = []
-    pre = array[0]
-    for post in array[1:]:
-        returns.append((float(post) - float(pre)) / pre)
-        pre = post
-
-    return sqrt(periodInYear) * stddev(returns) / mean(returns)
-

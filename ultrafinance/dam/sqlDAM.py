@@ -13,6 +13,26 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+class FmSql(Base):
+    __tablename__ = 'fundamental'
+
+    id = Column(Integer, Sequence('user_id_seq'), primary_key = True)
+    symbol = Column(String(12))
+    field = Column(String(50))
+    timeStamp = Column(String(50))
+    value = Column(Float)
+
+    def __init__(self, symbol, field, timeStamp, value):
+        ''' constructor '''
+        self.symbol = symbol
+        self.field = field
+        self.timeStamp = timeStamp
+        self.value = value
+
+    def __repr__(self):
+        return "<Fundamentals('%s', '%s', '%s', '%s')>" \
+           % (self.symbol, self.field, self.timeStamp, self.value)
+
 class QuoteSql(Base):
     __tablename__ = 'quotes'
 
@@ -68,7 +88,7 @@ class TickSql(Base):
            % (self.symbol, self.time, self.open, self.high, self.low, self.close, self.volume)
 
 class SqlDAM(BaseDAM):
-    ''' SQL DAO '''
+    ''' SQL DAM '''
 
     def __init__(self, echo = False):
         ''' constructor '''
@@ -145,3 +165,41 @@ class SqlDAM(BaseDAM):
     def commit(self):
         ''' commit changes '''
         self.session.commit()
+
+    '''
+    read/write fundamentals
+    TODO: when doing fundamentals and quote/tick operation together,
+    things may mess up
+    '''
+    def writeFundamental(self, keyTimeValueDict):
+        ''' write fundamental '''
+        if self.first:
+            Base.metadata.create_all(self.engine, checkfirst = True)
+            self.first = False
+
+        sqls = self._fundamentalToSqls(keyTimeValueDict)
+        self.session.add_all(sqls)
+
+    def readFundamental(self):
+        ''' read fundamental '''
+        rows = self.session.query(FmSql).filter(and_(FmSql.symbol == self.symbol))
+        return self._sqlToFundamental(rows)
+
+    def _sqlToFundamental(self, rows):
+        keyTimeValueDict = {}
+        for row in rows:
+            if row.field not in keyTimeValueDict:
+                keyTimeValueDict[row.field] = {}
+
+            keyTimeValueDict[row.field][row.timeStamp] = row.value
+
+        return keyTimeValueDict
+
+    def _fundamentalToSqls(self, keyTimeValueDict):
+        ''' convert fundament dict to sqls '''
+        sqls = []
+        for key, timeValues in keyTimeValueDict.iteritems():
+            for timeStamp, value in timeValues.iteritems():
+                sqls.append(FmSql(self.symbol, key, timeStamp, value))
+
+        return sqls

@@ -35,3 +35,16 @@ class testSqlDAM(unittest.TestCase):
         print [str(tick) for tick in dam.readTicks(0, "1320676201")]
         print [str(tick) for tick in dam.readTicks(0, "1320676202")]
 
+
+    def testFundamental(self):
+        dam = SqlDAM(echo = False)
+        dam.setDb('sqlite:////tmp/sqldam.sqlite')
+        dam.setSymbol("test")
+
+        keyTimeValueDict = {u'Total Debt': {u'As of 2011-12-31': 2089.6500000000001, u'As of 2012-03-31': 2085.0, u'As of 2010-12-31': 1794.23, u'As of 2009-12-31': 0.0, u'As of 2008-12-31': 1000.0, u'As of 2011-09-30': 2543.9899999999998, u'As of 2011-06-30': 2545.6999999999998, u'As of 2011-03-31': 1794.48}, u'Effect of Special Items on Income Taxes': {u'12 months ending 2010-12-31': None, u'3 months ending 2011-09-30': None, u'12 months ending 2008-12-31': None, u'3 months ending 2012-03-31': None, u'3 months ending 2011-12-31': None, u'12 months ending 2011-12-31': None, u'12 months ending 2009-12-31': None, u'3 months ending 2011-03-31': None, u'3 months ending 2011-06-30': None}}
+        dam.writeFundamental(keyTimeValueDict)
+        dam.commit()
+
+        ret = dam.readFundamental()
+        print ret
+        self.assertEquals(keyTimeValueDict, ret)

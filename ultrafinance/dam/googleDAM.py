@@ -32,3 +32,11 @@ class GoogleDAM(BaseDAM):
             return []
 
         return self.__gf.getTicks(self.symbol, start, end)
+
+    def readFundamental(self):
+        ''' read fundamental '''
+        if self.symbol is None:
+            LOG.debug('Symbol is None')
+            return {}
+
+        return self.__gf.getFinancials(self.symbol)

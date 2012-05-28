@@ -27,3 +27,10 @@ class testGoogleDam(unittest.TestCase):
         data = dam.readTicks('20111120', '20111201')
         print data
         self.assertNotEquals(len(data), 0)
+
+    def testReadFundamental(self):
+        dam = GoogleDAM()
+        dam.setSymbol('EBAY')
+        keyTimeValueDict = dam.readFundamental()
+        print keyTimeValueDict
+        self.assertNotEquals(len(keyTimeValueDict), 0)

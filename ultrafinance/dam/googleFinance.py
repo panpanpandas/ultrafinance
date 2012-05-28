@@ -129,7 +129,10 @@ class GoogleFinance(object):
 
                 if i < 5:
                     i += 1
-                    table = target.next_sibling
+                    target = target.nextSibling
+                    #ugly beautiful soap...
+                    if '\n' == target:
+                        target = target.nextSibling
                 else:
                     break
 
@@ -163,7 +166,9 @@ class GoogleFinance(object):
 
     def _getValue(self, td):
         ''' get value from td '''
-        return td.getText().replace(',', '')
+        if '-' == td.getText():
+            return None
+        return float(td.getText().replace(',', ''))
 
     def getTicks(self, symbol, start, end):
         """
