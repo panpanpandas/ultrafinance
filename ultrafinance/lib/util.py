@@ -51,22 +51,24 @@ def convertGoogCSVDate(googCSVDate):
 
 def findPatthen(page, pList):
     datas = [BeautifulSoup(page)]
-    index = 0
     for key, pattern in pList:
-        newDatas = []
-        for data in datas:
-            if 'id' == key:
-                newDatas.extend(data.findAll(id = pattern, recursive = True))
-            if 'text' == key:
-                newDatas.extend(data.findAll(text = pattern, recursive = True))
+        newDatas = findPattern(datas, key, pattern)
 
         datas = newDatas
-        index += 1
         if not datas:
             break
 
     return datas
 
+def findPattern(datas, key, pattern):
+    newDatas = []
+    for data in datas:
+        if 'id' == key:
+            newDatas.extend(data.findAll(id = pattern, recursive = True))
+        if 'text' == key:
+            newDatas.extend(data.findAll(text = pattern, recursive = True))
+
+    return newDatas
 def string2EpochTime(stingTime, format = '%Y%m%d'):
     ''' convert string time to epoch time '''
     return int(time.mktime(datetime.strptime(stingTime, '%Y%m%d').timetuple()))

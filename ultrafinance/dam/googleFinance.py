@@ -18,13 +18,26 @@ import logging
 LOG = logging.getLogger()
 
 class GoogleFinance(object):
+    FIELDS = ['Revenue', 'Other Revenue, Total', 'Total Revenue', 'Cost of Revenue, Total', 'Gross Profit', 'Selling/General/Admin. Expenses, Total',
+              'Research & Development', 'Depreciation/Amortization', 'Interest Expense(Income) - Net Operating', 'Unusual Expense (Income)',
+              'Other Operating Expenses, Total', 'Total Operating Expense', 'Operating Income', 'Interest Income(Expense), Net Non-Operating',
+              'Gain (Loss) on Sale of Assets', 'Gain (Loss) on Sale of Assets', 'Income Before Tax', 'Income After Tax', 'Minority Interest',
+              'Equity In Affiliates', 'Net Income Before Extra. Items', 'Accounting Change', 'Discontinued Operations', 'Extraordinary Item',
+              'Net Income', 'Preferred Dividends', 'Income Available to Common Excl. Extra Items', 'Income Available to Common Incl. Extra Items',
+              'Basic Weighted Average Shares', 'Basic EPS Excluding Extraordinary Items', 'Basic EPS Including Extraordinary Items',
+              'Dilution Adjustment', 'Diluted Weighted Average Shares', 'Diluted EPS Excluding Extraordinary Items', 'Diluted EPS Including Extraordinary Items',
+              'Dividends per Share - Common Stock Primary Issue', 'Gross Dividends - Common Stock', 'Net Income after Stock Based Comp. Expense',
+              'Basic EPS after Stock Based Comp. Expense', 'Diluted EPS after Stock Based Comp. Expense', 'Depreciation, Supplemental',
+              'Total Special Items', 'Normalized Income Before Taxes', 'Effect of Special Items on Income Taxes', 'Income Taxes Ex. Impact of Special Items',
+              'Normalized Income After Taxes', 'Normalized Income Avail to Common', 'Basic Normalized EPS', 'Diluted Normalized EPS']
+
     def __request(self, url):
         try:
             return urllib2.urlopen(url)
-        except IOError:
-            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Google server at %s" % url)
         except urllib2.HTTPError:
             raise UfException(Errors.NETWORK_400_ERROR, "400 error when connect to Google server")
+        except IOError:
+            raise UfException(Errors.NETWORK_ERROR, "Can't connect to Google server at %s" % url)
         except Exception:
             raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.__request %s" % traceback.format_exc())
 
@@ -88,7 +101,7 @@ class GoogleFinance(object):
         #sample output
         #[stockDaylyData(date='2010-01-04, open='112.37', high='113.39', low='111.51', close='113.33', volume='118944600', adjClose=None))...]
 
-    def getFinancials(self, symbol, fields = ['Total Revenue'], annual = True):
+    def getFinancials(self, symbol):
         """
         get financials:
         google finance provide annual and quanter financials, if annual is true, we will use annual data
@@ -105,32 +118,52 @@ class GoogleFinance(object):
                     raise UfException(Errors.STOCK_SYMBOL_ERROR, "Can find data for stock %s, symbol error?" % symbol)
                 raise ufExcep
 
-            timeInterval = 'annual' if annual else 'interim'
-            valueNum = 4 if annual else 5
+            bPage = BeautifulSoup(page)
+            target = bPage.find(id = 'incinterimdiv')
 
-            fieldValues = {}
-            for field in fields:
-                cPage = copy.copy(page)
-                fieldContents = findPatthen(cPage, [('id', re.compile(r"(\w+)%s(\w+)" % timeInterval)), ('id', 'fs-table'), ('text', re.compile(r"^%s$" % field))])
+            keyTimeValue = {}
+            #ugly do...while
+            i = 0
+            while True:
+                self._parseTarget(target, keyTimeValue)
 
-                if 1 != len(fieldContents):
-                    #raise ufException(Errors.STOCK_PARSING_ERROR, "Parse data error for symbol %s" % symbol)
-                    fieldValues[field] = []
-                    continue
+                if i < 5:
+                    i += 1
+                    table = target.next_sibling
+                else:
+                    break
 
-                value = fieldContents[0]
-                data = []
+            return keyTimeValue
 
-                for _ in range(valueNum):
-                    value = value.findNext('td')
-                    data.append(value.getText().replace(',', ''))
-
-                fieldValues[field] = data
-
-            return fieldValues
         except BaseException:
             raise UfException(Errors.UNKNOWN_ERROR, "Unknown Error in GoogleFinance.getHistoricalPrices %s" % traceback.format_exc())
 
+    def _parseTarget(self, target, keyTimeValue):
+        ''' parse table for get financial '''
+        table = target.table
+        timestamps = self._getTimeStamps(table)
+
+        for tr in table.tbody.findChildren('tr'):
+            for i, td in enumerate(tr.findChildren('td')):
+                if 0 == i:
+                    key = td.getText()
+                    if key not in keyTimeValue:
+                        keyTimeValue[key] = {}
+                else:
+                    keyTimeValue[key][timestamps[i - 1]] = self._getValue(td)
+
+    def _getTimeStamps(self, table):
+        ''' get time stamps '''
+        timeStamps = []
+        for th in table.thead.tr.contents:
+            if '\n' != th:
+                timeStamps.append(th.getText())
+
+        return timeStamps[1:]
+
+    def _getValue(self, td):
+        ''' get value from td '''
+        return td.getText().replace(',', '')
 
     def getTicks(self, symbol, start, end):
         """
