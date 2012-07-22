@@ -4,7 +4,6 @@ Created on Dec 3, 2011
 @author: ppa
 '''
 
-from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
 from ultrafinance.backTest.tradingCenter import TradingCenter
 from ultrafinance.backTest.tickFeeder import TickFeeder
@@ -23,8 +22,10 @@ from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CO
 import os
 
 from threading import Thread
-import logging
+
+
 import logging.config
+import logging
 LOG = logging.getLogger()
 
 class BackTester(object):
@@ -162,7 +163,7 @@ class TestRunner(object):
         #start tickFeeder
         self.__tickFeeder.execute()
         self.__tradingEngine.stop()
-        thread.join()
+        thread.join(timeout = 60)
 
     def _printResult(self):
         ''' print result'''

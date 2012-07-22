@@ -32,7 +32,7 @@ class PyConfig(object):
             LOG.error(msg)
             raise UfException(Errors.FILE_NOT_EXIST, msg)
         else:
-            self.__parser = ConfigParser.SafeConfigParser()
+            self.__parser = ConfigParser.SafeConfigParser(defaults={"here": self.__dir})
             self.__parser.read(fullPath)
             self.__fullPath = fullPath
 
@@ -64,5 +64,5 @@ class PyConfig(object):
 if __name__ == '__main__':
     config = PyConfig()
     config.setSource('test.ini')
-    print config.getOption('app_main', 'feeder')
-    print config.getSection('app_main')
+    print(config.getOption('app_main', 'feeder'))
+    print(config.getSection('app_main'))

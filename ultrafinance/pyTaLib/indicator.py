@@ -4,7 +4,7 @@ Created on May 26, 2012
 @author: ppa
 '''
 import numpy
-from math import *
+from math import sqrt
 
 def mean(array):
     ''' average '''

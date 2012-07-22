@@ -6,7 +6,7 @@ Created on July 1, 2011
 from setuptools import setup
 from setupCommand import TestCommand, CleanCommand
 
-version = '1.0.0'
+version = '1.0.1'
 
 setup(name='ultrafinance',
       version=version,
@@ -18,21 +18,24 @@ setup(name='ultrafinance',
         "License :: OSI Approved :: MIT License",
       ],
       keywords='python, Finance, Algorithm, Trading, Realtime, QuantLib, pydispather',
-      author='Pan Pan',
+      author='Pan',
       author_email='panpandas@gmail.com',
       url='http://code.google.com/p/ultra-finance/',
       license='MIT',
 
+      install_not_requires=[
+        'hbase-thrift>=0.20.4',
+        'pandas',
+        'xlwt3',
+        'xlrd3',
+        'matplotlib>=1.1.0'
+      ],
       packages=['ultrafinance'],
       include_package_data=True,
       install_requires=[
-        'PyDispatcher>=2.0.1',
-        'xlwt>=0.7.2',
-        'xlrd>=0.7.1',
-        'matplotlib>=0.99',
         'numpy>=1.5.1',
-        'BeautifulSoup>=3.2.0',
-        'hbase-thrift>=0.20.4'
+        'beautifulsoup4',
+        'SQLAlchemy>=0.7.8'
       ],
       cmdclass = {'test': TestCommand, 'clean': CleanCommand }
 )

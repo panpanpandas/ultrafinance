@@ -5,8 +5,6 @@ Created on Nov 6, 2011
 '''
 from ultrafinance.lib.errors import Errors, UfException
 import abc
-from ultrafinance.dam.hbaseLib import HBaseLib
-from hbase.Hbase import Mutation, ColumnDescriptor
 
 import logging
 LOG = logging.getLogger()

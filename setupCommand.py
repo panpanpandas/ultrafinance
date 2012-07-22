@@ -7,7 +7,7 @@ copied from http://da44en.wordpress.com/2002/11/22/using-distutils/
 from distutils.core import Command
 from unittest import TextTestRunner, TestLoader
 from glob import glob
-from os.path import splitext, basename, join as pjoin, walk
+from os.path import splitext, basename, join as pjoin
 import os
 
 class TestCommand(Command):
@@ -31,7 +31,7 @@ class TestCommand(Command):
                     ['tests', 'unit', splitext(basename(t))[0]])
                 )
 
-        print 'Running tests: %s' % testfiles
+        print('Running tests: %s' % testfiles)
         tests = TestLoader().loadTestsFromNames(testfiles)
         t = TextTestRunner(verbosity = 1)
         t.run(tests)
@@ -42,7 +42,7 @@ class CleanCommand(Command):
 
     def initialize_options(self):
         self._clean_me = [ ]
-        for root, dirs, files in os.walk('.'):
+        for root, _, files in os.walk('.'):
             for f in files:
                 if f.endswith('.pyc'):
                     self._clean_me.append(pjoin(root, f))

@@ -5,7 +5,6 @@ Created on Dec 4, 2011
 '''
 from ultrafinance.dam.DAMFactory import DAMFactory
 
-import os
 from os import path
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -35,7 +34,9 @@ class SymbolCrawler(object):
         self.succeeded = []
 
     def getOutputSql(self):
-        return path.join(os.getenv('HOME'), 'sqldam.sqlite')
+        return path.join(path.dirname(path.dirname(path.realpath(__file__))),
+                         "data",
+                         "stock.sqlite")
 
     def getOptions(self):
         ''' crawling data and save to hbase '''
@@ -52,11 +53,11 @@ class SymbolCrawler(object):
                           default = 'sql', type = "string",
                           help = "output dam, e.g. sql|hbase")
 
-        (options, args) = parser.parse_args()
+        (options, _) = parser.parse_args()
 
         # get symbols
         if options.symbolFile is None or not path.exists(options.symbolFile):
-            print "Please provide valid file: %s" % options.symbolFile
+            print("Please provide valid file: %s" % options.symbolFile)
             exit(4)
 
         # get all symbols
@@ -65,21 +66,21 @@ class SymbolCrawler(object):
                 self.symbols.append(line.strip())
 
         if not self.symbols:
-            print "No symbols provided in file %s" % options.symbolFile
+            print("No symbols provided in file %s" % options.symbolFile)
             exit(4)
 
         # set dataType
         if options.dataType not in ["quote", "tick", "all"]:
-            print "Please provide valid dataType %s" % options.dataType
+            print("Please provide valid dataType %s" % options.dataType)
             exit(4)
 
         # set output dam
         if options.outputDAM not in ["hbase", "sql"]:
-            print "Please provide valid outputDAM %s" % options.outputDAM
+            print("Please provide valid outputDAM %s" % options.outputDAM)
             exit(4)
 
         if options.start not in ['all', 'month']:
-            print "Please provide valid start option(all|month): %s" % options.outputDAM
+            print("Please provide valid start option(all|month): %s" % options.outputDAM)
             exit(4)
 
         if "quote" == options.dataType:
@@ -88,11 +89,11 @@ class SymbolCrawler(object):
             self.isTick = True
         else:
             self.isQuote = self.isTick = True
-        print "Retrieving data type: %s" % options.dataType
+        print("Retrieving data type: %s" % options.dataType)
 
         if 'sql' == options.outputDAM:
             sqlLocation = 'sqlite:///%s' % self.getOutputSql()
-            print "Sqlite location: %s" % sqlLocation
+            print("Sqlite location: %s" % sqlLocation)
             setting = {'db': sqlLocation}
 
 
@@ -107,9 +108,9 @@ class SymbolCrawler(object):
             self.start = (datetime.datetime.now() + relativedelta(months = -1)).strftime("%Y%m%d")
         self.end = datetime.datetime.now().strftime("%Y%m%d")
         if options.dataType in ["quote", "all"]:
-            print "Retrieving quotes start from %s" % self.start
+            print("Retrieving quotes start from %s" % self.start)
         else:
-            print "Retrieving ticks for last 15 days"
+            print("Retrieving ticks for last 15 days")
 
     def __getSaveOneSymbol(self, symbol):
         ''' get and save data for one symbol '''
@@ -143,10 +144,10 @@ class SymbolCrawler(object):
                 if self.isTick:
                     self.outputDAM.writeTicks(ticks)
         except BaseException as excp:
-            print "Error while processing %s: %s" % (symbol, excp)
+            print("Error while processing %s: %s" % (symbol, excp))
             self.failed.append(symbol)
         else:
-            print "Processed %s" % symbol
+            print("Processed %s" % symbol)
             self.succeeded.append(symbol)
 
     def getSaveSymbols(self):
@@ -180,8 +181,8 @@ class SymbolCrawler(object):
 
     def printFailedSucceeded(self):
         ''' print out which ones fails'''
-        print "Succeeded: %s" % self.succeeded
-        print "Failed: %s" % self.failed
+        print("Succeeded: %s" % self.succeeded)
+        print("Failed: %s" % self.failed)
 
 if __name__ == '__main__':
     crawler = SymbolCrawler()

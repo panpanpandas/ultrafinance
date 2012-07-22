@@ -49,7 +49,7 @@ class BasicMetric(BaseMetric):
 
     def formatResult(self):
         ''' format result '''
-        return "Lowest point %.2f at %s; Highest point %.2f at %s; STDDEV is %.2f; Sharpe ratio is %s" % \
+        return "Lowest point %.2f at %s; Highest point %.2f at %s; STDDEV is %.2f; Sharpe ratio is %.2f" % \
             (self.result[BasicMetric.MIN][1], self.result[BasicMetric.MIN][0],
              self.result[BasicMetric.MAX][1], self.result[BasicMetric.MAX][0],
              self.result[BasicMetric.STDDEV],
