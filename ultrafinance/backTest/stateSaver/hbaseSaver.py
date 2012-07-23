@@ -73,6 +73,6 @@ if __name__ == '__main__':
         h.write('time1', 'accountValue', 10000)
         h.commit()
         accountValue = h.read('time1', 'accountValue')
-        print accountValue
+        print(accountValue)
         assert str(10000) == accountValue
         assert None == h.read('time1', 'EDFASNONdafs')

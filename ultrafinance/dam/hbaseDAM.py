@@ -77,7 +77,6 @@ class HBaseDAM(BaseDAM):
                                              value = getattr(tick, field) ) for field in TICK_FIELDS])
 
 if __name__ == '__main__':
-    from ultrafinance.model import Quote, Tick
     dam = HBaseDAM()
     dam.setSymbol("test")
     quotes = [Quote(*['1320676200', '32.59', '32.59', '32.58', '32.58', '65213', None]),
@@ -87,6 +86,6 @@ if __name__ == '__main__':
 
     dam.writeQuotes(quotes)
     dam.writeTicks(ticks)
-    print dam.readQuotes("0", None)
-    print dam.readTicks("0", "1320676201")
-    print dam.readTicks("0", "1320676202")
+    print(dam.readQuotes("0", None))
+    print(dam.readTicks("0", "1320676201"))
+    print(dam.readTicks("0", "1320676202"))

@@ -6,14 +6,10 @@ Created on July 31, 2011
 import urllib2
 from BeautifulSoup import BeautifulSoup
 import traceback
-from operator import itemgetter
-from ultrafinance.lib.util import convertGoogCSVDate, findPatthen
+from ultrafinance.lib.util import convertGoogCSVDate
 from ultrafinance.model import Quote, Tick
 from ultrafinance.lib.errors import UfException, Errors
-import copy
-from ultrafinance.lib.util import string2EpochTime
 
-import re
 import logging
 LOG = logging.getLogger()
 

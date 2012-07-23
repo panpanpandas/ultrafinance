@@ -5,8 +5,7 @@ Created on Jan 08, 2012
 '''
 import unittest
 from ultrafinance.backTest.account import Account
-from ultrafinance.model import Order, Side
-from ultrafinance.lib.errors import UfException
+from ultrafinance.model import Order, Side, Quote
 
 class testAccount(unittest.TestCase):
     def setUp(self):
@@ -24,10 +23,10 @@ class testAccount(unittest.TestCase):
         price = 9.1
         account = Account(1000, 1)
         account._Account__holdings = {'stock1': (share, price)}
-        print account.holdings
+        print(account.holdings)
 
         holdingCost = account.getHoldingCost()
-        print holdingCost
+        print(holdingCost)
 
         self.assertAlmostEquals(share * price, holdingCost)
 
@@ -37,11 +36,11 @@ class testAccount(unittest.TestCase):
         curPrice = 10.1
         account = Account(1000, 1)
         account._Account__holdings = {'stock1': (share, price)}
-        account.setLastSymbolPrice({'stock1': curPrice})
+        account.setLastTickDict({'stock1': Quote(0, 0, 0, 0, curPrice, 0, 0)})
 
         holdingValue = account.getHoldingValue()
-        print holdingValue
-        self.assertAlmostEquals(share * curPrice, holdingValue)
+        print(holdingValue)
+        self.assertAlmostEqual(share * curPrice, holdingValue)
 
     def testTotalValue(self):
         share = 10
@@ -49,10 +48,10 @@ class testAccount(unittest.TestCase):
         curPrice = 10.1
         account = Account(1000, 1)
         account._Account__holdings = {'stock1': (share, price)}
-        account.setLastSymbolPrice({'stock1': curPrice})
+        account.setLastTickDict({'stock1': Quote(0, 0, 0, 0, curPrice, 0, 0)})
 
         totalValue = account.getTotalValue()
-        print totalValue
+        print(totalValue)
         self.assertAlmostEquals(1000 + share * curPrice, totalValue)
 
     def testValidate(self):

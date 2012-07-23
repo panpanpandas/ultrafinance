@@ -26,8 +26,8 @@ setup(name='ultrafinance',
       install_not_requires=[
         'hbase-thrift>=0.20.4',
         'pandas',
-        'xlwt3',
-        'xlrd3',
+        'xlwt',
+        'xlrd',
         'matplotlib>=1.1.0'
       ],
       packages=['ultrafinance'],
@@ -35,7 +35,8 @@ setup(name='ultrafinance',
       install_requires=[
         'numpy>=1.5.1',
         'beautifulsoup4',
-        'SQLAlchemy>=0.7.8'
+        'SQLAlchemy>=0.7.8',
+        'mox'
       ],
       cmdclass = {'test': TestCommand, 'clean': CleanCommand }
 )

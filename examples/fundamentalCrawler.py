@@ -4,11 +4,7 @@ Created on Dec 4, 2011
 @author: ppa
 '''
 from ultrafinance.dam.DAMFactory import DAMFactory
-
-import os
 from os import path
-import datetime
-from dateutil.relativedelta import relativedelta
 import optparse
 
 from threading import Thread
@@ -31,7 +27,10 @@ class FundamentalCrawler(object):
         self.succeeded = []
 
     def getOutputSql(self):
-        return path.join(os.getenv('HOME'), 'uf.sqlite')
+        ''' output path for sql database'''
+        return path.join(path.dirname(path.dirname(path.realpath(__file__))),
+                 "data",
+                 "fundamental.sqlite")
 
     def getOptions(self):
         ''' crawling data and save to hbase '''
@@ -42,11 +41,11 @@ class FundamentalCrawler(object):
                           default = 'sql', type = "string",
                           help = "output dam, e.g. sql|hbase")
 
-        (options, args) = parser.parse_args()
+        (options, _) = parser.parse_args()
 
         # get symbols
         if options.symbolFile is None or not path.exists(options.symbolFile):
-            print "Please provide valid file: %s" % options.symbolFile
+            print("Please provide valid file: %s" % options.symbolFile)
             exit(4)
 
         # get all symbols
@@ -55,17 +54,17 @@ class FundamentalCrawler(object):
                 self.symbols.append(line.strip())
 
         if not self.symbols:
-            print "No symbols provided in file %s" % options.symbolFile
+            print("No symbols provided in file %s" % options.symbolFile)
             exit(4)
 
         # set output dam
         if options.outputDAM not in ["hbase", "sql"]:
-            print "Please provide valid outputDAM %s" % options.outputDAM
+            print("Please provide valid outputDAM %s" % options.outputDAM)
             exit(4)
 
         if 'sql' == options.outputDAM:
             sqlLocation = 'sqlite:///%s' % self.getOutputSql()
-            print "Sqlite location: %s" % sqlLocation
+            print("Sqlite location: %s" % sqlLocation)
             setting = {'db': sqlLocation}
 
 
@@ -97,10 +96,10 @@ class FundamentalCrawler(object):
                 self.outputDAM.writeFundamental(keyTimeValueDict)
 
         except BaseException as excp:
-            print "Error while processing %s: %s" % (symbol, excp)
+            print("Error while processing %s: %s" % (symbol, excp))
             self.failed.append(symbol)
         else:
-            print "Processed %s" % symbol
+            print("Processed %s" % symbol)
             self.succeeded.append(symbol)
 
     def getSaveSymbols(self):
@@ -134,8 +133,8 @@ class FundamentalCrawler(object):
 
     def printFailedSucceeded(self):
         ''' print out which ones fails'''
-        print "Succeeded: %s" % self.succeeded
-        print "Failed: %s" % self.failed
+        print("Succeeded: %s" % self.succeeded)
+        print("Failed: %s" % self.failed)
 
 if __name__ == '__main__':
     crawler = FundamentalCrawler()

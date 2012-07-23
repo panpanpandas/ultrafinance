@@ -3,8 +3,6 @@ Created on Nov 6, 2011
 
 @author: ppa
 '''
-
-from ultrafinance.lib.errors import UfException, Errors
 from ultrafinance.backTest.constant import EVENT_TICK_UPDATE
 
 from threading import Thread
@@ -78,8 +76,8 @@ class TradingEngine(object):
 
         while True:
             if self.__stop:
-                LOG.debug("Stopping trading engine")
-                self.complete()
+                LOG.debug("Stopping trading engine...")
+                self._complete()
                 break
 
             else:
@@ -97,9 +95,9 @@ class TradingEngine(object):
                 if orderDict:
                     self._orderUpdate(orderDict)
 
-    def complete(self):
+    def _complete(self):
         ''' call when complete feeding ticks '''
-        for event, subDict in self.__subs.items():
+        for subDict in self.__subs.itervalues():
             for sub in subDict.iterkeys():
                 sub.complete()
 

@@ -26,8 +26,8 @@ class testGoogleFinance(unittest.TestCase):
     def testGetAll(self):
         googleFinance = GoogleFinance()
         data = googleFinance.getAll('EBAY')
-        print data
-        assert len(data)
+        print(data)
+        self.assertNotEqual(0, len(data))
 
     def testGetAll_badSymbol(self):
         googleFinance = GoogleFinance()
@@ -41,9 +41,9 @@ class testGoogleFinance(unittest.TestCase):
         googleFinance = GoogleFinance()
         #ret = googleFinance.getFinancials('NASDAQ:EBAY', ['Net Income', 'Total Revenue', 'Diluted Normalized EPS', 'Total Common Shares Outstanding'], False)
         ret = googleFinance.getFinancials('NASDAQ:EBAY')
-        print ret
+        print(ret)
 
     def testGetTicks(self):
         googleFinance = GoogleFinance()
         ret = googleFinance.getTicks('EBAY', start = '20110101', end = '20110110')
-        print ret
+        print(ret)

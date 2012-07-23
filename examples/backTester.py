@@ -23,10 +23,12 @@ import os
 
 from threading import Thread
 
-
+import traceback
 import logging.config
 import logging
 LOG = logging.getLogger()
+
+CONFIG_FILE = "backtest_period.ini"
 
 class BackTester(object):
     ''' back testing '''
@@ -39,7 +41,8 @@ class BackTester(object):
 
     def setup(self):
         ''' setup '''
-        self.__config.setSource("backtest_period.ini")
+        LOG.debug("Loading config from %s" % CONFIG_FILE)
+        self.__config.setSource(CONFIG_FILE)
         appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_APP_MAIN, CONF_TRADE_TYPE)
         self._setupLog()
         self._loadSymbols()
@@ -50,6 +53,7 @@ class BackTester(object):
 
     def _runOneTest(self, symbol):
         ''' run one test '''
+        LOG.debug("Running backtest for %s" % symbol)
         runner = TestRunner(self.__config, self.__mCalculator, symbol)
         runner.runTest()
 
@@ -68,7 +72,11 @@ class BackTester(object):
     def runTests(self):
         ''' run tests '''
         for symbol in self.__symbols:
-            self._runOneTest(symbol)
+            try:
+                self._runOneTest(symbol)
+            except BaseException as excp:
+                LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
+                          % (symbol, excp, traceback.format_exc(8)))
 
 
 class TestRunner(object):
@@ -156,8 +164,10 @@ class TestRunner(object):
 
     def _execute(self):
         ''' run backtest '''
+        LOG.info("Running backtest for %s" % self.__symbol)
         #start trading engine
         thread = Thread(target = self.__tradingEngine.runListener, args = ())
+        thread.setDaemon(True)
         thread.start()
 
         #start tickFeeder

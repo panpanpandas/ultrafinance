@@ -4,9 +4,8 @@ Created on Dec 25, 2011
 @author: ppa
 '''
 from ultrafinance.model import Side, Order
-from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
-from ultrafinance.backTest.constant import CONF_PERIOD, CONF_SYMBOLRE
+from ultrafinance.backTest.constant import CONF_PERIOD
 
 import logging
 LOG = logging.getLogger()

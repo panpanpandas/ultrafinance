@@ -6,7 +6,7 @@ Created on Dec 25, 2011
 import abc
 from ultrafinance.backTest.tickSubscriber import TickSubsriber
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.backTest.constant import CONF_SYMBOLRE, EVENT_TICK_UPDATE
+from ultrafinance.backTest.constant import EVENT_TICK_UPDATE
 
 import logging
 LOG = logging.getLogger()

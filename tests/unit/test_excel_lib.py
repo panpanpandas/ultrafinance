@@ -20,16 +20,16 @@ class testExcelLib(unittest.TestCase):
         dataSourcePath = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'dataSource')
         with ExcelLib( fileName = os.path.join(dataSourcePath, 'hoursing_interestRate.xls'),
                        mode = ExcelLib.READ_MODE ) as excel:
-            print "sheet numbers: %s" % excel.getOperation().getTotalSheetNumber()
-            print "sheetNames %s" % excel.getOperation().getSheetNames()
+            print("sheet numbers: %s" % excel.getOperation().getTotalSheetNumber())
+            print("sheetNames %s" % excel.getOperation().getSheetNames())
             excel.openSheet('Data')
             data = excel.readRow(0)
-            print data
-            assert len(data)
+            print(data)
+            self.assertNotEqual(0, len(data))
 
             data = excel.readCol(0, 7)
-            print data
-            assert len(data)
+            print(data)
+            self.assertNotEqual(0, len(data))
 
     def testWriteExcel(self):
         targetPath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'output')
@@ -44,5 +44,4 @@ class testExcelLib(unittest.TestCase):
             excel.openSheet(sheetName)
             excel.writeRow(0, [1, 2, 3, "4", "5"])
 
-        if not os.path.exists(targetFile):
-            assert 0
+        self.assertTrue(os.path.exists(targetFile))

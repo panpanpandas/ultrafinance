@@ -11,7 +11,6 @@ sample usage:
 '''
 import urllib
 import traceback
-from operator import itemgetter
 from ultrafinance.model import Quote
 from ultrafinance.lib.errors import UfException, Errors
 
@@ -85,7 +84,7 @@ class YahooFinance(object):
             for value in values[1:]:
                 data.append(Quote(value[0], value[1], value[2], value[3], value[4], value[5], value[6]))
 
-            dateValues = sorted(data, key=itemgetter(0))
+            dateValues = sorted(data, key = lambda q: q.time)
             return dateValues
 
         except IOError:

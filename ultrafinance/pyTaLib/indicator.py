@@ -5,6 +5,7 @@ Created on May 26, 2012
 '''
 import numpy
 from math import sqrt
+from collections import deque
 
 def mean(array):
     ''' average '''
@@ -28,3 +29,16 @@ def sharpeRatio(array, n = 252):
 
     return sqrt(n) * mean(returns) / stddev(returns)
 
+''' refer to http://rosettacode.org/wiki/Averages/Simple_moving_average#Python '''
+class Sma(object):
+    def __init__(self, period):
+        assert period == int(period) and period > 0, "Period must be an integer > 0"
+        self.__period = period
+        self.__stream = deque()
+
+    def __call__(self, n):
+        self.__stream.append(n)
+        if len(self.__stream) > self.__period:
+            self.__stream.popleft()
+
+        return sum(self.__stream) / float(len(self.__stream) )

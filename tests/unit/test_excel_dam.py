@@ -23,9 +23,9 @@ class testExcelDAM(unittest.TestCase):
         writeDam.setDir(self.targetPath)
         writeDam.setSymbol(self.symbol)
 
-        for file in [writeDam.targetPath(ExcelDAM.QUOTE), writeDam.targetPath(ExcelDAM.TICK)]:
-            if os.path.exists(file):
-                os.remove(file)
+        for f in [writeDam.targetPath(ExcelDAM.QUOTE), writeDam.targetPath(ExcelDAM.TICK)]:
+            if os.path.exists(f):
+                os.remove(f)
 
         quote1 = Quote('1320676200', '32.58', '32.58', '32.57', '32.57', '65212', None)
         quote2 = Quote('1320676201', '32.59', '32.59', '32.58', '32.58', '65213', None)
@@ -40,5 +40,5 @@ class testExcelDAM(unittest.TestCase):
         readDam.setDir(self.targetPath)
         readDam.setSymbol(self.symbol)
 
-        print readDam.readQuotes(0, 10000000000)
-        print readDam.readTicks(1320676201, 1320676201)
+        print(readDam.readQuotes(0, 10000000000))
+        print(readDam.readTicks(1320676201, 1320676201))

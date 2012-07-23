@@ -13,6 +13,9 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+import logging
+LOG = logging.getLogger()
+
 class FmSql(Base):
     __tablename__ = 'fundamental'
 

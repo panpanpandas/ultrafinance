@@ -27,7 +27,7 @@ class HexViewer:
 
     def update(self, subject):
         self.data = subject.data
-        print 'HexViewer: Subject %s has data 0x%x' % (subject.name, subject.getData())
+        print('HexViewer: Subject %s has data 0x%x' % (subject.name, subject.getData()))
 
 class DecimalViewer:
     def __init__(self):
@@ -35,7 +35,7 @@ class DecimalViewer:
 
     def update(self, subject):
         self.data = subject.data
-        print 'DecimalViewer: Subject %s has data %d' % (subject.name, subject.getData())
+        print('DecimalViewer: Subject %s has data %d' % (subject.name, subject.getData()))
 
 class testObservable(unittest.TestCase):
     def setUp(self):
@@ -51,19 +51,19 @@ class testObservable(unittest.TestCase):
         data1.attach(view1)
         data1.attach(view2)
 
-        print "Setting Data 1 = 10"
+        print("Setting Data 1 = 10")
         data1.setData(10)
         self.assertEquals(10, data1.data)
         self.assertEquals(10, view1.data)
         self.assertEquals(10, view2.data)
-        print "Setting Data 1 = 3"
+        print("Setting Data 1 = 3")
         data1.setData(3)
         self.assertEquals(3, data1.data)
         self.assertEquals(3, view1.data)
         self.assertEquals(3, view2.data)
-        print "Detach HexViewer from data1"
+        print("Detach HexViewer from data1")
         data1.detach(view2)
-        print "Setting Data 1 = 10"
+        print("Setting Data 1 = 10")
         data1.setData(10)
         self.assertEquals(10, data1.data)
         self.assertEquals(10, view1.data)

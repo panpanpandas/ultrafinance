@@ -23,7 +23,7 @@ class testTradingCenter(unittest.TestCase):
         tc.createAccountWithMetrix(200000, 0)
 
         accounts = tc.getCopyAccounts('.*')
-        print [str(account) for account in accounts]
+        print([str(account) for account in accounts])
         self.assertEquals(2, len(accounts))
 
 
@@ -32,7 +32,7 @@ class testTradingCenter(unittest.TestCase):
         accountId1 = tc.createAccountWithMetrix(100000, 0)
 
         account = tc.getCopyAccount(accountId1)
-        print account
+        print(account)
         self.assertEquals(100000, account.cash)
 
     def testIsOrderMet(self):
@@ -136,15 +136,15 @@ class testTradingCenter(unittest.TestCase):
         tc._TradingCenter__openOrders = {'symbol1': [order1, order2]}
 
         tc.cancelOrder('id1')
-        print tc._TradingCenter__openOrders
-        print tc._TradingCenter__closedOrders
+        print(tc._TradingCenter__openOrders)
+        print(tc._TradingCenter__closedOrders)
         self.assertEquals({'symbol1': [order2]}, tc._TradingCenter__openOrders)
         self.assertEquals({'id1': order1}, tc._TradingCenter__closedOrders)
         self.assertEquals(Order.CANCELED, order1.status)
 
         tc.cancelOrder('id2')
-        print tc._TradingCenter__openOrders
-        print tc._TradingCenter__closedOrders
+        print(tc._TradingCenter__openOrders)
+        print(tc._TradingCenter__closedOrders)
         self.assertEquals({}, tc._TradingCenter__openOrders)
         self.assertEquals({'id1': order1, 'id2': order2}, tc._TradingCenter__closedOrders)
 
@@ -156,8 +156,8 @@ class testTradingCenter(unittest.TestCase):
         tc._TradingCenter__openOrders = {'symbol1': [order1, order2]}
 
         tc.cancelAllOpenOrders()
-        print tc._TradingCenter__openOrders
-        print tc._TradingCenter__closedOrders
+        print(tc._TradingCenter__openOrders)
+        print(tc._TradingCenter__closedOrders)
         self.assertEquals({}, tc._TradingCenter__openOrders)
         self.assertEquals({'id1': order1, 'id2': order2}, tc._TradingCenter__closedOrders)
 

@@ -6,8 +6,7 @@ Created on Mar 1, 2011
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.stateSaver import StateSaver
 
-from sqlalchemy import Table, Column, Integer, String, Float, Sequence, create_engine, MetaData
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Table, Column, Integer, String, create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 
 import logging

@@ -17,4 +17,4 @@ class testYahooFinance(unittest.TestCase):
     def testGetHistoricalPrices(self):
         yahooFinance = YahooFinance()
         data = yahooFinance.getQuotes('^STI', '20110101', '20110110')
-        assert len(data)
+        self.assertNotEqual(0, len(data))
