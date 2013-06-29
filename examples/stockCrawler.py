@@ -115,6 +115,7 @@ class SymbolCrawler(object):
     def __getSaveOneSymbol(self, symbol):
         ''' get and save data for one symbol '''
         try:
+            lastExcp = None
             with self.readLock: #dam is not thread safe
                 failCount = 0
                 #try several times since it may fail
@@ -129,11 +130,12 @@ class SymbolCrawler(object):
                             ticks = self.googleDAM.readTicks(self.start, self.end)
                     except BaseException as excp:
                         failCount += 1
+                        lastExcp = excp
                     else:
                         break
 
                 if failCount >= MAX_TRY:
-                    raise BaseException("Can't retrive historical data")
+                    raise BaseException("Can't retrieve historical data %s" % lastExcp)
 
             with self.writeLock: #dam is not thread safe
                 self.outputDAM.setSymbol(symbol)

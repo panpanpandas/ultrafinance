@@ -80,13 +80,16 @@ class GoogleFinance(object):
             data = []
             for value in values[1:]:
                 date = convertGoogCSVDate(value[0])
-                data.append(Quote(date,
-                                  value[1].strip(),
-                                  value[2].strip(),
-                                  value[3].strip(),
-                                  value[4].strip(),
-                                  value[5].strip(),
-                                  None))
+                try:
+                    data.append(Quote(date,
+                                      value[1].strip(),
+                                      value[2].strip(),
+                                      value[3].strip(),
+                                      value[4].strip(),
+                                      value[5].strip(),
+                                      None))
+                except Exception:
+                    LOG.warning("Exception when processing %s at date %s for value %s" % (symbol, date, value))
 
             #dateValues = sorted(data, key=itemgetter(0))
             dateValues = sorted(data, key = lambda x: x.time)
