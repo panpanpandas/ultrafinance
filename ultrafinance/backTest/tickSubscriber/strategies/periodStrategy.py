@@ -19,7 +19,7 @@ class PeriodStrategy(BaseStrategy):
 
         assert int(configDict[CONF_PERIOD]) >= 1
 
-        self.perAmount = min(1, round(int(configDict[CONF_INIT_CASH]) / 100)) #buy 1/100 per time
+        self.perAmount = max(1, round(int(configDict[CONF_INIT_CASH]) / 100)) #buy 1/100 per time
         self.period = int(configDict[CONF_PERIOD])
         self.symbols = None
         self.counter = 0

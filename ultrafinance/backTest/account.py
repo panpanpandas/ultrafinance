@@ -47,10 +47,11 @@ class Account(object):
     def execute(self, order):
         ''' execute order'''
         LOG.debug("execute order: %s" % order)
-        if not self.validate(order):
+        msg = self.validate(order)
+        if msg != None:
             raise UfException(Errors.ORDER_INVALID_ERROR,
-                              ''' Transition is invalid: symbol %s, share %s, price %s'''\
-                              % (order.symbol, order.share, order.price))
+                              "Transition is invalid: symbol %s, share %s, price %s, details %s"\
+                              % (order.symbol, order.share, order.price, msg))
 
         value = self.__getOrderValue(order)
         if Side.BUY == order.side:
@@ -63,28 +64,23 @@ class Account(object):
         self.__orderHisotry.append(order)
 
     def validate(self, order):
-        ''' validate order to check whether it's doable or not '''
+        ''' validate order to check whether it's do-able or not '''
         value = self.__getOrderValue(order)
         cost = value + self.__commision
+        msg = None
 
         if Side.BUY == order.side:
-            if cost <= self.__cash:
-                return True
-            else:
-                LOG.error('Transition fails validation: cash %.2f is smaller than cost %.2f' % (self.__cash, cost))
-                return False
+            if cost > self.__cash:
+                msg = 'Transition fails validation: cash %.2f is smaller than cost %.2f' % (self.__cash, cost)
         else:
             if order.symbol not in self.__holdings:
-                LOG.error('Transition fails validation: symbol %s not in holdings' % order.symbol)
-                return False
-            if order.share > self.__holdings[order.symbol][0]:
-                LOG.error('Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol]))
-                return False
-            if self.__commision > self.__cash:
-                LOG.error('Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision))
-                return False
-            else:
-                return True
+                msg = 'Transition fails validation: symbol %s not in holdings' % order.symbol
+            elif order.share > self.__holdings[order.symbol][0]:
+                msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
+            elif self.__commision > self.__cash:
+                msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
+
+        return msg
 
     def getCash(self):
         ''' get cash '''

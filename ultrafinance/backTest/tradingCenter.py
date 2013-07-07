@@ -35,18 +35,22 @@ class TradingCenter(object):
 
     def validateOrder(self, order):
         ''' validate an order '''
+        msg = None
         account = self.accountManager.getAccount(order.accountId)
-        if account and account.validate(order):
-            return True
+        if account is None:
+            msg = "Can't find account for order in validateOrder %s" % order
+        else:
+            msg = account.validate(order)
 
-        return False
+        return msg
 
     def placeOrder(self, order):
         ''' place an order '''
         if order.orderId:
             raise UfException(Errors.ORDER_TYPE_ERROR, 'OrderId already set: %s' % order.orderId)
 
-        if self.validateOrder(order):
+        msg = self.validateOrder(order)
+        if msg is None:
             # generate a unique order id
             order.orderId = uuid.uuid4()
 
@@ -59,6 +63,7 @@ class TradingCenter(object):
             return order.orderId
 
         else:
+            LOG.warn("Can't place order because %s" % msg)
             return None
 
     def __generateId(self):
@@ -136,13 +141,19 @@ class TradingCenter(object):
                                               ''' Account is invalid: accountId %s''' % order.accountId)
                         else:
                             LOG.debug("executing order %s" % order)
-                            account.execute(order)
-                            order.status = Order.FILLED
-                            order.filledTime = time.time()
+                            try:
+                                account.execute(order)
+                                order.status = Order.FILLED
+                                order.filledTime = time.time()
 
-                            del self.__openOrders[symbol][index]
-                            self.__closedOrders[order.orderId] = order
-                            self.__updatedOrder[order.orderId] = order
+                                del self.__openOrders[symbol][index]
+                                self.__closedOrders[order.orderId] = order
+                                self.__updatedOrder[order.orderId] = order
+                            except Exception as ex:
+                                LOG.error("Got exception when executing order %s: %s" % (order, ex))
+                                # delete the order if it still exists
+                                if symbol in self.__openOrders and index in self.__openOrders[symbol]:
+                                    del self.__openOrders[symbol][index]
 
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
