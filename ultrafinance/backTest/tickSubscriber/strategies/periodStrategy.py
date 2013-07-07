@@ -5,7 +5,7 @@ Created on Dec 25, 2011
 '''
 from ultrafinance.model import Side, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
-from ultrafinance.backTest.constant import CONF_PERIOD
+from ultrafinance.backTest.constant import CONF_PERIOD, CONF_INIT_CASH
 
 import logging
 LOG = logging.getLogger()
@@ -19,7 +19,7 @@ class PeriodStrategy(BaseStrategy):
 
         assert int(configDict[CONF_PERIOD]) >= 1
 
-        self.perAmount = 1000 # buy $100p per period
+        self.perAmount = min(1, round(int(configDict[CONF_INIT_CASH]) / 100)) #buy 1/100 per time
         self.period = int(configDict[CONF_PERIOD])
         self.symbols = None
         self.counter = 0

@@ -16,9 +16,7 @@ from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.metric import MetricCalculator
 from ultrafinance.backTest.indexHelper import IndexHelper
 from ultrafinance.backTest.history import History
-from ultrafinance.backTest.constant import CONF_STRATEGY, CONF_STRATEGY_NAME, CONF_APP_MAIN, \
-    TRADE_TYPE, CONF_TRADE_TYPE, CONF_INPUT_SECTION, CONF_DAM, CONF_SYMBOL_FILE, \
-    CONF_OUTPUT_SECTION, CONF_SAVER, CONF_INDEX
+from ultrafinance.backTest.constant import *
 import os
 
 from threading import Thread
@@ -44,6 +42,7 @@ class BackTester(object):
         LOG.debug("Loading config from %s" % CONFIG_FILE)
         self.__config.setSource(CONFIG_FILE)
         appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_APP_MAIN, CONF_TRADE_TYPE)
+        self.__config.override(CONF_STRATEGY, CONF_INIT_CASH, BackTester.CASH)
         self._setupLog()
         self._loadSymbols()
 

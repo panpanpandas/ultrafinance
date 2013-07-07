@@ -16,6 +16,8 @@ CONF_TRADE_TYPE = 'tradetype'
 CONF_SYMBOL_FILE = 'symbolfile'
 CONF_INDEX = 'index'
 
+CONF_INIT_CASH = "initcash"
+
 # input
 CONF_INPUT_SECTION = 'input'
 CONF_DAM = 'dam'

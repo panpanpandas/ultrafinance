@@ -61,8 +61,19 @@ class PyConfig(object):
         ''' get directory '''
         return self.__dir
 
+    def override(self, section, key, value):
+        ''' override/set a key value pair'''
+        if not self.__parser.has_section(section):
+            self.__parser.add_section(section)
+
+        self.__parser.set(section, key, str(value))
+
+
 if __name__ == '__main__':
     config = PyConfig()
     config.setSource('test.ini')
+    config.override("testSection", "123", "456")
+    config.override("testSection", "123", "567")
     print(config.getOption('app_main', 'feeder'))
     print(config.getSection('app_main'))
+    print(config.getOption("testSection", "123"))
