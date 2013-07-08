@@ -83,6 +83,9 @@ class TradingCenter(object):
                     if not len(orders):
                         del self.__openOrders[symbol]
 
+                    LOG.debug("Order canceled: %s" % orderId)
+                    break
+
     def cancelAllOpenOrders(self):
         ''' cancel all open order '''
         for symbol, orders in self.__openOrders.items():
@@ -131,8 +134,9 @@ class TradingCenter(object):
     def _checkAndExecuteOpenOrder(self, tickDict):
         ''' check and execute open order '''
         for symbol, tick in tickDict.iteritems():
-            LOG.debug("_executeOpenOrder symbol %s with tick %s" % (symbol, tick.time))
+            LOG.debug("_executeOpenOrder symbol %s with tick %s, price %s" % (symbol, tick.time, tick.close))
             if symbol in self.__openOrders:
+                indexListToBeDeleted = []
                 for index, order in enumerate(self.__openOrders[symbol]):
                     if self.isOrderMet(tick, order):
                         account = self.accountManager.getAccount(order.accountId)
@@ -142,24 +146,30 @@ class TradingCenter(object):
                         else:
                             LOG.debug("executing order %s" % order)
                             try:
+                                indexListToBeDeleted.append(index)
+                                LOG.debug("INDEX is %s" % index)
                                 account.execute(order)
                                 order.status = Order.FILLED
                                 order.filledTime = time.time()
 
-                                del self.__openOrders[symbol][index]
                                 self.__closedOrders[order.orderId] = order
                                 self.__updatedOrder[order.orderId] = order
                             except Exception as ex:
                                 LOG.error("Got exception when executing order %s: %s" % (order, ex))
-                                # delete the order if it still exists
-                                if symbol in self.__openOrders and index in self.__openOrders[symbol]:
-                                    del self.__openOrders[symbol][index]
+
+                for i in reversed(indexListToBeDeleted):
+                    if symbol in self.__openOrders and i in self.__openOrders[symbol]:
+                        del self.__openOrders[symbol][i]
+
+
 
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
         if Side.BUY == order.side and float(tick.close) <= float(order.price):
             return True
         elif Side.SELL == order.side and float(tick.close) >= float(order.price):
+            return True
+        elif Side.STOP == order.side and float(tick.close) < float(order.price):
             return True
         else:
             return False

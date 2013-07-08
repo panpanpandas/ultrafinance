@@ -77,10 +77,11 @@ class Side(object):
     ''' side class '''
     SELL = 'sell'
     BUY = 'buy'
+    STOP = 'stop'
 
     @staticmethod
     def validate(side):
-        if side not in [Side.BUY, Side.SELL]:
+        if side not in [Side.BUY, Side.SELL, Side.STOP]:
             raise UfException(Errors.SIDE_TYPE_ERROR, 'Side error: %s is not accepted' % side)
 
         return side

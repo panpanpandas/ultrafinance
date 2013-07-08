@@ -3,8 +3,9 @@ Created on Jan 29, 2011
 
 @author: ppa
 '''
-from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.account import Account
+
+import copy
 
 import logging
 LOG = logging.getLogger()
@@ -27,6 +28,10 @@ class AccountManager(object):
         self.__accountPositions[account.accountId] = [] # list contains tuple (time, position)
 
         return account.accountId
+
+    def getAccountCopy(self, accountId):
+        ''' get shallow copy of an account '''
+        return copy.copy(self.__accounts.get(accountId))
 
     def getAccount(self, accountId):
         ''' get account '''

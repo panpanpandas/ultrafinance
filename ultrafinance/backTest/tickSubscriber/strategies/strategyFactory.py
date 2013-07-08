@@ -5,12 +5,14 @@ Created on Dec 26, 2011
 '''
 
 from ultrafinance.backTest.tickSubscriber.strategies.periodStrategy import PeriodStrategy
+from ultrafinance.backTest.tickSubscriber.strategies.smaStrategy import SMAStrategy
 
 from ultrafinance.lib.errors import Errors, UfException
 
 class StrategyFactory(object):
     ''' Strategy factory '''
-    STRATEGY_DICT = {'period': PeriodStrategy}
+    STRATEGY_DICT = {'period': PeriodStrategy,
+                     'sma': SMAStrategy}
 
     @staticmethod
     def createStrategy(name, configDict):

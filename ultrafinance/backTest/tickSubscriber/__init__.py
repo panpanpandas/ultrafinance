@@ -38,6 +38,10 @@ class TickSubsriber(object):
         ''' consume ticks '''
         return
 
+    def orderExecuted(self, orderId):
+        ''' call back for executed order with order id, should be overridden '''
+        return
+
     def complete(self):
         ''' complete operation '''
         pass

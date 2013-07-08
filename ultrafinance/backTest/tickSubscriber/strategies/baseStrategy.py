@@ -6,7 +6,7 @@ Created on Dec 25, 2011
 import abc
 from ultrafinance.backTest.tickSubscriber import TickSubsriber
 from ultrafinance.lib.errors import Errors, UfException
-from ultrafinance.backTest.constant import EVENT_TICK_UPDATE
+from ultrafinance.backTest.constant import EVENT_TICK_UPDATE, EVENT_ORDER_EXECUTED
 
 import logging
 LOG = logging.getLogger()
@@ -25,11 +25,12 @@ class BaseStrategy(TickSubsriber):
         self.__curTime = ''
         self.indexHelper = None
         self.history = None
+        self.accountManager = None
+
 
     def subRules(self):
         ''' override function '''
-        #return ([self.configDict[CONF_SYMBOLRE] ], [EVENT_TICK_UPDATE])
-        return (self.symbols, [EVENT_TICK_UPDATE])
+        return (self.symbols, [EVENT_TICK_UPDATE, EVENT_ORDER_EXECUTED])
 
     def checkReady(self):
         '''
@@ -59,3 +60,7 @@ class BaseStrategy(TickSubsriber):
                               "symbols %s is not a list" % symbols)
 
         self.symbols = symbols
+
+    def getAccountCopy(self):
+        ''' get copy of account info '''
+        return self.accountManager.getAccountCopy(self.accountId)

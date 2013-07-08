@@ -26,7 +26,7 @@ import logging.config
 import logging
 LOG = logging.getLogger()
 
-CONFIG_FILE = "backtest_period.ini"
+CONFIG_FILE = "backtest_sma.ini"
 
 class BackTester(object):
     ''' back testing '''
@@ -156,6 +156,7 @@ class TestRunner(object):
         #associate account
         accountId = self.__accountManager.createAccount(BackTester.CASH)
         strategy.accountId = accountId
+        strategy.accountManager = self.__accountManager
 
         #register on trading engine
         strategy.tradingEngine = self.__tradingEngine

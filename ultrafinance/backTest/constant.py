@@ -34,3 +34,4 @@ STOP_FLAG = "stopFlag"
 
 #EVENT LIST
 EVENT_TICK_UPDATE = 'tickUpdate'
+EVENT_ORDER_EXECUTED = "orderExecuted"

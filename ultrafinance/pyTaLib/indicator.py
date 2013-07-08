@@ -35,10 +35,16 @@ class Sma(object):
         assert period == int(period) and period > 0, "Period must be an integer > 0"
         self.__period = period
         self.__stream = deque()
+        self.__value = None
+
+    def getLastValue(self):
+        return self.__value
 
     def __call__(self, n):
         self.__stream.append(n)
         if len(self.__stream) > self.__period:
             self.__stream.popleft()
-
-        return sum(self.__stream) / float(len(self.__stream) )
+            self.__value = sum(self.__stream) / float(len(self.__stream) )
+            return self.__value
+        else:
+            return None

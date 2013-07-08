@@ -3,7 +3,7 @@ Created on Nov 6, 2011
 
 @author: ppa
 '''
-from ultrafinance.backTest.constant import EVENT_TICK_UPDATE
+from ultrafinance.backTest.constant import EVENT_TICK_UPDATE, EVENT_ORDER_EXECUTED
 
 from threading import Thread
 from time import sleep
@@ -112,18 +112,43 @@ class TradingEngine(object):
         thread.start()
         return thread
 
+    def consumeExecutedOrders(self, orderDict, sub, event):
+        ''' publish ticks to sub '''
+        thread = Thread(target = getattr(sub, event), args = (orderDict,))
+        thread.start()
+        return thread
+
+
     def placeOrder(self, order):
         ''' called by each strategy to place order '''
-        self.orderProxy.placeOrder(order)
+        orderId = self.orderProxy.placeOrder(order)
 
         # record order
         if self.saver:
             self.saver.write(self.__curTime, 'placedOrder', order)
 
+        return orderId
+
+    def cancelOrder(self, orderId):
+        ''' cancel order '''
+        self.orderProxy.cancelOrder(orderId)
+
     def _orderUpdate(self, orderDict):
         '''
         order status changes
         '''
+        event = EVENT_ORDER_EXECUTED
+        for sub, attrs in self.__subs[EVENT_ORDER_EXECUTED].items():
+            thread = self.consumeExecutedOrders(orderDict, sub, event)
+            thread.join(timeout = self.__threadTimeout * 1000)
+            if thread.isAlive():
+                LOG.error("Thread timeout for order update subId %s" % sub.subId)
+                attrs['fail'] += 1
+
+            if attrs['fail'] > self.__threadMaxFail:
+                LOG.error("For order update, subId %s fails for too many times" % sub.subId)
+                self.unregister(sub)
+
         if self.saver:
             self.saver.write(self.__curTime, 'updatedOrder', [str(order) for order in orderDict.values()])
 
@@ -145,11 +170,11 @@ class TradingEngine(object):
             thread = self.consumeTicks(ticks, sub, event)
             thread.join(timeout = self.__threadTimeout * 1000)
             if thread.isAlive():
-                LOG.error("thread timeout for subId %s at time %s" % (sub.subId, time))
+                LOG.error("Thread timeout for tick update, subId %s at time %s" % (sub.subId, time))
                 attrs['fail'] += 1
 
             if attrs['fail'] > self.__threadMaxFail:
-                LOG.error("subId %s fails for too many times" % sub.subId)
+                LOG.error("For tick update, subId %s fails for too many times" % sub.subId)
                 self.unregister(sub)
 
         if self.saver:
