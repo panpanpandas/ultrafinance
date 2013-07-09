@@ -5,6 +5,7 @@ Created on Nov 6, 2011
 '''
 from ultrafinance.lib.errors import UfException, Errors
 from threading import Thread
+from time import sleep
 
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE
@@ -34,9 +35,13 @@ class TickFeeder(object):
     def getUpdatedTick(self):
         ''' return timeTickTuple with status changes '''
         timeTicksTuple = self.__updatedTick
-        self.__updatedTick = None
 
         return timeTicksTuple
+
+    def clearUpdateTick(self):
+        ''' clear current ticks '''
+        self.__updatedTick = None
+
 
     def _getTicks(self, dam):
         ''' get ticks from one dam'''
@@ -86,9 +91,14 @@ class TickFeeder(object):
         indexTicksDict = self.loadIndex()
 
         for timeStamp in sorted(timeTicksDict.iterkeys()):
-            self._freshUpdatedTick(timeStamp, timeTicksDict[timeStamp])
+            while self.__updatedTick:
+                time.sleep(0)
+
+            # make sure trading center finish updating first
             self._freshTradingCenter(timeTicksDict[timeStamp])
             self._freshIndexHelper(indexTicksDict.get(timeStamp))
+
+            self._freshUpdatedTick(timeStamp, timeTicksDict[timeStamp])
             self._updateHistory(timeStamp, timeTicksDict[timeStamp], indexTicksDict.get(timeStamp))
 
     def _updateHistory(self, timeStamp, symbolTicksDict, indexTick):
@@ -97,17 +107,7 @@ class TickFeeder(object):
 
     def _freshUpdatedTick(self, timeStamp, symbolTicksDict):
         ''' update self.__updatedTick '''
-        curTime = time.time()
-        while (curTime + self.__intervalTimeout > time.time()):
-            if not self.__updatedTick:
-                self.__updatedTick = (timeStamp, symbolTicksDict)
-                return
-            else:
-                # sleep for a small amount of time
-                time.sleep(0)
-
-        raise UfException(Errors.FEEDER_TIMEOUT,
-                          "Can't do freshUpdateTick in %s seconds" % self.__intervalTimeout)
+        self.__updatedTick = (timeStamp, symbolTicksDict)
 
     def _freshTradingCenter(self, symbolTicksDict):
         ''' feed trading center ticks '''

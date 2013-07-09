@@ -82,9 +82,8 @@ class TradingEngine(object):
 
             else:
                 timeTicksTuple = self.tickProxy.getUpdatedTick()
-                orderDict = self.orderProxy.getUpdatedOrder()
 
-                if not timeTicksTuple and not orderDict:
+                if not timeTicksTuple:
                     sleep(0)
                     continue
 
@@ -92,8 +91,12 @@ class TradingEngine(object):
                     self.__curTime = timeTicksTuple[0]
                     self._tickUpdate(timeTicksTuple)
 
+                orderDict = self.orderProxy.getUpdatedOrder()
                 if orderDict:
                     self._orderUpdate(orderDict)
+
+                self.tickProxy.clearUpdateTick()
+
 
     def _complete(self):
         ''' call when complete feeding ticks '''
@@ -129,9 +132,9 @@ class TradingEngine(object):
 
         return orderId
 
-    def cancelOrder(self, orderId):
+    def cancelOrder(self, symbol, orderId):
         ''' cancel order '''
-        self.orderProxy.cancelOrder(orderId)
+        self.orderProxy.cancelOrder(symbol, orderId)
 
     def _orderUpdate(self, orderDict):
         '''

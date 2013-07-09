@@ -46,7 +46,6 @@ class Account(object):
 
     def execute(self, order):
         ''' execute order'''
-        LOG.debug("account execute order: %s" % order)
         msg = self.validate(order)
         if msg != None:
             raise UfException(Errors.ORDER_INVALID_ERROR,
@@ -60,7 +59,7 @@ class Account(object):
         elif Side.SELL == order.side:
             self.__cash = self.__cash + value - self.__commision
             self.__reduceHolding(order.symbol, order.share)
-        else:
+        elif Side.STOP == order.side:
             self.__cash = self.__cash + value - self.__commision
             self.__reduceHolding(order.symbol, order.share)
 
@@ -82,8 +81,13 @@ class Account(object):
                 msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
             elif self.__commision > self.__cash:
                 msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
-        #TODO validate stop order
-
+        elif Side.STOP == order.side:
+            if order.symbol not in self.__holdings:
+                msg = 'Transition fails validation: symbol %s not in holdings' % order.symbol
+            elif order.share > self.__holdings[order.symbol][0]:
+                msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
+            elif self.__commision > self.__cash:
+                msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
 
         return msg
 

@@ -6,7 +6,6 @@ Created on Dec 18, 2011
 from ultrafinance.model import Side, Order
 from ultrafinance.lib.errors import Errors, UfException
 import uuid
-import re
 import time
 
 import logging
@@ -20,10 +19,10 @@ class TradingCenter(object):
     def __init__(self):
         ''' constructor '''
         self.accountManager = None
-        self.__openOrders = {}
-        self.__closedOrders = {}
-        self.__lastSymbolPrice = {}
-        self.__updatedOrder = {}
+        self.__openOrders = {} #SAMPLE: {"EBAY": {orderId1: order1, orderId2, order2}}
+        self.__closedOrders = {} #SAMPLE {"EBAY": [order1, order2]}
+        self.__updatedOrder = {} #SAMPLE {"EBAY": [order1, order2]}
+        self.__lastTickDict = None
 
     def getUpdatedOrder(self):
         ''' return orders with status changes '''
@@ -42,6 +41,12 @@ class TradingCenter(object):
         else:
             msg = account.validate(order)
 
+            #valid order with current market price
+            if msg is None and order.symbol in self.__lastTickDict:
+                closePrice = self.__lastTickDict[order.symbol].close
+                if Side.STOP == order.side and order.price > closePrice:
+                    msg = "Stop order price %s shouldn't be higher than market price %s" % (order.price, closePrice)
+
         return msg
 
     def placeOrder(self, order):
@@ -56,10 +61,12 @@ class TradingCenter(object):
 
             # put order in list
             if order.symbol not in self.__openOrders:
-                self.__openOrders[order.symbol] = []
-            self.__openOrders[order.symbol].append(order)
+                self.__openOrders[order.symbol] = {}
+            self.__openOrders[order.symbol][order.orderId] = order
 
             LOG.debug("Order placed %s" % order)
+
+            self.__checkAndExecuteOrder(order)
             return order.orderId
 
         else:
@@ -70,97 +77,86 @@ class TradingCenter(object):
         ''' generate id '''
         return uuid.uuid4()
 
-    def cancelOrder(self, orderId):
+    def cancelOrder(self, symbol, orderId):
         ''' cancel an order '''
-        for symbol, orders in self.__openOrders.items():
-            for index, order in enumerate(orders):
-                if orderId == order.orderId:
-                    order.status = Order.CANCELED #change order state
-                    self.__closedOrders[order.orderId] = order
+        if symbol not in self.__openOrders:
+            LOG.warn("Can't cancel order %s because there is no open orders for symbol %s" % (orderId, symbol))
+            return
 
-                    del orders[index]
-                    #if no open orders left for that symbol, remove it
-                    if not len(orders):
-                        del self.__openOrders[symbol]
+        if orderId not in self.__openOrders[symbol]:
+            LOG.warn("Can't cancel order %s because there is no open orders for order id %s with symbol %s" % (orderId, orderId, symbol))
+            return
 
-                    LOG.debug("Order canceled: %s" % orderId)
-                    break
+        #TODO cancel the order and update history
+        del self.__openOrders[symbol][orderId]
+
+        #if no open orders left for that symbol, remove it
+        if not len(self.__openOrders[symbol]):
+            del self.__openOrders[symbol]
+
+        LOG.debug("Order canceled: %s" % orderId)
+
 
     def cancelAllOpenOrders(self):
         ''' cancel all open order '''
-        for symbol, orders in self.__openOrders.items():
-            for order in orders:
+        for symbol, orderIdAndOrderDict in self.__openOrders.items():
+            for orderId, order in orderIdAndOrderDict.values():
                 order.status = Order.CANCELED #change order state
-                self.__closedOrders[order.orderId] = order
+                self.__closedOrders[orderId] = order
 
             del self.__openOrders[symbol]
 
-    def getOpenOrdersBySymbol(self, symbol):
-        ''' get open orders by symbol '''
-        if symbol in self.__openOrders:
-            return self.__openOrders[symbol]
-        else:
-            return []
-
-    def getOpenOrderByOrderId(self, orderId):
-        ''' get open order by orderId '''
-        for openOrders in self.__openOrders.values():
-            for order in openOrders:
-                if orderId == order.orderId:
-                    return order
-
-        return None
-
-    def getClosedOrder(self, orderId):
-        ''' get closed orders'''
-        return self.__closedOrders.get(orderId)
-
-    def getClosedOrders(self, expression):
-        ''' get closed orders '''
-        orders = []
-        pair = re.compile(expression)
-
-        for orderId, order in self.__closedOrders:
-            if pair.match(orderId):
-                orders.append(order)
-
-        return orders
-
     def consumeTicks(self, tickDict):
         ''' consume ticks '''
-        self._checkAndExecuteOpenOrder(tickDict)
+        self._checkAndExecuteOrders(tickDict)
         self.accountManager.updateAccountsPosition(tickDict)
 
-    def _checkAndExecuteOpenOrder(self, tickDict):
+    def _checkAndExecuteOrders(self, tickDict):
         ''' check and execute open order '''
+        self.__lastTickDict = tickDict
         for symbol, tick in tickDict.iteritems():
-            LOG.debug("_executeOpenOrder symbol %s with tick %s, price %s" % (symbol, tick.time, tick.close))
-            if symbol in self.__openOrders:
-                indexListToBeDeleted = []
-                for index, order in enumerate(self.__openOrders[symbol]):
-                    if self.isOrderMet(tick, order):
-                        account = self.accountManager.getAccount(order.accountId)
-                        if not account:
-                            raise UfException(Errors.INVALID_ACCOUNT,
-                                              ''' Account is invalid: accountId %s''' % order.accountId)
-                        else:
-                            LOG.debug("executing order %s" % order)
-                            try:
-                                indexListToBeDeleted.append(index)
-                                LOG.debug("INDEX is %s" % index)
-                                account.execute(order)
-                                order.status = Order.FILLED
-                                order.filledTime = time.time()
+            LOG.debug("_checkAndExecuteOrders symbol %s with tick %s, price %s" % (symbol, tick.time, tick.close))
+            if symbol not in self.__openOrders:
+                LOG.debug("_checkAndExecuteOrders no open orders for symbol %s with tick %s, price %s" % (symbol, tick.time, tick.close))
+                continue
 
-                                self.__closedOrders[order.orderId] = order
-                                self.__updatedOrder[order.orderId] = order
-                            except Exception as ex:
-                                LOG.error("Got exception when executing order %s: %s" % (order, ex))
+            for order in self.__openOrders[symbol].values():
+                if self.isOrderMet(tick, order):
+                    self.__executeOrder(order)
 
-                for i in reversed(indexListToBeDeleted):
-                    if symbol in self.__openOrders and i in self.__openOrders[symbol]:
-                        del self.__openOrders[symbol][i]
 
+    def __checkAndExecuteOrder(self, order):
+        ''' check and execute one order '''
+        tick = self.__lastTickDict.get(order.symbol)
+        if tick is None:
+            LOG.debug("_checkAndExecuteOrder no open orders for symbol %s with tick %s, price %s" % (order.symbol, tick.time, tick.close))
+            return
+
+        if self.isOrderMet(tick, order):
+            self.__executeOrder(order)
+
+
+    def __executeOrder(self, order):
+        ''' execute an order '''
+        account = self.accountManager.getAccount(order.accountId)
+        if not account:
+            raise UfException(Errors.INVALID_ACCOUNT,
+                              ''' Account is invalid with accountId %s for order %s''' % (order.accountId, order.orderId))
+        else:
+            LOG.debug("executing order %s" % order)
+            try:
+                account.execute(order)
+                order.status = Order.FILLED
+                order.filledTime = time.time()
+
+                self.__closedOrders[order.orderId] = order
+                self.__updatedOrder[order.orderId] = order
+            except Exception as ex:
+                LOG.error("Got exception when executing order %s: %s" % (order, ex))
+
+            del self.__openOrders[order.symbol][order.orderId]
+            if not len(self.__openOrders[order.symbol]):
+                del self.__openOrders[order.symbol]
 
 
     def isOrderMet(self, tick, order):

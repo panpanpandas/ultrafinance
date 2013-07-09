@@ -109,14 +109,17 @@ class SMAStrategy(BaseStrategy):
                                   symbol = symbol,
                                   price = tick.close,
                                   share = self.__stopOrder.share) )
-            self.tradingEngine.cancelOrder(self.__stopOrderId)
+            self.tradingEngine.cancelOrder(symbol, self.__stopOrderId)
             self.__clearStopOrder()
 
-    def orderExecuted(self, orderId):
+    def orderExecuted(self, orderDict):
         ''' call back for executed order '''
-        if orderId == self.__stopOrderId:
-            # stop order executed
-            self.__clearStopOrder()
+        for orderId in orderDict.keys():
+            if orderId == self.__stopOrderId:
+                LOG.debug("smaStrategy stop order canceled %s" % orderId)
+                # stop order executed
+                self.__clearStopOrder()
+                break
 
     def __clearStopOrder(self):
         ''' clear stop order status '''
@@ -127,7 +130,7 @@ class SMAStrategy(BaseStrategy):
         ''' update stop order if needed '''
         newStopPrice = + self.__buyOrder.price + ((tick.close - self.__buyOrder.price) / 2)
         if self.__stopOrderId and newStopPrice > self.__stopOrder.price:
-            self.tradingEngine.cancelOrder(self.__stopOrderId)
+            self.tradingEngine.cancelOrder(symbol, self.__stopOrderId)
             stopOrder = Order(accountId = self.accountId,
                               side = Side.STOP,
                               symbol = symbol,
@@ -150,6 +153,7 @@ class SMAStrategy(BaseStrategy):
         symbol = self.symbols[0]
         tick = tickDict[symbol]
 
+        LOG.debug("tickUpdate symbol %s with tick %s, price %s" % (symbol, tick.time, tick.close))
         # update sma
         self.__smaShort(tick.close)
         self.__smaMid(tick.close)
