@@ -9,8 +9,8 @@ When to Sell:
 2 if the 10 < 50 or 10 < 200, place sell order
 
 Stop order:
-1 when buy order is placed, set limit order to be 5%
-2 as time goes, increase limit price to be half of the profit
+1 when buy order is placed, set stop order to be 5%
+2 as time goes, increase stop price to be min(max(half of the profit, 85% of current price), 95% of current price)
 3 never decrease limit price
 
 When to Buy:
@@ -46,8 +46,8 @@ class SMAStrategy(BaseStrategy):
         self.__buyOrder = None
 
         self.__smaShort = Sma(10)
-        self.__smaMid = Sma(50)
-        self.__smaLong = Sma(200)
+        self.__smaMid = Sma(60)
+        self.__smaLong = Sma(300)
 
         #state of privious day
         self.__previousTick = None
@@ -103,7 +103,8 @@ class SMAStrategy(BaseStrategy):
 
     def __sellIfMeet(self, tick, symbol):
         ''' place sell order if conditions meet '''
-        if self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue():
+        if self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
+            and (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue()):
             self.placeOrder(Order(accountId = self.accountId,
                                   side = Side.SELL,
                                   symbol = symbol,
@@ -128,8 +129,13 @@ class SMAStrategy(BaseStrategy):
 
     def __adjustStopOrder(self, tick, symbol):
         ''' update stop order if needed '''
-        newStopPrice = + self.__buyOrder.price + ((tick.close - self.__buyOrder.price) / 2)
-        if self.__stopOrderId and newStopPrice > self.__stopOrder.price:
+        if not self.__stopOrderId:
+            return
+
+        newStopPrice = max(self.__stopOrder.price + ((tick.close - self.__stopOrder.price) / 2), tick.close * 0.85)
+        newStopPrice = min(newStopPrice, tick.close * 0.95)
+
+        if newStopPrice > self.__stopOrder.price:
             self.tradingEngine.cancelOrder(symbol, self.__stopOrderId)
             stopOrder = Order(accountId = self.accountId,
                               side = Side.STOP,
