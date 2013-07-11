@@ -77,6 +77,9 @@ class BackTester(object):
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbol, excp, traceback.format_exc(8)))
 
+    def printMetrics(self):
+        ''' print metrics '''
+        LOG.info(self.__mCalculator.formatMetrics())
 
 class TestRunner(object):
     ''' back testing '''
@@ -84,6 +87,7 @@ class TestRunner(object):
 
     def __init__(self, config, mCalculator, symbol):
         self.__accountManager = AccountManager()
+        self.__accountId = None
         self.__tickFeeder = TickFeeder()
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
@@ -154,8 +158,8 @@ class TestRunner(object):
         strategy.history = self.__history
 
         #associate account
-        accountId = self.__accountManager.createAccount(BackTester.CASH)
-        strategy.accountId = accountId
+        self.__accountId = self.__accountManager.createAccount(BackTester.CASH)
+        strategy.accountId = self.__accountId
         strategy.accountManager = self.__accountManager
 
         #register on trading engine
@@ -167,7 +171,7 @@ class TestRunner(object):
         LOG.info("Running backtest for %s" % self.__symbol)
         #start trading engine
         thread = Thread(target = self.__tradingEngine.runListener, args = ())
-        thread.setDaemon(True)
+        thread.setDaemon(False)
         thread.start()
 
         #start tickFeeder
@@ -175,14 +179,15 @@ class TestRunner(object):
         self.__tradingEngine.stop()
         thread.join(timeout = 60)
 
+        self.__mCalculator.calculate(self.__symbol, self.__accountManager.getAccountPostions(self.__accountId))
+
     def _printResult(self):
         ''' print result'''
-        for account in self.__accountManager.getAccounts():
-            accountId = account.accountId
-            LOG.info("account %s" % account)
-            LOG.debug([str(order) for order in account.orderHistory])
-            LOG.debug("account position %s" % self.__accountManager.getAccountPostions(accountId))
-            LOG.info(self.__mCalculator.formatMetrics(self.__accountManager.getAccountPostions(accountId)))
+        account = self.__accountManager.getAccount(self.__accountId)
+        LOG.info("account %s" % account)
+        LOG.debug([str(order) for order in account.orderHistory])
+        LOG.debug("account position %s" % self.__accountManager.getAccountPostions(self.__accountId))
+
 
     def runTest(self):
         ''' run one test '''
@@ -194,3 +199,5 @@ if __name__ == "__main__":
     backTester = BackTester()
     backTester.setup()
     backTester.runTests()
+    backTester.printMetrics()
+

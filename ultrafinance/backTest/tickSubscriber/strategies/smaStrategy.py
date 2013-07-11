@@ -132,7 +132,8 @@ class SMAStrategy(BaseStrategy):
         if not self.__stopOrderId:
             return
 
-        newStopPrice = max(self.__stopOrder.price + ((tick.close - self.__stopOrder.price) / 2), tick.close * 0.85)
+        orgStopPrice = self.__buyOrder.price * 0.95
+        newStopPrice = max(orgStopPrice + ((tick.close - orgStopPrice) / 2), tick.close * 0.85)
         newStopPrice = min(newStopPrice, tick.close * 0.95)
 
         if newStopPrice > self.__stopOrder.price:
