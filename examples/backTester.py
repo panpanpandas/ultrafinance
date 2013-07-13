@@ -26,7 +26,7 @@ import logging.config
 import logging
 LOG = logging.getLogger()
 
-CONFIG_FILE = "backtest_sma.ini"
+CONFIG_FILE = "backtest_smaPortfolio.ini"
 
 class BackTester(object):
     ''' back testing '''
@@ -35,7 +35,7 @@ class BackTester(object):
     def __init__(self):
         self.__config = PyConfig()
         self.__mCalculator = MetricCalculator()
-        self.__symbols = []
+        self.__symbolLists = []
 
     def setup(self):
         ''' setup '''
@@ -50,10 +50,10 @@ class BackTester(object):
         ''' setup logging '''
         logging.config.fileConfig(self.__config.getFullPath())
 
-    def _runOneTest(self, symbol):
+    def _runOneTest(self, symbols):
         ''' run one test '''
-        LOG.debug("Running backtest for %s" % symbol)
-        runner = TestRunner(self.__config, self.__mCalculator, symbol)
+        LOG.debug("Running backtest for %s" % symbols)
+        runner = TestRunner(self.__config, self.__mCalculator, symbols)
         runner.runTest()
 
     def _loadSymbols(self):
@@ -62,20 +62,20 @@ class BackTester(object):
         assert symbolFile is not None, "%s is required in config file" % CONF_SYMBOL_FILE
 
         with open(os.path.join(self.__config.getDir(), symbolFile), "r") as f:
-            for symbol in f:
-                if symbol not in self.__symbols:
-                    self.__symbols.append(symbol.strip())
+            for symbols in f:
+                if symbols not in self.__symbolLists:
+                    self.__symbolLists.append([symbol.strip() for symbol in symbols.split()])
 
-        assert self.__symbols, "None symbol provided"
+        assert self.__symbolLists, "None symbol provided"
 
     def runTests(self):
         ''' run tests '''
-        for symbol in self.__symbols:
+        for symbols in self.__symbolLists:
             try:
-                self._runOneTest(symbol)
+                self._runOneTest(symbols)
             except BaseException as excp:
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
-                          % (symbol, excp, traceback.format_exc(8)))
+                          % (symbols, excp, traceback.format_exc(8)))
 
     def printMetrics(self):
         ''' print metrics '''
@@ -85,7 +85,7 @@ class TestRunner(object):
     ''' back testing '''
     CASH = 100000 #  0.1 million to start
 
-    def __init__(self, config, mCalculator, symbol):
+    def __init__(self, config, mCalculator, symbols):
         self.__accountManager = AccountManager()
         self.__accountId = None
         self.__tickFeeder = TickFeeder()
@@ -94,7 +94,7 @@ class TestRunner(object):
         self.__indexHelper = IndexHelper()
         self.__history = History()
         self.__saver = None
-        self.__symbol = symbol
+        self.__symbols = symbols
         self.__config = config
         self.__mCalculator = mCalculator
 
@@ -122,8 +122,9 @@ class TestRunner(object):
         self.__tickFeeder.indexHelper = self.__indexHelper
         self.__tickFeeder.hisotry = self.__history
         #set source dam
-        sDam = self._createDam(self.__symbol)
-        self.__tickFeeder.addSource(sDam)
+        for symbol in self.__symbols:
+            sDam = self._createDam(symbol)
+            self.__tickFeeder.addSource(sDam)
 
         #set index dam
         iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
@@ -146,14 +147,14 @@ class TestRunner(object):
         if saverName:
             self.__saver = StateSaverFactory.createStateSaver(saverName,
                                                               setting,
-                                                              "%s_%s" % (self.__symbol,
+                                                              "%s_%s" % (self.__symbols,
                                                                          self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME)))
 
     def _setupStrategy(self):
         ''' setup tradingEngine'''
         strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
                                                   self.__config.getSection(CONF_STRATEGY))
-        strategy.setSymbols([self.__symbol])
+        strategy.setSymbols(self.__symbols)
         strategy.indexHelper = self.__indexHelper
         strategy.history = self.__history
 
@@ -168,7 +169,7 @@ class TestRunner(object):
 
     def _execute(self):
         ''' run backtest '''
-        LOG.info("Running backtest for %s" % self.__symbol)
+        LOG.info("Running backtest for %s" % self.__symbols)
         #start trading engine
         thread = Thread(target = self.__tradingEngine.runListener, args = ())
         thread.setDaemon(False)
@@ -179,7 +180,7 @@ class TestRunner(object):
         self.__tradingEngine.stop()
         thread.join(timeout = 60)
 
-        self.__mCalculator.calculate(self.__symbol, self.__accountManager.getAccountPostions(self.__accountId))
+        self.__mCalculator.calculate(self.__symbols, self.__accountManager.getAccountPostions(self.__accountId))
 
     def _printResult(self):
         ''' print result'''

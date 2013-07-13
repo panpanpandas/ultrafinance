@@ -51,7 +51,7 @@ class BasicMetric(BaseMetric):
         self.result[BasicMetric.START_TIME] = timePositions[0][0]
         self.result[BasicMetric.END_TIME] = timePositions[-1][0]
         self.result[BasicMetric.END_VALUE] = timePositions[-1][1]
-        self.result[BasicMetric.STDDEV] = stddev([timePosition[1] for timePosition in timePositions[::21]])
+        self.result[BasicMetric.STDDEV] = stddev([timePosition[1] for timePosition in timePositions])
         self.result[BasicMetric.SRATIO] = sharpeRatio([timePosition[1] for timePosition in timePositions])
 
         return self.result
@@ -74,7 +74,7 @@ class MetricCalculator(object):
         ''' calculate metric base on positions '''
         metric = BasicMetric()
         metric.calculate(timePositions)
-        self.__calculated[symbols] = metric
+        self.__calculated['_'.join(symbols)] = metric
 
     def formatMetrics(self):
         ''' output all calculated metrics '''
@@ -84,15 +84,15 @@ class MetricCalculator(object):
         worstMetric = None
 
         output = []
-        for symbol, metric in self.__calculated.items():
-            output.append("%s: %s" % (symbol, metric.formatResult()))
+        for symbols, metric in self.__calculated.items():
+            output.append("%s: %s" % (symbols, metric.formatResult()))
 
             if bestSymbol == None or metric.result[BasicMetric.END_VALUE] > bestMetric.result[BasicMetric.END_VALUE]:
-                bestSymbol = symbol
+                bestSymbol = symbols
                 bestMetric = metric
 
             if worstSymbol == None or metric.result[BasicMetric.END_VALUE] < worstMetric.result[BasicMetric.END_VALUE]:
-                worstSymbol = symbol
+                worstSymbol = symbols
                 worstMetric = metric
 
         output.append("MEAN end value: %.1f, mean sharp ratio: %.2f" % (mean([m.result[BasicMetric.END_VALUE] for m in self.__calculated.values()]),

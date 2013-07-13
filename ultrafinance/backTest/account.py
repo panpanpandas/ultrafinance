@@ -20,7 +20,7 @@ class Account(object):
         self.__cash = cash
         self.__commision = commision
         self.__orderHisotry = []
-        self.__lastTickDict = None
+        self.__lastTickDict = {}
 
     def __generateId(self):
         ''' generate id '''
@@ -143,7 +143,7 @@ class Account(object):
 
     def setLastTickDict(self, tickDict):
         ''' set tickDict'''
-        self.__lastTickDict = tickDict
+        self.__lastTickDict.update(tickDict)
 
     def getLastTickDict(self):
         ''' get time for last symbolPrice '''

@@ -159,15 +159,16 @@ class TradingEngine(object):
         ''' got tick update '''
         time, symbolTicksDict = timeTicksTuple
         #TODO: remove hard coded event
+        #This should not happen
         event = EVENT_TICK_UPDATE
-        for sub, attrs in self.__subs[EVENT_TICK_UPDATE].items():
+        if event not in self.__subs:
+            LOG.warn("EVENT_TICK_UPDATE not in self.__subs %s" % self.__subs)
+            return
+
+        for sub, attrs in self.__subs[event].items():
             ticks = {}
             for symbol in attrs['symbols']:
-                if symbol not in symbolTicksDict:
-                    LOG.error("For %s with subId %s, symbol %s does't exist at time %s"\
-                              % (sub.name, sub.subId, symbol, time))
-                    attrs['fail'] += 1
-                else:
+                if symbol in symbolTicksDict:
                     ticks[symbol] = symbolTicksDict[symbol]
 
             thread = self.consumeTicks(ticks, sub, event)
