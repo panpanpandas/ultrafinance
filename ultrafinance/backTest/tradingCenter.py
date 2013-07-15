@@ -44,8 +44,11 @@ class TradingCenter(object):
             #valid order with current market price
             if msg is None and order.symbol in self.__lastTickDict:
                 closePrice = self.__lastTickDict[order.symbol].close
-                if Type.STOP == order.type and order.price > closePrice:
-                    msg = "Stop order price %s shouldn't be higher than market price %s" % (order.price, closePrice)
+                if Action.SELL == order.action and Type.STOP == order.type and order.price > closePrice:
+                    msg = "Sell stop order price %s shouldn't be higher than market price %s" % (order.price, closePrice)
+
+                elif Action.BUY_TO_COVER == order.action and Type.STOP == order.type and order.price < closePrice:
+                    msg = "Buy to cover stop order price %s shouldn't be higher than market price %s" % (order.price, closePrice)
 
         return msg
 
@@ -170,6 +173,16 @@ class TradingCenter(object):
             if Type.MARKET == order.type:
                 return True
             elif Type.STOP == order.type and float(tick.close) <= float(order.price):
+                return True
+        elif Action.SELL_SHORT == order.action:
+            if Type.MARKET == order.type:
+                return True
+            elif Type.LIMIT == order.type and float(tick.close) <= float(order.price):
+                return True
+        elif Action.BUY_TO_COVER == order.action:
+            if Type.MARKET == order.type:
+                return True
+            elif Type.STOP == order.type and float(tick.close) >= float(order.price):
                 return True
         else:
             return False

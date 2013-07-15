@@ -84,19 +84,31 @@ class OneTraker(object):
 
     def __buyIfMeet(self, tick):
         ''' place buy order if conditions meet '''
-        if self.__smaShort.getLastValue() < self.__smaLong.getLastValue() and self.__smaMid.getLastValue() < self.__smaLong.getLastValue():
-            return
+        # place short sell order
+        if (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaMid.getLastValue() < self.__smaLong.getLastValue()):
+            if tick.close/self.__previousTick.close < 0.9:
+                return
 
-        if tick.close/self.__previousTick.close > 1.1:
-            return
+            if self.__previousSmaShort > self.__previousSmaLong and self.__smaShort.getLastValue() < self.__smaLong.getLastValue():
+                # assume no commission fee for now
+                self.__placeShortSellOrder(tick)
 
-        if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue():
-            # assume no commission fee for now
-            self.__placeBuyOrder(tick)
+            elif self.__previousSmaLong > self.__previousSmaShort > self.__previousSmaMid and self.__smaLong.getLastValue() > self.__smaMid.getLastValue() > self.__smaShort.getLastValue():
+                # assume no commission fee for now
+                self.__placeBuyToCoverOrder(tick)
 
-        elif self.__previousSmaLong < self.__previousSmaShort < self.__previousSmaMid and self.__smaLong.getLastValue() < self.__smaMid.getLastValue() < self.__smaShort.getLastValue():
-            # assume no commission fee for now
-            self.__placeBuyOrder(tick)
+        # place buy order
+        if (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaMid.getLastValue() > self.__smaLong.getLastValue()):
+            if tick.close/self.__previousTick.close > 1.1:
+                return
+
+            if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue():
+                # assume no commission fee for now
+                self.__placeBuyOrder(tick)
+
+            elif self.__previousSmaLong < self.__previousSmaShort < self.__previousSmaMid and self.__smaLong.getLastValue() < self.__smaMid.getLastValue() < self.__smaShort.getLastValue():
+                # assume no commission fee for now
+                self.__placeBuyOrder(tick)
 
     def __getCashToBuyStock(self):
         ''' calculate the amount of money to buy stock '''

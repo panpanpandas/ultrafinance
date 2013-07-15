@@ -63,10 +63,10 @@ class Account(object):
             self.__cash = self.__cash + value - self.__commision
             self.__reduceHolding(order.symbol, order.share)
         elif Action.SELL_SHORT == order.action:
-            self.__cash = self.__cash - value - self.__commision
+            self.__cash = self.__cash + value - self.__commision
             self.__addHolding(order.symbol, 0 - order.share, order.price)
         elif Action.BUY_TO_COVER == order.action:
-            self.__cash = self.__cash + value - self.__commision
+            self.__cash = self.__cash - value - self.__commision
             self.__reduceHolding(order.symbol, 0 - order.share)
 
         self.__orderHisotry.append(order)
@@ -85,7 +85,7 @@ class Account(object):
             if order.symbol not in self.__holdings:
                 msg = 'Transition fails validation: symbol %s not in holdings' % order.symbol
             elif order.share > self.__holdings[order.symbol][0]:
-                msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
+                msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol][0])
             elif self.__commision > self.__cash:
                 msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
         elif Action.SELL_SHORT == order.action:
@@ -94,8 +94,8 @@ class Account(object):
         elif Action.BUY_TO_COVER == order.action:
             if order.symbol not in self.__holdings:
                 msg = 'Transition fails validation: symbol %s not in holdings' % order.symbol
-            elif self.__holdings[order.symbol][0] >= 0 or 0 - self.__holdings[order.symbol][0] < order.share:
-                msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
+            elif order.share > 0 - self.__holdings[order.symbol][0]:
+                msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol][0])
             elif self.__commision > self.__cash:
                 msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
 
@@ -122,7 +122,7 @@ class Account(object):
                               "no all symbols in holdings have price: %s" % missingSymbols)
 
         value = 0.0
-        for symbol, (share, price) in self.__holdings.items():
+        for symbol, (share, _) in self.__holdings.items():
             price = self.__lastTickDict[symbol].close
             value += share * price
 
