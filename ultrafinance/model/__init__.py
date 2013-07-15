@@ -73,18 +73,34 @@ class Quote(object):
 #Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))
 #DateValue = namedtuple('DateValue', 'date, value')
 
-class Side(object):
-    ''' side class '''
+class Action(object):
+    ''' action class '''
     SELL = 'sell'
     BUY = 'buy'
-    STOP = 'stop'
+    SELL_SHORT = 'sell_short'
+    BUY_TO_COVER = 'buy_to_cover'
 
     @staticmethod
-    def validate(side):
-        if side not in [Side.BUY, Side.SELL, Side.STOP]:
-            raise UfException(Errors.SIDE_TYPE_ERROR, 'Side error: %s is not accepted' % side)
+    def validate(action):
+        if action not in [Action.BUY, Action.SELL, Action.SELL_SHORT, Action.BUY_TO_COVER]:
+            raise UfException(Errors.SIDE_TYPE_ERROR, 'Action error: %s is not accepted' % action)
 
-        return side
+        return action
+
+
+class Type(object):
+    ''' type class '''
+    MARKET = 'market'
+    STOP = 'stop'
+    LIMIT = 'limit' # not support yet
+
+    @staticmethod
+    def validate(type):
+        if type not in [Type.MARKET, Type.STOP, Type.LIMIT]:
+            raise UfException(Errors.SIDE_TYPE_ERROR, 'Type error: %s is not accepted' % type)
+
+        return type
+
 
 class Order(object):
     ''' order class'''
@@ -92,10 +108,11 @@ class Order(object):
     FILLED = 'filled'
     CANCELED = 'canceled'
 
-    def __init__(self, accountId, side, symbol, price, share, orderId = None,
+    def __init__(self, accountId, action, type, symbol, share, price = None, orderId = None,
                  status = OPEN, filledTime = None, executedTime = None):
         ''' constructor '''
-        self.__side = Side.validate(side)
+        self.__action = Action.validate(action)
+        self.__type = Type.validate(type)
         self.__orderId = None
         self.__status = None
         self.accountId = accountId
@@ -123,26 +140,35 @@ class Order(object):
         self.__orderId = orderId
 
     def getOrderId(self):
-        ''' get order ids '''
+        ''' get order id '''
         return self.__orderId
 
     def getStatus(self):
         ''' get status '''
         return self.__status
 
-    def getSide(self):
-        ''' get side '''
-        return self.__side
+    def getAction(self):
+        ''' get action '''
+        return self.__action
 
-    def setSide(self, side):
-        ''' set side '''
-        self.__side = Side.validate(side)
+    def setAction(self, action):
+        ''' set action '''
+        self.__side = Action.validate(action)
+
+    def getType(self):
+        ''' get type '''
+        return self.__type
+
+    def setType(self, type):
+        ''' set action '''
+        self.__side = Type.validate(type)
 
     def __str__(self):
         ''' override buildin function '''
-        return json.dumps({'accountId': str(self.accountId), 'side': self.__side, 'symbol': self.symbol, 'price': self.price,
-                           'share': self.share, 'orderId': str(self.orderId), 'status': self.status})
+        return json.dumps({'accountId': str(self.accountId), 'action': self.__action, 'type': self.__type, 'symbol': self.symbol,
+                           'price': self.price, 'share': self.share, 'orderId': str(self.orderId), 'status': self.status})
 
-    side = property(getSide, setSide)
+    type = property(getType, setType)
+    action = property(getAction, setAction)
     orderId = property(getOrderId, setOrderId)
     status = property(getStatus, setStatus)

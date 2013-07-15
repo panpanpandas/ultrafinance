@@ -3,7 +3,7 @@ Created on Dec 18, 2011
 
 @author: ppa
 '''
-from ultrafinance.model import Side, Order
+from ultrafinance.model import Action, Type, Order
 from ultrafinance.lib.errors import Errors, UfException
 import uuid
 import time
@@ -32,19 +32,19 @@ class TradingCenter(object):
 
         return updatedOrder
 
-    def validateOrder(self, order):
+    def validateOrder(self, order, tick):
         ''' validate an order '''
         msg = None
         account = self.accountManager.getAccount(order.accountId)
         if account is None:
             msg = "Can't find account for order in validateOrder %s" % order
         else:
-            msg = account.validate(order)
+            msg = account.validate(order, tick)
 
             #valid order with current market price
             if msg is None and order.symbol in self.__lastTickDict:
                 closePrice = self.__lastTickDict[order.symbol].close
-                if Side.STOP == order.side and order.price > closePrice:
+                if Type.STOP == order.type and order.price > closePrice:
                     msg = "Stop order price %s shouldn't be higher than market price %s" % (order.price, closePrice)
 
         return msg
@@ -54,7 +54,7 @@ class TradingCenter(object):
         if order.orderId:
             raise UfException(Errors.ORDER_TYPE_ERROR, 'OrderId already set: %s' % order.orderId)
 
-        msg = self.validateOrder(order)
+        msg = self.validateOrder(order, self.__lastTickDict.get(order.symbol))
         if msg is None:
             # generate a unique order id
             order.orderId = uuid.uuid4()
@@ -122,7 +122,7 @@ class TradingCenter(object):
 
             for order in self.__openOrders[symbol].values():
                 if self.isOrderMet(tick, order):
-                    self.__executeOrder(order)
+                    self.__executeOrder(tick, order)
 
 
     def __checkAndExecuteOrder(self, order):
@@ -133,10 +133,10 @@ class TradingCenter(object):
             return
 
         if self.isOrderMet(tick, order):
-            self.__executeOrder(order)
+            self.__executeOrder(tick, order)
 
 
-    def __executeOrder(self, order):
+    def __executeOrder(self, tick, order):
         ''' execute an order '''
         account = self.accountManager.getAccount(order.accountId)
         if not account:
@@ -145,7 +145,7 @@ class TradingCenter(object):
         else:
             LOG.debug("executing order %s" % order)
             try:
-                account.execute(order)
+                account.execute(order, tick)
                 order.status = Order.FILLED
                 order.filledTime = time.time()
 
@@ -161,12 +161,15 @@ class TradingCenter(object):
 
     def isOrderMet(self, tick, order):
         ''' whether order can be execute or not '''
-        if Side.BUY == order.side and float(tick.close) <= float(order.price):
-            return True
-        elif Side.SELL == order.side and float(tick.close) >= float(order.price):
-            return True
-        elif Side.STOP == order.side and float(tick.close) < float(order.price):
-            return True
+        if Action.BUY == order.action:
+            if Type.MARKET == order.type:
+                return True
+            elif Type.LIMIT == order.type and float(tick.close) <= float(order.price):
+                return True
+        elif Action.SELL == order.action:
+            if Type.MARKET == order.type:
+                return True
+            elif Type.STOP == order.type and float(tick.close) <= float(order.price):
+                return True
         else:
             return False
-

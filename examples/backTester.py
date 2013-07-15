@@ -26,7 +26,7 @@ import logging.config
 import logging
 LOG = logging.getLogger()
 
-CONFIG_FILE = "backtest_smaPortfolio.ini"
+CONFIG_FILE = "backtest_sma.ini"
 
 class BackTester(object):
     ''' back testing '''

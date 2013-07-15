@@ -3,7 +3,7 @@ Created on Nov 6, 2011
 
 @author: ppa
 '''
-from ultrafinance.model import Side
+from ultrafinance.model import Type, Action
 from ultrafinance.lib.errors import Errors, UfException
 import uuid
 
@@ -44,52 +44,63 @@ class Account(object):
         curShare = preShare - share
         self.__holdings[symbol] = [curShare, prePrice]
 
-    def execute(self, order):
+    def execute(self, order, tick):
         ''' execute order'''
-        msg = self.validate(order)
+        msg = self.validate(order, tick)
         if msg != None:
             raise UfException(Errors.ORDER_INVALID_ERROR,
                               "Transition is invalid: symbol %s, share %s, price %s, details %s"\
                               % (order.symbol, order.share, order.price, msg))
 
-        value = self.__getOrderValue(order)
-        if Side.BUY == order.side:
+        value = self.__getOrderValue(order, tick)
+        if Type.MARKET == order.type:
+            order.price = tick.close
+
+        if Action.BUY == order.action:
             self.__cash = self.__cash - value - self.__commision
             self.__addHolding(order.symbol, order.share, order.price)
-        elif Side.SELL == order.side:
+        elif Action.SELL == order.action:
             self.__cash = self.__cash + value - self.__commision
             self.__reduceHolding(order.symbol, order.share)
-        elif Side.STOP == order.side:
+        elif Action.SELL_SHORT == order.action:
+            self.__cash = self.__cash - value - self.__commision
+            self.__addHolding(order.symbol, 0 - order.share, order.price)
+        elif Action.BUY_TO_COVER == order.action:
             self.__cash = self.__cash + value - self.__commision
-            self.__reduceHolding(order.symbol, order.share)
+            self.__reduceHolding(order.symbol, 0 - order.share)
 
         self.__orderHisotry.append(order)
 
-    def validate(self, order):
+
+    def validate(self, order, tick):
         ''' validate order to check whether it's do-able or not '''
-        value = self.__getOrderValue(order)
+        value = self.__getOrderValue(order, tick)
         cost = value + self.__commision
         msg = None
 
-        if Side.BUY == order.side:
+        if Action.BUY == order.action:
             if cost > self.__cash:
                 msg = 'Transition fails validation: cash %.2f is smaller than cost %.2f' % (self.__cash, cost)
-        elif Side.SELL == order.side:
+        elif Action.SELL == order.action:
             if order.symbol not in self.__holdings:
                 msg = 'Transition fails validation: symbol %s not in holdings' % order.symbol
             elif order.share > self.__holdings[order.symbol][0]:
                 msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
             elif self.__commision > self.__cash:
                 msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
-        elif Side.STOP == order.side:
+        elif Action.SELL_SHORT == order.action:
+            if cost > self.__cash:
+                msg = 'Transition fails validation: cash %.2f is smaller than cost %.2f' % (self.__cash, cost)
+        elif Action.BUY_TO_COVER == order.action:
             if order.symbol not in self.__holdings:
                 msg = 'Transition fails validation: symbol %s not in holdings' % order.symbol
-            elif order.share > self.__holdings[order.symbol][0]:
+            elif self.__holdings[order.symbol][0] >= 0 or 0 - self.__holdings[order.symbol][0] < order.share:
                 msg = 'Transition fails validation: share %s is not enough as %s' % (order.share, self.__holdings[order.symbol])
             elif self.__commision > self.__cash:
                 msg = 'Transition fails validation: cash %s is not enough for commission %s' % (self.__cash, self.__commision)
 
         return msg
+
 
     def getCash(self):
         ''' get cash '''
@@ -121,9 +132,13 @@ class Account(object):
         ''' get total value '''
         return self.getCash() + self.getHoldingValue()
 
-    def __getOrderValue(self, order):
+    def __getOrderValue(self, order, tick):
         ''' get value of order '''
-        return float(order.price) * float(order.share)
+        price = order.price
+        if order.type == Type.MARKET:
+            price = tick.close
+
+        return float(price) * float(order.share)
 
     def __getId(self):
         ''' get id '''

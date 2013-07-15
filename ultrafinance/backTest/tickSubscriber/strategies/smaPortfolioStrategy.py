@@ -23,7 +23,7 @@ When to Buy:
 
 @author: ppa
 '''
-from ultrafinance.model import Side, Order
+from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
 from ultrafinance.pyTaLib.indicator import Sma
 import math
@@ -114,16 +114,17 @@ class OneTraker(object):
 
         share = math.floor(cash / float(tick.close))
         buyOrder = Order(accountId = self.__strategy.accountId,
-                                  side = Side.BUY,
+                                  action = Action.BUY,
+                                  type = Type.MARKET,
                                   symbol = self.__symbol,
-                                  price = tick.close,
                                   share = share)
         if self.__strategy.placeOrder(buyOrder):
             self.__buyOrder = buyOrder
 
             #place stop order
             stopOrder = Order(accountId = self.__strategy.accountId,
-                          side = Side.STOP,
+                          action = Action.SELL,
+                          type = Type.STOP,
                           symbol = self.__symbol,
                           price = tick.close * 0.95,
                           share = share)
@@ -143,9 +144,9 @@ class OneTraker(object):
         if self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
             and (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue()):
             self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
-                                  side = Side.SELL,
+                                  action = Action.SELL,
+                                  type = Type.MARKET,
                                   symbol = self.__symbol,
-                                  price = tick.close,
                                   share = self.__stopOrder.share) )
             self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
             self.__clearStopOrder()
@@ -174,7 +175,8 @@ class OneTraker(object):
         if newStopPrice > self.__stopOrder.price:
             self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
             stopOrder = Order(accountId = self.__strategy.accountId,
-                              side = Side.STOP,
+                              action = Action.SELL,
+                              type = Type.STOP,
                               symbol = self.__symbol,
                               price = newStopPrice,
                               share = self.__stopOrder.share)

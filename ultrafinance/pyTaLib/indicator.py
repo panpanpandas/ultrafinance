@@ -24,7 +24,7 @@ def sharpeRatio(array, n = 252):
     returns = []
     pre = array[0]
     for post in array[1:]:
-        returns.append((float(post) - float(pre)) / pre)
+        returns.append((float(post) - float(pre)))
         pre = post
 
     return sqrt(n) * mean(returns) / stddev(returns)

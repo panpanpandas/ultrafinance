@@ -23,7 +23,7 @@ When to Buy:
 
 @author: ppa
 '''
-from ultrafinance.model import Side, Order
+from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
 from ultrafinance.pyTaLib.indicator import Sma
 import math
@@ -77,16 +77,17 @@ class SMAStrategy(BaseStrategy):
         ''' place buy order'''
         share = math.floor(self.getAccountCopy().getCash() / float(tick.close))
         buyOrder = Order(accountId = self.accountId,
-                                  side = Side.BUY,
+                                  action = Action.BUY,
+                                  type = Type.MARKET,
                                   symbol = symbol,
-                                  price = tick.close,
                                   share = share)
         if self.placeOrder(buyOrder):
             self.__buyOrder = buyOrder
 
             #place stop order
             stopOrder = Order(accountId = self.accountId,
-                          side = Side.STOP,
+                          action = Action.SELL,
+                          type = Type.STOP,
                           symbol = symbol,
                           price = tick.close * 0.95,
                           share = share)
@@ -106,9 +107,9 @@ class SMAStrategy(BaseStrategy):
         if self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
             and (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue()):
             self.placeOrder(Order(accountId = self.accountId,
-                                  side = Side.SELL,
+                                  action = Action.SELL,
+                                  type = Type.MARKET,
                                   symbol = symbol,
-                                  price = tick.close,
                                   share = self.__stopOrder.share) )
             self.tradingEngine.cancelOrder(symbol, self.__stopOrderId)
             self.__clearStopOrder()
@@ -139,7 +140,8 @@ class SMAStrategy(BaseStrategy):
         if newStopPrice > self.__stopOrder.price:
             self.tradingEngine.cancelOrder(symbol, self.__stopOrderId)
             stopOrder = Order(accountId = self.accountId,
-                              side = Side.STOP,
+                              action = Action.SELL,
+                              type = Type.STOP,
                               symbol = symbol,
                               price = newStopPrice,
                               share = self.__stopOrder.share)

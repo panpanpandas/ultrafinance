@@ -3,7 +3,7 @@ Created on Dec 25, 2011
 
 @author: ppa
 '''
-from ultrafinance.model import Side, Order
+from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
 from ultrafinance.backTest.constant import CONF_PERIOD, CONF_INIT_CASH
 
@@ -42,7 +42,8 @@ class PeriodStrategy(BaseStrategy):
 
         if self.increaseAndCheckCounter():
             self.placeOrder(Order(accountId = self.accountId,
-                                  side = Side.BUY,
+                                  action = Action.BUY,
+                                  type = Type.MARKET,
                                   symbol = symbol,
                                   price = tick.close,
                                   share = self.perAmount / float(tick.close)))
