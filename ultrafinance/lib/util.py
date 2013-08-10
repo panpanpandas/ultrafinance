@@ -4,7 +4,7 @@ Created on Dec 18, 2010
 @author: ppa
 '''
 import sys
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from datetime import datetime
 import time
 
@@ -76,3 +76,18 @@ def string2EpochTime(stingTime, format = '%Y%m%d'):
 def string2datetime(stringTime, format = '%Y%m%d'):
     ''' convert string time to epoch time'''
     return datetime.strptime(stringTime, '%Y%m%d')
+
+
+def split_dict_equally(input_dict, chunks=2):
+    '''Splits dict by keys. Returns a list of dictionaries.
+    from http://enginepewpew.blogspot.com/2012/03/splitting-dictionary-into-equal-chunks.html
+    '''
+    return_list = [dict() for idx in xrange(chunks)]
+    idx = 0
+    for k,v in input_dict.iteritems():
+        return_list[idx][k] = v
+        if idx < chunks-1:  # indexes start at 0
+            idx += 1
+        else:
+            idx = 0
+    return return_list

@@ -91,11 +91,11 @@ class OneTraker(object):
 
             if self.__previousSmaShort > self.__previousSmaLong and self.__smaShort.getLastValue() < self.__smaLong.getLastValue():
                 # assume no commission fee for now
-                self.__placeShortSellOrder(tick)
+                self.__placeSellShortOrder(tick)
 
             elif self.__previousSmaLong > self.__previousSmaShort > self.__previousSmaMid and self.__smaLong.getLastValue() > self.__smaMid.getLastValue() > self.__smaShort.getLastValue():
                 # assume no commission fee for now
-                self.__placeBuyToCoverOrder(tick)
+                self.__placeSellShortOrder(tick)
 
         # place buy order
         if (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaMid.getLastValue() > self.__smaLong.getLastValue()):
@@ -110,11 +110,33 @@ class OneTraker(object):
                 # assume no commission fee for now
                 self.__placeBuyOrder(tick)
 
+    def __placeSellShortOrder(self, tick):
+        ''' place short sell order'''
+        share = math.floor(self.__strategy.getAccountCopy().getCash() / float(tick.close))
+        sellShortOrder = Order(accountId = self.__strategy.accountId,
+                                  action = Action.SELL_SHORT,
+                                  type = Type.MARKET,
+                                  symbol = self.__symbol,
+                                  share = share)
+
+        if self.__strategy.placeOrder(sellShortOrder):
+            self.__buyOrder = sellShortOrder
+
+            #place stop order
+            stopOrder = Order(accountId = self.__strategy.accountId,
+                          action = Action.BUY_TO_COVER,
+                          type = Type.STOP,
+                          symbol = self.__symbol,
+                          price = tick.close * 1.05,
+                          share = share)
+            self.__placeStopOrder(stopOrder)
+
+
     def __getCashToBuyStock(self):
         ''' calculate the amount of money to buy stock '''
         account = self.__strategy.getAccountCopy()
-        if (account.getCash() >= account.getTotalValue() / 20):
-            return account.getTotalValue() / 20
+        if (account.getCash() >= account.getTotalValue() / 10):
+            return account.getTotalValue() / 10
         else:
             return 0
 
@@ -153,7 +175,17 @@ class OneTraker(object):
 
     def __sellIfMeet(self, tick):
         ''' place sell order if conditions meet '''
-        if self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
+        if self.__stopOrder.action == Action.BUY_TO_COVER and self.__previousSmaShort < self.__previousSmaMid and self.__previousSmaShort < self.__previousSmaLong\
+            and (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaShort.getLastValue() > self.__smaMid.getLastValue()):
+            self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
+                                  action = Action.BUY_TO_COVER,
+                                  type = Type.MARKET,
+                                  symbol = self.__symbol,
+                                  share = self.__stopOrder.share) )
+            self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
+            self.__clearStopOrder()
+
+        elif self.__stopOrder.action == Action.SELL and self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
             and (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue()):
             self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
                                   action = Action.SELL,
@@ -162,6 +194,7 @@ class OneTraker(object):
                                   share = self.__stopOrder.share) )
             self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
             self.__clearStopOrder()
+
 
     def orderExecuted(self, orderId):
         ''' call back for executed order '''
@@ -180,19 +213,36 @@ class OneTraker(object):
         if not self.__stopOrderId:
             return
 
-        orgStopPrice = self.__buyOrder.price * 0.95
-        newStopPrice = max(orgStopPrice + ((tick.close - orgStopPrice) / 2), tick.close * 0.85)
-        newStopPrice = min(newStopPrice, tick.close * 0.95)
+        if self.__stopOrder.action == Action.SELL:
+            orgStopPrice = self.__buyOrder.price * 0.95
+            newStopPrice = max(((tick.close + orgStopPrice) / 2), tick.close * 0.85)
+            newStopPrice = min(newStopPrice, tick.close * 0.95)
 
-        if newStopPrice > self.__stopOrder.price:
-            self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
-            stopOrder = Order(accountId = self.__strategy.accountId,
-                              action = Action.SELL,
-                              type = Type.STOP,
-                              symbol = self.__symbol,
-                              price = newStopPrice,
-                              share = self.__stopOrder.share)
-            self.__placeStopOrder(stopOrder)
+            if newStopPrice > self.__stopOrder.price:
+                self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
+                stopOrder = Order(accountId = self.__strategy.accountId,
+                                  action = Action.SELL,
+                                  type = Type.STOP,
+                                  symbol = self.__symbol,
+                                  price = newStopPrice,
+                                  share = self.__stopOrder.share)
+                self.__placeStopOrder(stopOrder)
+
+        elif self.__stopOrder.action == Action.BUY_TO_COVER:
+            orgStopPrice = self.__buyOrder.price * 1.05
+            newStopPrice = min(((orgStopPrice + tick.close) / 2), tick.close * 1.15)
+            newStopPrice = max(newStopPrice, tick.close * 1.05)
+
+            if newStopPrice < self.__stopOrder.price:
+                self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
+                stopOrder = Order(accountId = self.__strategy.accountId,
+                                  action = Action.BUY_TO_COVER,
+                                  type = Type.STOP,
+                                  symbol = self.__symbol,
+                                  price = newStopPrice,
+                                  share = self.__stopOrder.share)
+                self.__placeStopOrder(stopOrder)
+
 
     def __updatePreviousState(self, tick):
         ''' update previous state '''
@@ -215,14 +265,16 @@ class OneTraker(object):
             self.__updatePreviousState(tick)
             return
 
+        # already have some holdings
+        if self.__stopOrderId:
+            self.__sellIfMeet(tick)
+            self.__adjustStopOrder(tick)
+
+
         # don't have any holdings
         if not self.__stopOrderId and self.__getCashToBuyStock():
             self.__buyIfMeet(tick)
 
-        # already have some holdings
-        elif self.__stopOrderId:
-            self.__sellIfMeet(tick)
-            self.__adjustStopOrder(tick)
 
 
         self.__updatePreviousState(tick)

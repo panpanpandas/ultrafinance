@@ -35,7 +35,7 @@ setup(name='ultrafinance',
       install_requires=[
         'numpy>=1.5.1',
         'beautifulsoup4',
-        'SQLAlchemy>=0.7.8',
+        'SQLAlchemy>=0.8',
         'mox'
       ],
       cmdclass = {'test': TestCommand, 'clean': CleanCommand }

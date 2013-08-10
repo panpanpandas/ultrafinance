@@ -5,11 +5,12 @@ Created on Nov 6, 2011
 '''
 from ultrafinance.lib.errors import UfException, Errors
 from threading import Thread
-from time import sleep
 
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE
+from ultrafinance.lib.util import split_dict_equally
 
+import traceback
 import time
 import logging
 LOG = logging.getLogger()
@@ -31,6 +32,8 @@ class TickFeeder(object):
         self.indexHelper = None
         self.hisotry = None
         self.__updatedTick = None
+        self.timeTicksDict = {}
+        self.indexTicksDict = {}
 
     def getUpdatedTick(self):
         ''' return timeTickTuple with status changes '''
@@ -54,25 +57,46 @@ class TickFeeder(object):
             raise UfException(Errors.INVALID_TYPE,
                               'Type %s is not accepted' % appGlobal[TRADE_TYPE])
 
+        dam.destruct()
+
         return ticks
 
-    def loadTicks(self):
+    def __loadTicks(self):
         ''' generate timeTicksDict based on source DAM'''
-        LOG.debug('Start loading ticks, it may take a while......')
-        timeTicksDict = {}
-        for symbol, dam in self.__source.items():
-            LOG.debug('Indexing ticks for %s' % symbol)
-            ticks = self._getTicks(dam)
+        LOG.info('Start loading ticks, it may take a while......')
 
-            for tick in ticks:
-                if tick.time not in timeTicksDict:
-                    timeTicksDict[tick.time] = {}
+        threads = []
+        for partSource in split_dict_equally(self.__source, 10):
+            if partSource:
+                thread = Thread(target = self.__loadPartTicks, args = (partSource,))
+                thread.setDaemon(False)
+                thread.start()
+                threads.append(thread)
 
-                timeTicksDict[tick.time][symbol] = tick
+        for thread in threads:
+            thread.join(2 * len(self.__source)) # wait for enough time
 
-        return timeTicksDict
 
-    def loadIndex(self):
+    def __loadPartTicks(self, partSource):
+        ''' publish ticks to sub '''
+        for symbol, dam in partSource.items():
+            LOG.info('Indexing ticks for %s' % symbol)
+            try:
+                ticks = self._getTicks(dam)
+
+                for tick in ticks:
+                    if tick.time not in self.timeTicksDict:
+                        self.timeTicksDict[tick.time] = {}
+
+                    self.timeTicksDict[tick.time][symbol] = tick
+            except KeyboardInterrupt as ki:
+                LOG.warn("Interrupted by user  when loading ticks for %s" % symbol)
+                raise ki
+            except BaseException as excp:
+                LOG.warn("Unknown exception when loading ticks for %s: except %s, traceback %s" % (symbol, excp, traceback.format_exc(8)))
+
+
+    def __loadIndex(self):
         ''' generate timeTicksDict based on source DAM'''
         LOG.debug('Start loading ticks, it may take a while......')
         indexTicksDict = {}
@@ -87,19 +111,19 @@ class TickFeeder(object):
 
     def execute(self):
         ''' execute func '''
-        timeTicksDict = self.loadTicks()
-        indexTicksDict = self.loadIndex()
+        self.__loadTicks()
+        self.__loadIndex()
 
-        for timeStamp in sorted(timeTicksDict.iterkeys()):
+        for timeStamp in sorted(self.timeTicksDict.iterkeys()):
             while self.__updatedTick:
                 time.sleep(0)
 
             # make sure trading center finish updating first
-            self._freshTradingCenter(timeTicksDict[timeStamp])
-            self._freshIndexHelper(indexTicksDict.get(timeStamp))
+            self._freshTradingCenter(self.timeTicksDict[timeStamp])
+            self._freshIndexHelper(self.indexTicksDict.get(timeStamp))
 
-            self._freshUpdatedTick(timeStamp, timeTicksDict[timeStamp])
-            self._updateHistory(timeStamp, timeTicksDict[timeStamp], indexTicksDict.get(timeStamp))
+            self._freshUpdatedTick(timeStamp, self.timeTicksDict[timeStamp])
+            self._updateHistory(timeStamp, self.timeTicksDict[timeStamp], self.indexTicksDict.get(timeStamp))
 
     def _updateHistory(self, timeStamp, symbolTicksDict, indexTick):
         ''' update history '''
@@ -137,5 +161,6 @@ class TickFeeder(object):
     def pubTicks(self, ticks, sub):
         ''' publish ticks to sub '''
         thread = Thread(target = sub.doConsume, args = (ticks,))
+        thread.setDaemon(False)
         thread.start()
         return thread

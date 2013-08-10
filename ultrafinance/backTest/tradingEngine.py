@@ -112,12 +112,14 @@ class TradingEngine(object):
     def consumeTicks(self, ticks, sub, event):
         ''' publish ticks to sub '''
         thread = Thread(target = getattr(sub, event), args = (ticks,))
+        thread.setDaemon(False)
         thread.start()
         return thread
 
     def consumeExecutedOrders(self, orderDict, sub, event):
         ''' publish ticks to sub '''
         thread = Thread(target = getattr(sub, event), args = (orderDict,))
+        thread.setDaemon(False)
         thread.start()
         return thread
 

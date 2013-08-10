@@ -91,27 +91,32 @@ class TickSql(Base):
            % (self.symbol, self.time, self.open, self.high, self.low, self.close, self.volume)
 
 class SqlDAM(BaseDAM):
-    ''' SQL DAM '''
+    '''
+    SQL DAM
+    for one program, there is only one db
+    '''
+    ENGINE_DICT = None
+    SESSION_DICT = None
 
     def __init__(self, echo = False):
         ''' constructor '''
         super(SqlDAM, self).__init__()
         self.echo = echo
-        self.db = None
         self.session = None
         self.engine = None
         self.first = True
 
     def setup(self, setting):
         ''' set up '''
-        if 'db' in setting:
-            self.setDb(setting['db'])
+        if 'db' not in setting:
+            raise Exception("db not specified in setting")
 
-    def setDb(self, db):
-        self.db = db
-        self.engine = create_engine(db, echo = self.echo)
-        Session = sessionmaker(bind = self.engine)
-        self.session = Session()
+        db = setting['db']
+        if self.db not in SqlDAM.ENGINE_DICT:
+            SqlDAM.ENGINE_DICT[self.db] = create_engine(self.db, echo = self.echo)
+            SqlDAM.SESSION[self.db] = sessionmaker(bind = SqlDAM.ENGINE)
+
+        self.session = SqlDAM.SESSION[db]()
 
     def __sqlToQuote(self, row):
         ''' convert row result to Quote '''
@@ -168,6 +173,11 @@ class SqlDAM(BaseDAM):
     def commit(self):
         ''' commit changes '''
         self.session.commit()
+
+    def destruct(self):
+        ''' destructor '''
+        if (self.session):
+            self.session.close()
 
     '''
     read/write fundamentals

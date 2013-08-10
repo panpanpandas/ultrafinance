@@ -4,7 +4,7 @@ Created on July 31, 2011
 @author: ppa
 '''
 import urllib2
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import traceback
 from ultrafinance.lib.util import convertGoogCSVDate
 from ultrafinance.model import Quote, Tick

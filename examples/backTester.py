@@ -18,6 +18,7 @@ from ultrafinance.backTest.indexHelper import IndexHelper
 from ultrafinance.backTest.history import History
 from ultrafinance.backTest.constant import *
 import os
+import sys
 
 from threading import Thread
 
@@ -26,7 +27,7 @@ import logging.config
 import logging
 LOG = logging.getLogger()
 
-CONFIG_FILE = "backtest_sma.ini"
+CONFIG_FILE = "backtest_smaPortfolio.ini"
 
 class BackTester(object):
     ''' back testing '''
@@ -73,6 +74,9 @@ class BackTester(object):
         for symbols in self.__symbolLists:
             try:
                 self._runOneTest(symbols)
+            except KeyboardInterrupt:
+                LOG.error("User Interrupted")
+                sys.exit("User Interrupted")
             except BaseException as excp:
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbols, excp, traceback.format_exc(8)))

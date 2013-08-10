@@ -42,6 +42,10 @@ class BaseDAM(object):
         ''' set symbol '''
         self.__symbol = symbol
 
+    def destruct(self):
+        ''' destructor '''
+        pass
+
     def __getSymbol(self):
         ''' get symbol '''
         return self.__symbol

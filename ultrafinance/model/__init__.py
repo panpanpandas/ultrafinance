@@ -44,6 +44,26 @@ class Quote(object):
     def __init__(self, time, open, high, low, close, volume, adjClose):
         ''' constructor '''
         self.time = time
+        self.close = float(close)
+
+    def __str__(self):
+        ''' convert to string '''
+        return json.dumps({"time": self.time,
+                           "close": self.close})
+
+    @staticmethod
+    def fromStr(string):
+        ''' convert from string'''
+        d = json.loads(string)
+        return Quote(d['time'], d.get('open'), d.get('high'),
+                     d.get('low'), d['close'], d.get('volume'), d.get('adjClose'))
+
+"""
+class Quote(object):
+    ''' tick class '''
+    def __init__(self, time, open, high, low, close, volume, adjClose):
+        ''' constructor '''
+        self.time = time
         self.open = float(open)
         self.high = float(high)
         self.low = float(low)
@@ -67,7 +87,7 @@ class Quote(object):
         d = json.loads(string)
         return Quote(d['time'], d['open'], d['high'],
                      d['low'], d['close'], d['volume'], d['adjClose'])
-
+"""
 
 #Tick = namedtuple('Tick', ' '.join(TICK_FIELDS))
 #Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))

@@ -42,6 +42,9 @@ class BasicMetric(BaseMetric):
 
     def calculate(self, timePositions):
         ''' calculate basic metrics '''
+        if not timePositions:
+            return self.result
+
         for (timeStamp, position) in timePositions:
             if self.result[BasicMetric.MAX][0] is None or self.result[BasicMetric.MAX][1] < position:
                 self.result[BasicMetric.MAX] = timeStamp, position
@@ -95,8 +98,8 @@ class MetricCalculator(object):
                 worstSymbol = symbols
                 worstMetric = metric
 
-        output.append("MEAN end value: %.1f, mean sharp ratio: %.2f" % (mean([m.result[BasicMetric.END_VALUE] for m in self.__calculated.values()]),
-                                                                    mean([m.result[BasicMetric.SRATIO] for m in self.__calculated.values()])))
+        output.append("MEAN end value: %.1f, mean sharp ratio: %.2f" % (mean([m.result[BasicMetric.END_VALUE] for m in self.__calculated.values() if m.result[BasicMetric.END_VALUE] > 0]),
+                                                                    mean([m.result[BasicMetric.SRATIO] for m in self.__calculated.values() if m.result[BasicMetric.SRATIO] > 0])))
         output.append("Best %s: %s" % (bestSymbol, bestMetric.formatResult()))
         output.append("Worst %s: %s" % (worstSymbol, worstMetric.formatResult()))
         return '\n'.join(output)
