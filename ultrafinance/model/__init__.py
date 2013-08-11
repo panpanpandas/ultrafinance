@@ -38,7 +38,7 @@ class Tick(object):
         return Tick(d['time'], d['open'], d['high'],
                     d['low'], d['close'], d['volume'], d['adjClose'])
 
-
+"""
 class Quote(object):
     ''' tick class '''
     def __init__(self, time, open, high, low, close, volume, adjClose):
@@ -87,7 +87,6 @@ class Quote(object):
         d = json.loads(string)
         return Quote(d['time'], d['open'], d['high'],
                      d['low'], d['close'], d['volume'], d['adjClose'])
-"""
 
 #Tick = namedtuple('Tick', ' '.join(TICK_FIELDS))
 #Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))

@@ -66,7 +66,7 @@ class TickFeeder(object):
         LOG.info('Start loading ticks, it may take a while......')
 
         threads = []
-        for partSource in split_dict_equally(self.__source, 10):
+        for partSource in split_dict_equally(self.__source, 20):
             if partSource:
                 thread = Thread(target = self.__loadPartTicks, args = (partSource,))
                 thread.setDaemon(False)

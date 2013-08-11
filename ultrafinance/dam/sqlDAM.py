@@ -93,30 +93,32 @@ class TickSql(Base):
 class SqlDAM(BaseDAM):
     '''
     SQL DAM
-    for one program, there is only one db
     '''
-    ENGINE_DICT = None
-    SESSION_DICT = None
+    ENGINE_DICT = {}
+    SESSION_DICT = {}
 
     def __init__(self, echo = False):
         ''' constructor '''
         super(SqlDAM, self).__init__()
         self.echo = echo
         self.session = None
-        self.engine = None
         self.first = True
+
+    def __getEngine(self):
+        ''' get engine '''
+        return SqlDAM.ENGINE_DICT.get(self.db)
 
     def setup(self, setting):
         ''' set up '''
         if 'db' not in setting:
             raise Exception("db not specified in setting")
 
-        db = setting['db']
-        if self.db not in SqlDAM.ENGINE_DICT:
+        self.db = setting['db']
+        if self.__getEngine() is None:
             SqlDAM.ENGINE_DICT[self.db] = create_engine(self.db, echo = self.echo)
-            SqlDAM.SESSION[self.db] = sessionmaker(bind = SqlDAM.ENGINE)
+            SqlDAM.SESSION_DICT[self.db] = sessionmaker(bind = SqlDAM.ENGINE_DICT[self.db])
 
-        self.session = SqlDAM.SESSION[db]()
+        self.session = SqlDAM.SESSION_DICT[self.db]()
 
     def __sqlToQuote(self, row):
         ''' convert row result to Quote '''
@@ -157,7 +159,7 @@ class SqlDAM(BaseDAM):
     def writeQuotes(self, quotes):
         ''' write quotes '''
         if self.first:
-            Base.metadata.create_all(self.engine, checkfirst = True)
+            Base.metadata.create_all(self.__getEngine(), checkfirst = True)
             self.first = False
 
         self.session.add_all([self.__quoteToSql(quote) for quote in quotes])
@@ -165,7 +167,7 @@ class SqlDAM(BaseDAM):
     def writeTicks(self, ticks):
         ''' write ticks '''
         if self.first:
-            Base.metadata.create_all(self.engine, checkfirst = True)
+            Base.metadata.create_all(self.__getEngine(), checkfirst = True)
             self.first = False
 
         self.session.add_all([self.__tickToSql(tick) for tick in ticks])
@@ -187,7 +189,7 @@ class SqlDAM(BaseDAM):
     def writeFundamental(self, keyTimeValueDict):
         ''' write fundamental '''
         if self.first:
-            Base.metadata.create_all(self.engine, checkfirst = True)
+            Base.metadata.create_all(self.__getEngine(), checkfirst = True)
             self.first = False
 
         sqls = self._fundamentalToSqls(keyTimeValueDict)

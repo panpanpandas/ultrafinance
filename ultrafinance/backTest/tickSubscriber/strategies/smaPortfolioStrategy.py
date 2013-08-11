@@ -85,6 +85,7 @@ class OneTraker(object):
     def __buyIfMeet(self, tick):
         ''' place buy order if conditions meet '''
         # place short sell order
+        '''
         if (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaMid.getLastValue() < self.__smaLong.getLastValue()):
             if tick.close/self.__previousTick.close < 0.9:
                 return
@@ -96,6 +97,7 @@ class OneTraker(object):
             elif self.__previousSmaLong > self.__previousSmaShort > self.__previousSmaMid and self.__smaLong.getLastValue() > self.__smaMid.getLastValue() > self.__smaShort.getLastValue():
                 # assume no commission fee for now
                 self.__placeSellShortOrder(tick)
+        '''
 
         # place buy order
         if (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaMid.getLastValue() > self.__smaLong.getLastValue()):
@@ -175,6 +177,7 @@ class OneTraker(object):
 
     def __sellIfMeet(self, tick):
         ''' place sell order if conditions meet '''
+        '''
         if self.__stopOrder.action == Action.BUY_TO_COVER and self.__previousSmaShort < self.__previousSmaMid and self.__previousSmaShort < self.__previousSmaLong\
             and (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaShort.getLastValue() > self.__smaMid.getLastValue()):
             self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
@@ -184,8 +187,8 @@ class OneTraker(object):
                                   share = self.__stopOrder.share) )
             self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
             self.__clearStopOrder()
-
-        elif self.__stopOrder.action == Action.SELL and self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
+        '''
+        if self.__stopOrder.action == Action.SELL and self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
             and (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue()):
             self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
                                   action = Action.SELL,

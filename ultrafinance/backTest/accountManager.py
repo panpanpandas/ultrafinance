@@ -54,6 +54,9 @@ class AccountManager(object):
             if self.saver:
                 self.saver.write(curTime, "account-%s" % accountId, position)
 
+            if position < 0:
+                raise Exception("account %s value %s less than 0" % (accountId, position))
+
     def getAccountPostions(self, accountId):
         ''' get account positions '''
         return self.__accountPositions.get(accountId)
