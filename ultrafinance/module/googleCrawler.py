@@ -26,7 +26,7 @@ class GoogleCrawler(object):
         self.sqlLocation = None
         self.outputDAM = DAMFactory.createDAM("sql", self.__getOutputDamSetting())
         self.googleDAM = DAMFactory.createDAM("google")
-        self.start = None
+        self.start = start
         self.end = None
         self.readLock = Lock()
         self.writeLock = Lock()
