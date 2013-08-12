@@ -31,12 +31,15 @@ CONFIG_FILE = "backtest_smaPortfolio.ini"
 
 class BackTester(object):
     ''' back testing '''
-    CASH = 1000000 #  1 million to start
+    CASH = 200000 #  1 million to start
 
-    def __init__(self):
+    def __init__(self, startTickDate = 0, startTradeDate = 0):
         self.__config = PyConfig()
         self.__mCalculator = MetricCalculator()
         self.__symbolLists = []
+        self.__accounts = []
+        self.__startTickDate = startTickDate
+        self.__startTradeDate = startTradeDate
 
     def setup(self):
         ''' setup '''
@@ -44,6 +47,7 @@ class BackTester(object):
         self.__config.setSource(CONFIG_FILE)
         appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_APP_MAIN, CONF_TRADE_TYPE)
         self.__config.override(CONF_STRATEGY, CONF_INIT_CASH, BackTester.CASH)
+        self.__config.override(CONF_STRATEGY, CONF_START_TRADE_DATE, self.__startTradeDate)
         self._setupLog()
         self._loadSymbols()
 
@@ -54,7 +58,7 @@ class BackTester(object):
     def _runOneTest(self, symbols):
         ''' run one test '''
         LOG.debug("Running backtest for %s" % symbols)
-        runner = TestRunner(self.__config, self.__mCalculator, symbols)
+        runner = TestRunner(self.__config, self.__mCalculator, self.__accounts, symbols, self.__startTickDate)
         runner.runTest()
 
     def _loadSymbols(self):
@@ -81,19 +85,32 @@ class BackTester(object):
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbols, excp, traceback.format_exc(8)))
 
+    def getLatestOrders(self, num = 10):
+        ''' get latest orders'''
+        orders = []
+        for account in self.__accounts:
+            orders.extend(account.orderHistory[-num:])
+
+        return orders
+
+    def getMetrics(self):
+        ''' get alll metrics '''
+        return self.__mCalculator.formatMetrics()
+
     def printMetrics(self):
         ''' print metrics '''
-        LOG.info(self.__mCalculator.formatMetrics())
+        LOG.info(self.getMetrics())
 
 class TestRunner(object):
     ''' back testing '''
-    def __init__(self, config, mCalculator, symbols):
+    def __init__(self, config, mCalculator, accounts, symbols, startTickDate):
         self.__accountManager = AccountManager()
         self.__accountId = None
-        self.__tickFeeder = TickFeeder()
+        self.__tickFeeder = TickFeeder(start = startTickDate)
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
         self.__indexHelper = IndexHelper()
+        self.__accounts = accounts
         self.__history = History()
         self.__saver = None
         self.__symbols = symbols
@@ -187,6 +204,7 @@ class TestRunner(object):
     def _printResult(self):
         ''' print result'''
         account = self.__accountManager.getAccount(self.__accountId)
+        self.__accounts.append(account)
         LOG.info("account %s" % account)
         LOG.debug([str(order) for order in account.orderHistory])
         LOG.debug("account position %s" % self.__accountManager.getAccountPostions(self.__accountId))
@@ -199,7 +217,7 @@ class TestRunner(object):
         self._printResult()
 
 if __name__ == "__main__":
-    backTester = BackTester()
+    backTester = BackTester(startTickDate = 20101010, startTradeDate = 20131010)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()

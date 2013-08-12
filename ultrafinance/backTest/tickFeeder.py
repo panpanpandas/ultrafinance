@@ -21,11 +21,11 @@ class TickFeeder(object):
         threadMaxFails indicates how many times thread for a subscriber can timeout,
         if it exceeds, them unregister that subscriber
     '''
-    def __init__(self, intervalTimeout = 2):
+    def __init__(self, intervalTimeout = 2, start = 0):
         self.__subs = {} # securityIds: sub
         self.__source = {}
         self.__intervalTimeout = intervalTimeout
-        self.start = 0
+        self.start = start
         self.end = None
         self.__indexDam = None
         self.tradingCenter = None

@@ -9,7 +9,6 @@ from os import path
 
 from threading import Thread
 from threading import Lock
-from os.path import expanduser
 
 import logging
 LOG = logging.getLogger()
@@ -40,7 +39,7 @@ class GoogleCrawler(object):
         return {'db': self.sqlLocation}
 
     def __getOutputSql(self):
-        return path.join(expanduser("~"),
+        return path.join("/"
                          "data",
                          "stock.sqlite")
 
@@ -90,7 +89,7 @@ class GoogleCrawler(object):
             threads = []
             for symbol in symbols:
                 thread = Thread(name = symbol, target = self.__getSaveOneSymbol, args = [symbol])
-                thread.daemon = True
+                thread.daemon = False
                 thread.start()
 
                 threads.append(thread)

@@ -17,6 +17,7 @@ CONF_SYMBOL_FILE = 'symbolfile'
 CONF_INDEX = 'index'
 
 CONF_INIT_CASH = "initcash"
+CONF_START_TRADE_DATE = "starttradedate"
 
 # input
 CONF_INPUT_SECTION = 'input'
