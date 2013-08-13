@@ -64,10 +64,10 @@ class Quote(object):
     def __init__(self, time, open, high, low, close, volume, adjClose):
         ''' constructor '''
         self.time = time
-        self.open = float(open)
-        self.high = float(high)
-        self.low = float(low)
-        self.close = float(close)
+        self.open = 0 if ("-" == open) else float(open)
+        self.high = 0 if ("-" == high) else float(high)
+        self.low = 0 if ("-" == low) else float(low)
+        self.close = 0 if ("-" == close) else float(close)
         self.volume = int(volume)
         self.adjClose = adjClose
 
