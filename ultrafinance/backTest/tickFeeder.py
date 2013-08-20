@@ -8,7 +8,6 @@ from threading import Thread
 
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE
-from ultrafinance.lib.util import split_dict_equally
 
 import traceback
 import time
@@ -23,7 +22,9 @@ class TickFeeder(object):
     '''
     def __init__(self, intervalTimeout = 2, start = 0):
         self.__subs = {} # securityIds: sub
-        self.__source = {}
+        self.__symbols = []
+        self.__indexSymbol = None
+        self.__dam = None
         self.__intervalTimeout = intervalTimeout
         self.start = start
         self.end = None
@@ -46,18 +47,16 @@ class TickFeeder(object):
         self.__updatedTick = None
 
 
-    def _getTicks(self, dam):
+    def _getSymbolTicksDict(self, symbols):
         ''' get ticks from one dam'''
         ticks = []
         if TICK == appGlobal[TRADE_TYPE]:
-            ticks = dam.readTicks(self.start, self.end)
+            ticks = self.__dam.readBatchTupleTicks(symbols, self.start, self.end)
         elif QUOTE == appGlobal[TRADE_TYPE]:
-            ticks = dam.readQuotes(self.start, self.end)
+            ticks = self.__dam.readBatchTupleQuotes(symbols, self.start, self.end)
         else:
             raise UfException(Errors.INVALID_TYPE,
                               'Type %s is not accepted' % appGlobal[TRADE_TYPE])
-
-        dam.destruct()
 
         return ticks
 
@@ -65,54 +64,41 @@ class TickFeeder(object):
         ''' generate timeTicksDict based on source DAM'''
         LOG.info('Start loading ticks, it may take a while......')
 
-        threads = []
-        for partSource in split_dict_equally(self.__source, 20):
-            if partSource:
-                thread = Thread(target = self.__loadPartTicks, args = (partSource,))
-                thread.setDaemon(False)
-                thread.start()
-                threads.append(thread)
+        LOG.info('Indexing ticks for %s' % self.__symbols)
+        try:
+            symbolTicksDict = self._getSymbolTicksDict(self.__symbols)
 
-        for thread in threads:
-            thread.join(2 * len(self.__source)) # wait for enough time
-
-
-    def __loadPartTicks(self, partSource):
-        ''' publish ticks to sub '''
-        for symbol, dam in partSource.items():
-            LOG.info('Indexing ticks for %s' % symbol)
-            try:
-                ticks = self._getTicks(dam)
-
+            for symbol, ticks in symbolTicksDict.items():
                 for tick in ticks:
                     if tick.time not in self.timeTicksDict:
                         self.timeTicksDict[tick.time] = {}
 
-                    self.timeTicksDict[tick.time][symbol] = tick
-            except KeyboardInterrupt as ki:
-                LOG.warn("Interrupted by user  when loading ticks for %s" % symbol)
-                raise ki
-            except BaseException as excp:
-                LOG.warn("Unknown exception when loading ticks for %s: except %s, traceback %s" % (symbol, excp, traceback.format_exc(8)))
+                        self.timeTicksDict[tick.time][symbol] = tick
+        except KeyboardInterrupt as ki:
+            LOG.warn("Interrupted by user  when loading ticks for %s" % self.__symbols)
+            raise ki
+        except BaseException as excp:
+            LOG.warn("Unknown exception when loading ticks for %s: except %s, traceback %s" % (self.__symbols, excp, traceback.format_exc(8)))
 
-
+    """
     def __loadIndex(self):
         ''' generate timeTicksDict based on source DAM'''
         LOG.debug('Start loading ticks, it may take a while......')
         indexTicksDict = {}
 
         LOG.debug('loading index...')
-        ticks = self._getTicks(self.__indexDam)
+        ticks = self._getSymbolTicksDict(self.__indexSymbol)
 
         for tick in ticks:
             indexTicksDict[tick.time] = tick
 
         return indexTicksDict
+    """
 
     def execute(self):
         ''' execute func '''
         self.__loadTicks()
-        self.__loadIndex()
+        #self.__loadIndex()
 
         for timeStamp in sorted(self.timeTicksDict.iterkeys()):
             while self.__updatedTick:
@@ -120,7 +106,7 @@ class TickFeeder(object):
 
             # make sure trading center finish updating first
             self._freshTradingCenter(self.timeTicksDict[timeStamp])
-            self._freshIndexHelper(self.indexTicksDict.get(timeStamp))
+            #self._freshIndexHelper(self.indexTicksDict.get(timeStamp))
 
             self._freshUpdatedTick(timeStamp, self.timeTicksDict[timeStamp])
             self._updateHistory(timeStamp, self.timeTicksDict[timeStamp], self.indexTicksDict.get(timeStamp))
@@ -149,14 +135,13 @@ class TickFeeder(object):
         ''' set index dam '''
         self.__indexDam = dam
 
-    def addSource(self, dam):
-        ''' add a source '''
-        if dam.symbol in self.__source:
-            raise UfException(Errors.SYMBOL_EXIST,
-                              "Can't add dam with existing symbol: %s" % dam.symbol)
+    def setSymbols(self, symbols):
+        ''' set symbols '''
+        self.__symbols = symbols
 
-        else:
-            self.__source[dam.symbol] = dam
+    def setDam(self, dam):
+        ''' set source dam '''
+        self.__dam = dam
 
     def pubTicks(self, ticks, sub):
         ''' publish ticks to sub '''

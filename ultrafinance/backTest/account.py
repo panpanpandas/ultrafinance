@@ -69,7 +69,7 @@ class Account(object):
             self.__cash = self.__cash - value - self.__commision
             self.__reduceHolding(order.symbol, 0 - order.share)
 
-        self.__orderHisotry.append(order)
+        self.__orderHisotry.append([tick.time, order])
 
 
     def validate(self, order, tick):

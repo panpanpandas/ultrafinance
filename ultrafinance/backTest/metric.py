@@ -99,7 +99,7 @@ class MetricCalculator(object):
                 worstMetric = metric
 
         output.append("MEAN end value: %.1f, mean sharp ratio: %.2f" % (mean([m.result[BasicMetric.END_VALUE] for m in self.__calculated.values() if m.result[BasicMetric.END_VALUE] > 0]),
-                                                                    mean([m.result[BasicMetric.SRATIO] for m in self.__calculated.values() if m.result[BasicMetric.SRATIO] > 0])))
+                                                                    mean([m.result[BasicMetric.SRATIO] for m in self.__calculated.values() if m.result[BasicMetric.SRATIO] > -1])))
         output.append("Best %s: %s" % (bestSymbol, bestMetric.formatResult()))
         output.append("Worst %s: %s" % (worstSymbol, worstMetric.formatResult()))
         return '\n'.join(output)

@@ -183,6 +183,6 @@ class TradingEngine(object):
                 LOG.error("For tick update, subId %s fails for too many times" % sub.subId)
                 self.unregister(sub)
 
-        if self.saver:
+        if self.saver and len(symbolTicksDict) < 10:
             for symbol in symbolTicksDict:
                 self.saver.write(self.__curTime, symbol, str(symbolTicksDict[symbol]))

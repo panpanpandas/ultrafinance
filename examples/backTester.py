@@ -123,15 +123,13 @@ class TestRunner(object):
         ''' setup tickFeeder'''
         self.__tickFeeder.indexHelper = self.__indexHelper
         self.__tickFeeder.hisotry = self.__history
-        #set source dam
-        for symbol in self.__symbols:
-            sDam = self._createDam(symbol)
-            self.__tickFeeder.addSource(sDam)
+        self.__tickFeeder.setSymbols(self.__symbols)
+        self.__tickFeeder.setDam(self._createDam("")) # no need to set symbol because it's batch operation
 
         #set index dam
-        iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
-        iDam = self._createDam(iSymbol)
-        self.__tickFeeder.setIndexDam(iDam)
+        #iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
+        #iDam = self._createDam(iSymbol)
+        #self.__tickFeeder.setIndexDam(iDam)
 
     def _createDam(self, symbol):
         ''' setup Dam'''

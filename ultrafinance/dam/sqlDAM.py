@@ -4,7 +4,9 @@ Created on Nov 9, 2011
 @author: ppa
 '''
 from ultrafinance.dam.baseDAM import BaseDAM
-from ultrafinance.model import Quote, Tick
+from ultrafinance.model import Quote, Tick, TupleQuote
+from ultrafinance.lib.util import splitListEqually
+from math import ceil
 import sys
 
 from sqlalchemy import Column, Integer, String, Float, Sequence, create_engine, and_
@@ -124,8 +126,17 @@ class SqlDAM(BaseDAM):
         ''' convert row result to Quote '''
         return Quote(row.time, row.open, row.high, row.low, row.close, row.volume, row.adjClose)
 
+    def __sqlToTupleQuote(self, row):
+        ''' convert row result to tuple Quote '''
+        #return TupleQuote(row.time, row.open, row.high, row.low, row.close, row.volume, row.adjClose)
+        return TupleQuote(row.time, row.close)
+
     def __sqlToTick(self, row):
         ''' convert row result to Tick '''
+        return Tick(row.time, row.open, row.high, row.low, row.close, row.volume)
+
+    def __sqlToTupleTick(self, row):
+        ''' convert row result to tuple Tick '''
         return Tick(row.time, row.open, row.high, row.low, row.close, row.volume)
 
     def __tickToSql(self, tick):
@@ -145,6 +156,48 @@ class SqlDAM(BaseDAM):
                                                         QuoteSql.time < int(end)))
 
         return [self.__sqlToQuote(row) for row in rows]
+
+    def readTupleQuotes(self, start, end):
+        ''' read quotes as tuple '''
+        if end is None:
+            end = sys.maxint
+        rows = self.session.query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
+                                                        QuoteSql.time >= int(start),
+                                                        QuoteSql.time < int(end)))
+
+        return [self.__sqlToTupleQuote(row) for row in rows]
+
+    def readBatchTupleQuotes(self, symbols, start, end):
+        '''
+        read batch quotes as tuple to save memory
+        '''
+        if end is None:
+            end = sys.maxint
+
+        ret = {}
+        symbolChunks = splitListEqually(symbols, int(ceil(len(symbols) / 100.0)))
+        for chunk in symbolChunks:
+            rows = self.session.query(QuoteSql).filter(and_(QuoteSql.symbol.in_(chunk),
+                                                            QuoteSql.time >= int(start),
+                                                            QuoteSql.time < int(end)))
+
+            for row in rows:
+                if row.symbol not in ret:
+                    ret[row.symbol] = []
+                ret[row.symbol].append(self.__sqlToTupleQuote(row))
+
+        return ret
+
+
+    def readTupleTicks(self, start, end):
+        ''' read ticks as tuple '''
+        if end is None:
+            end = sys.maxint
+        rows = self.session.query(TickSql).filter(and_(TickSql.symbol == self.symbol,
+                                                       TickSql.time >= int(start),
+                                                       TickSql.time < int(end)))
+
+        return [self.__sqlToTupleTick(row) for row in rows]
 
     def readTicks(self, start, end):
         ''' read ticks '''

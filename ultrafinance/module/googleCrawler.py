@@ -14,7 +14,7 @@ import logging
 LOG = logging.getLogger()
 
 
-BATCH_SIZE = 30
+BATCH_SIZE = 10
 THREAD_TIMEOUT = 5
 MAX_TRY = 3
 

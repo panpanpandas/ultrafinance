@@ -38,7 +38,7 @@ class SMAPortfolioStrategy(BaseStrategy):
         ''' constructor '''
         super(SMAPortfolioStrategy, self).__init__("smaPortfolioStrategy")
         self.__trakers = {}
-        self.startDate = configDict.get(CONF_START_TRADE_DATE)
+        self.startDate = int(configDict.get(CONF_START_TRADE_DATE))
 
     def __setUpTrakers(self):
         ''' set symbols '''
@@ -140,8 +140,8 @@ class OneTraker(object):
     def __getCashToBuyStock(self):
         ''' calculate the amount of money to buy stock '''
         account = self.__strategy.getAccountCopy()
-        if (account.getCash() >= account.getTotalValue() / 20):
-            return account.getTotalValue() / 20
+        if (account.getCash() >= account.getTotalValue() / 10):
+            return account.getTotalValue() / 10
         else:
             return 0
 
@@ -272,8 +272,8 @@ class OneTraker(object):
             return
 
         #if haven't started, don't do any trading
-        #if tick.time <= self.__startDate:
-        #    return
+        if tick.time <= self.__startDate:
+            return
 
         # already have some holdings
         if self.__stopOrderId:

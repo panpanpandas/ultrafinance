@@ -66,6 +66,7 @@ class BackTester(object):
         symbolFile = self.__config.getOption(CONF_APP_MAIN, CONF_SYMBOL_FILE)
         assert symbolFile is not None, "%s is required in config file" % CONF_SYMBOL_FILE
 
+        LOG.info("loading symbols from %s" % os.path.join(self.__config.getDir(), symbolFile))
         with open(os.path.join(self.__config.getDir(), symbolFile), "r") as f:
             for symbols in f:
                 if symbols not in self.__symbolLists:
@@ -140,15 +141,13 @@ class TestRunner(object):
         ''' setup tickFeeder'''
         self.__tickFeeder.indexHelper = self.__indexHelper
         self.__tickFeeder.hisotry = self.__history
-        #set source dam
-        for symbol in self.__symbols:
-            sDam = self._createDam(symbol)
-            self.__tickFeeder.addSource(sDam)
+        self.__tickFeeder.setSymbols(self.__symbols)
+        self.__tickFeeder.setDam(self._createDam("")) # no need to set symbol because it's batch operation
 
         #set index dam
-        iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
-        iDam = self._createDam(iSymbol)
-        self.__tickFeeder.setIndexDam(iDam)
+        #iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
+        #iDam = self._createDam(iSymbol)
+        #self.__tickFeeder.setIndexDam(iDam)
 
     def _createDam(self, symbol):
         ''' setup Dam'''
@@ -166,7 +165,7 @@ class TestRunner(object):
         if saverName:
             self.__saver = StateSaverFactory.createStateSaver(saverName,
                                                               setting,
-                                                              "%s_%s" % (self.__symbols,
+                                                              "%s_%s" % (self.__symbols if len(self.__symbols) <= 1 else len(self.__symbols),
                                                                          self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME)))
 
     def _setupStrategy(self):
@@ -217,7 +216,7 @@ class TestRunner(object):
         self._printResult()
 
 if __name__ == "__main__":
-    backTester = BackTester(startTickDate = 20101010, startTradeDate = 20131010)
+    backTester = BackTester(startTickDate = 20101010, startTradeDate =  20111220)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()

@@ -9,7 +9,8 @@ from ultrafinance.lib.errors import UfException, Errors
 
 # namedtuple are used to handle data getting from csv or internet
 TICK_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume']
-QUOTE_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume', 'adjClose']
+#QUOTE_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume', 'adjClose']
+QUOTE_FIELDS = ['time', 'close']
 
 class Tick(object):
     ''' tick class '''
@@ -89,7 +90,7 @@ class Quote(object):
                      d['low'], d['close'], d['volume'], d['adjClose'])
 
 #Tick = namedtuple('Tick', ' '.join(TICK_FIELDS))
-#Quote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))
+TupleQuote = namedtuple('Quote', ' '.join(QUOTE_FIELDS))
 #DateValue = namedtuple('DateValue', 'date, value')
 
 class Action(object):
