@@ -6,6 +6,7 @@ Created on Dec 4, 2011
 from ultrafinance.dam.DAMFactory import DAMFactory
 
 from os import path
+import time
 
 from threading import Thread
 from threading import Lock
@@ -14,13 +15,12 @@ import logging
 LOG = logging.getLogger()
 
 
-BATCH_SIZE = 10
 THREAD_TIMEOUT = 5
 MAX_TRY = 3
 
 class GoogleCrawler(object):
     ''' collect quotes/ticks for a list of symbol '''
-    def __init__(self, symbols, start):
+    def __init__(self, symbols, start, poolsize = 5):
         ''' constructor '''
         self.symbols = symbols
         self.sqlLocation = None
@@ -28,6 +28,7 @@ class GoogleCrawler(object):
         self.googleDAM = DAMFactory.createDAM("google")
         self.start = start
         self.end = None
+        self.poolsize = poolsize
         self.readLock = Lock()
         self.writeLock = Lock()
         self.failed = []
@@ -82,14 +83,14 @@ class GoogleCrawler(object):
 
         while counter < len(self.symbols):
             size = len(self.symbols) - counter
-            if BATCH_SIZE < size:
-                size = BATCH_SIZE
+            if self.poolsize < size:
+                size = self.poolsize
             symbols = self.symbols[counter: counter + size]
 
             threads = []
             for symbol in symbols:
                 thread = Thread(name = symbol, target = self.__getSaveOneSymbol, args = [symbol])
-                thread.daemon = False
+                thread.daemon = True
                 thread.start()
 
                 threads.append(thread)
@@ -103,6 +104,9 @@ class GoogleCrawler(object):
 
             counter += size
             rounds += 1
+
+            # sleep for 1 second to avoid being blocked by google...
+            time.sleep(1)
 
 if __name__ == '__main__':
     crawler = GoogleCrawler(["AAPL", "EBAY", "GOOG"], "20130401")
