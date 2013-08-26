@@ -27,14 +27,15 @@ import logging.config
 import logging
 LOG = logging.getLogger()
 
-CONFIG_FILE = "backtest_smaPortfolio.ini"
-
 class BackTester(object):
     ''' back testing '''
     CASH = 200000 #  1 million to start
 
-    def __init__(self, startTickDate = 0, startTradeDate = 0):
+    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0):
+        LOG.debug("Loading config from %s" % configFile)
         self.__config = PyConfig()
+        self.__config.setSource(configFile)
+
         self.__mCalculator = MetricCalculator()
         self.__symbolLists = []
         self.__accounts = []
@@ -43,11 +44,9 @@ class BackTester(object):
 
     def setup(self):
         ''' setup '''
-        LOG.debug("Loading config from %s" % CONFIG_FILE)
-        self.__config.setSource(CONFIG_FILE)
-        appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_APP_MAIN, CONF_TRADE_TYPE)
-        self.__config.override(CONF_STRATEGY, CONF_INIT_CASH, BackTester.CASH)
-        self.__config.override(CONF_STRATEGY, CONF_START_TRADE_DATE, self.__startTradeDate)
+        appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_TRADE_TYPE)
+        self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_INIT_CASH, BackTester.CASH)
+        self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE, self.__startTradeDate)
         self._setupLog()
         self._loadSymbols()
 
@@ -63,7 +62,7 @@ class BackTester(object):
 
     def _loadSymbols(self):
         ''' find symbols'''
-        symbolFile = self.__config.getOption(CONF_APP_MAIN, CONF_SYMBOL_FILE)
+        symbolFile = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_SYMBOL_FILE)
         assert symbolFile is not None, "%s is required in config file" % CONF_SYMBOL_FILE
 
         LOG.info("loading symbols from %s" % os.path.join(self.__config.getDir(), symbolFile))
@@ -151,27 +150,27 @@ class TestRunner(object):
 
     def _createDam(self, symbol):
         ''' setup Dam'''
-        damName = self.__config.getOption(CONF_INPUT_SECTION, CONF_DAM)
-        setting = self.__config.getSection(CONF_INPUT_SECTION)
-        dam = DAMFactory.createDAM(damName, setting)
+        damName = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_INPUT_DAM)
+        inputDb = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_INPUT_DB)
+        dam = DAMFactory.createDAM(damName, {'db': inputDb})
         dam.setSymbol(symbol)
 
         return dam
 
     def _setupSaver(self):
         ''' setup Saver '''
-        saverName = self.__config.getOption(CONF_OUTPUT_SECTION, CONF_SAVER)
-        setting = self.__config.getSection(CONF_OUTPUT_SECTION)
+        saverName = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_SAVER)
+        outputDb = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_OUTPUT_DB)
         if saverName:
             self.__saver = StateSaverFactory.createStateSaver(saverName,
-                                                              setting,
+                                                              {'db': outputDb},
                                                               "%s_%s" % (self.__symbols if len(self.__symbols) <= 1 else len(self.__symbols),
-                                                                         self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME)))
+                                                                         self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME)))
 
     def _setupStrategy(self):
         ''' setup tradingEngine'''
-        strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_STRATEGY, CONF_STRATEGY_NAME),
-                                                  self.__config.getSection(CONF_STRATEGY))
+        strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME),
+                                                  self.__config.getSection(CONF_ULTRAFINANCE_SECTION))
         strategy.setSymbols(self.__symbols)
         strategy.indexHelper = self.__indexHelper
         strategy.history = self.__history
@@ -216,7 +215,7 @@ class TestRunner(object):
         self._printResult()
 
 if __name__ == "__main__":
-    backTester = BackTester(startTickDate = 20101010, startTradeDate =  20111220)
+    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 20101010, startTradeDate =  20111220)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()
