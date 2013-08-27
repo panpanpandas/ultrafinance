@@ -52,7 +52,8 @@ class BackTester(object):
 
     def _setupLog(self):
         ''' setup logging '''
-        logging.config.fileConfig(self.__config.getFullPath())
+        if self.__config.getSection("loggers"):
+            logging.config.fileConfig(self.__config.getFullPath())
 
     def _runOneTest(self, symbols):
         ''' run one test '''

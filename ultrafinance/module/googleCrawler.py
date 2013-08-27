@@ -105,8 +105,8 @@ class GoogleCrawler(object):
             counter += size
             rounds += 1
 
-            # sleep for 1 second to avoid being blocked by google...
-            time.sleep(1)
+            # sleep for 3 second to avoid being blocked by google...
+            time.sleep(3)
 
 if __name__ == '__main__':
     crawler = GoogleCrawler(["AAPL", "EBAY", "GOOG"], "20130401")
