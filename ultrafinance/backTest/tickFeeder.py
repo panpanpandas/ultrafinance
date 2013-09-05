@@ -73,7 +73,7 @@ class TickFeeder(object):
                     if tick.time not in self.timeTicksDict:
                         self.timeTicksDict[tick.time] = {}
 
-                        self.timeTicksDict[tick.time][symbol] = tick
+                    self.timeTicksDict[tick.time][symbol] = tick
         except KeyboardInterrupt as ki:
             LOG.warn("Interrupted by user  when loading ticks for %s" % self.__symbols)
             raise ki

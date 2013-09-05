@@ -175,7 +175,7 @@ class SqlDAM(BaseDAM):
             end = sys.maxint
 
         ret = {}
-        symbolChunks = splitListEqually(symbols, int(ceil(len(symbols) / 100.0)))
+        symbolChunks = splitListEqually(symbols, 100)
         for chunk in symbolChunks:
             rows = self.session.query(QuoteSql).filter(and_(QuoteSql.symbol.in_(chunk),
                                                             QuoteSql.time >= int(start),

@@ -233,7 +233,7 @@ class OneTraker(object):
                                   price = newStopPrice,
                                   share = self.__stopOrder.share)
                 self.__placeStopOrder(stopOrder)
-
+        '''
         elif self.__stopOrder.action == Action.BUY_TO_COVER:
             orgStopPrice = self.__buyOrder.price * 1.05
             newStopPrice = min(((orgStopPrice + tick.close) / 2), tick.close * 1.15)
@@ -248,7 +248,7 @@ class OneTraker(object):
                                   price = newStopPrice,
                                   share = self.__stopOrder.share)
                 self.__placeStopOrder(stopOrder)
-
+        '''
 
     def __updatePreviousState(self, tick):
         ''' update previous state '''
