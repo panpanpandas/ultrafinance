@@ -19,7 +19,7 @@ class TradingCenter(object):
     def __init__(self):
         ''' constructor '''
         self.accountManager = None
-        self.__openOrders = {} #SAMPLE: {"EBAY": {orderId1: order1, orderId2, order2}}
+        self.__openOrders = {} #SAMPLE: {"EBAY": {orderId1: order1, orderId2: order2}}
         self.__closedOrders = {} #SAMPLE {"EBAY": [order1, order2]}
         self.__updatedOrder = {} #SAMPLE {"EBAY": [order1, order2]}
         self.__lastTickDict = None

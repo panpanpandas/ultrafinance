@@ -86,7 +86,7 @@ class BackTester(object):
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbols, excp, traceback.format_exc(8)))
 
-    def getLatestOrders(self, num = 10):
+    def getLatestOrders(self, num = 20):
         ''' get latest orders'''
         orders = []
         for account in self.__accounts:
@@ -94,9 +94,21 @@ class BackTester(object):
 
         return orders
 
+    def getHoldings(self):
+        ''' get holdings '''
+        holdings = []
+        for account in self.__accounts:
+            holdings.append(account.holdings)
+
+        return holdings
+
     def getMetrics(self):
         ''' get alll metrics '''
-        return self.__mCalculator.formatMetrics()
+        return self.__mCalculator.getMetrics()
+
+    def getOpenOrders(self):
+        ''' get open orders '''
+        return self.__
 
     def printMetrics(self):
         ''' print metrics '''

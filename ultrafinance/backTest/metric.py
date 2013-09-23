@@ -22,18 +22,18 @@ class BaseMetric(object):
 
 class BasicMetric(BaseMetric):
     ''' basic metrics '''
-    MAX = 'max'
-    MIN = 'min'
+    MAX_TIME_VALUE = 'maxTimeValue'
+    MIN_TIME_VALUE = 'minTimeValue'
     STDDEV = 'stddev'
-    SRATIO = 'sratio'
-    START_TIME = "stime"
-    END_TIME="etime"
-    END_VALUE="evalue"
+    SRATIO = 'sharpeRatio'
+    START_TIME = "startTime"
+    END_TIME="endTime"
+    END_VALUE="endValue"
 
     def __init__(self):
         super(BasicMetric, self).__init__()
-        self.result = {BasicMetric.MAX: (None, -1),
-                       BasicMetric.MIN: (None, -1),
+        self.result = {BasicMetric.MAX_TIME_VALUE: (None, -1),
+                       BasicMetric.MIN_TIME_VALUE: (None, -1),
                        BasicMetric.STDDEV:-1,
                        BasicMetric.SRATIO:-1,
                        BasicMetric.START_TIME:-1,
@@ -46,10 +46,10 @@ class BasicMetric(BaseMetric):
             return self.result
 
         for (timeStamp, position) in timePositions:
-            if self.result[BasicMetric.MAX][0] is None or self.result[BasicMetric.MAX][1] < position:
-                self.result[BasicMetric.MAX] = timeStamp, position
-            if self.result[BasicMetric.MIN][0] is None or self.result[BasicMetric.MIN][1] > position:
-                self.result[BasicMetric.MIN] = timeStamp, position
+            if self.result[BasicMetric.MAX_TIME_VALUE][0] is None or self.result[BasicMetric.MAX_TIME_VALUE][1] < position:
+                self.result[BasicMetric.MAX_TIME_VALUE] = timeStamp, position
+            if self.result[BasicMetric.MIN_TIME_VALUE][0] is None or self.result[BasicMetric.MIN_TIME_VALUE][1] > position:
+                self.result[BasicMetric.MIN_TIME_VALUE] = timeStamp, position
 
         self.result[BasicMetric.START_TIME] = timePositions[0][0]
         self.result[BasicMetric.END_TIME] = timePositions[-1][0]
@@ -62,8 +62,8 @@ class BasicMetric(BaseMetric):
     def formatResult(self):
         ''' format result '''
         return "Lowest value %.2f at %s; Highest %.2f at %s; %s - %s end values %.1f; Sharpe ratio is %.2f" % \
-            (self.result[BasicMetric.MIN][1], self.result[BasicMetric.MIN][0],
-             self.result[BasicMetric.MAX][1], self.result[BasicMetric.MAX][0],
+            (self.result[BasicMetric.MIN_TIME_VALUE][1], self.result[BasicMetric.MIN_TIME_VALUE][0],
+             self.result[BasicMetric.MAX_TIME_VALUE][1], self.result[BasicMetric.MAX_TIME_VALUE][0],
              self.result[BasicMetric.START_TIME], self.result[BasicMetric.END_TIME], self.result[BasicMetric.END_VALUE],
              self.result[BasicMetric.SRATIO])
 
@@ -77,7 +77,7 @@ class MetricCalculator(object):
         ''' calculate metric base on positions '''
         metric = BasicMetric()
         metric.calculate(timePositions)
-        self.__calculated['_'.join(symbols)] = metric
+        self.__calculated['_'.join(symbols)] = metric.result
 
     def formatMetrics(self):
         ''' output all calculated metrics '''
@@ -98,9 +98,13 @@ class MetricCalculator(object):
                 worstSymbol = symbols
                 worstMetric = metric
 
-        output.append("MEAN end value: %.1f, mean sharp ratio: %.2f" % (mean([m.result[BasicMetric.END_VALUE] for m in self.__calculated.values() if m.result[BasicMetric.END_VALUE] > 0]),
-                                                                    mean([m.result[BasicMetric.SRATIO] for m in self.__calculated.values() if m.result[BasicMetric.SRATIO] > -1])))
+        output.append("MEAN end value: %.1f, mean sharp ratio: %.2f" % (mean([m[BasicMetric.END_VALUE] for m in self.__calculated.values() if m[BasicMetric.END_VALUE] > 0]),
+                                                                    mean([m[BasicMetric.SRATIO] for m in self.__calculated.values() if m[BasicMetric.SRATIO] > -1])))
         output.append("Best %s: %s" % (bestSymbol, bestMetric.formatResult()))
         output.append("Worst %s: %s" % (worstSymbol, worstMetric.formatResult()))
         return '\n'.join(output)
 
+
+    def getMetrics(self):
+        ''' get metrics '''
+        return self.__calculated
