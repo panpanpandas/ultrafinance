@@ -4,9 +4,11 @@ Created on Nov 6, 2011
 @author: ppa
 '''
 from ultrafinance.backTest.constant import EVENT_TICK_UPDATE, EVENT_ORDER_EXECUTED
+from ultrafinance.backTest.constant import STATE_SAVER_UPDATED_ORDERS, STATE_SAVER_PLACED_ORDERS
 
 from threading import Thread
 from time import sleep
+import json
 
 import logging
 LOG = logging.getLogger()
@@ -91,12 +93,17 @@ class TradingEngine(object):
                     self.__curTime = timeTicksTuple[0]
                     self._tickUpdate(timeTicksTuple)
 
-                orderDict = self.orderProxy.getUpdatedOrder()
-                if orderDict:
-                    self._orderUpdate(orderDict)
+                updatedOrderDict = self.orderProxy.getUpdatedOrder()
+                placedOrderDict = self.orderProxy.getPlacedOrder()
+                if updatedOrderDict:
+                    self._orderUpdate(updatedOrderDict)
+
+                #record order
+                if self.saver:
+                    self.saver.write(self.__curTime, STATE_SAVER_UPDATED_ORDERS, json.dumps([str(order) for order in updatedOrderDict.values()]))
+                    self.saver.write(self.__curTime, STATE_SAVER_PLACED_ORDERS, json.dumps([str(order) for order in placedOrderDict.values()]))
 
                 self.tickProxy.clearUpdateTick()
-
 
     def _complete(self):
         ''' call when complete feeding ticks '''
@@ -127,11 +134,6 @@ class TradingEngine(object):
     def placeOrder(self, order):
         ''' called by each strategy to place order '''
         orderId = self.orderProxy.placeOrder(order)
-
-        # record order
-        if self.saver:
-            self.saver.write(self.__curTime, 'placedOrder', order)
-
         return orderId
 
     def cancelOrder(self, symbol, orderId):
@@ -153,9 +155,6 @@ class TradingEngine(object):
             if attrs['fail'] > self.__threadMaxFail:
                 LOG.error("For order update, subId %s fails for too many times" % sub.subId)
                 self.unregister(sub)
-
-        if self.saver:
-            self.saver.write(self.__curTime, 'updatedOrder', [str(order) for order in orderDict.values()])
 
     def _tickUpdate(self, timeTicksTuple):
         ''' got tick update '''

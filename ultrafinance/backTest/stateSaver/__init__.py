@@ -18,8 +18,8 @@ class StateSaver(object):
         self.__tableName = None
 
     @abc.abstractmethod
-    def read(self, row, col):
-        ''' read value with row and col '''
+    def getStates(self, start, end):
+        ''' read value with row '''
         pass
 
     @abc.abstractmethod

@@ -7,6 +7,7 @@ Created on Dec 3, 2011
 from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
 from ultrafinance.backTest.tradingCenter import TradingCenter
 from ultrafinance.backTest.tickFeeder import TickFeeder
+from ultrafinance.lib.util import getDateString
 from ultrafinance.backTest.tradingEngine import TradingEngine
 from ultrafinance.backTest.accountManager import AccountManager
 from ultrafinance.ufConfig.pyConfig import PyConfig
@@ -22,6 +23,7 @@ import sys
 
 from threading import Thread
 
+import json
 import traceback
 import logging.config
 import logging
@@ -41,6 +43,7 @@ class BackTester(object):
         self.__accounts = []
         self.__startTickDate = startTickDate
         self.__startTradeDate = startTradeDate
+        self.__firstSaver = None
 
     def setup(self):
         ''' setup '''
@@ -49,6 +52,19 @@ class BackTester(object):
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE, self.__startTradeDate)
         self._setupLog()
         self._loadSymbols()
+
+    def __getFirstSaver(self):
+        ''' get first saver, create it if not exist'''
+        saverName = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_SAVER)
+        outputDb = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_OUTPUT_DB)
+        if saverName and len(self.__symbolLists) > 0:
+            self.__firstSaver = StateSaverFactory.createStateSaver(saverName,
+                                                                   {'db': outputDb},
+                                                                   getBackTestTableName(self.__symbolLists[0],
+                                                                                        self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME)))
+
+        return self.__firstSaver
+
 
     def _setupLog(self):
         ''' setup logging '''
@@ -86,8 +102,12 @@ class BackTester(object):
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbols, excp, traceback.format_exc(8)))
 
-    def getLatestOrders(self, num = 20):
-        ''' get latest orders'''
+    def getLatestStates(self, num = 60):
+        ''' get latest state for numb days'''
+        return [json.loads(str(result)) for result in self.__getFirstSaver().getStates(int(getDateString(num)), None)]
+
+    def getLatestPlacedOrders(self, num = 20):
+        ''' get latest placed orders of first symbol list '''
         orders = []
         for account in self.__accounts:
             orders.extend(account.orderHistory[-num:])
@@ -177,8 +197,7 @@ class TestRunner(object):
         if saverName:
             self.__saver = StateSaverFactory.createStateSaver(saverName,
                                                               {'db': outputDb},
-                                                              "%s_%s" % (self.__symbols if len(self.__symbols) <= 1 else len(self.__symbols),
-                                                                         self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME)))
+                                                              getBackTestTableName(self.__symbols, self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME)))
 
     def _setupStrategy(self):
         ''' setup tradingEngine'''
@@ -227,9 +246,18 @@ class TestRunner(object):
         self._execute()
         self._printResult()
 
+
+############Util function################################
+def getBackTestTableName(symbols, strategyName):
+    ''' get table name for back test result'''
+    return "%s_%s" % (symbols if len(symbols) <= 1 else len(symbols), strategyName)
+
+
+
 if __name__ == "__main__":
     backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 20101010, startTradeDate =  20111220)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()
+    print backTester.getLatestStates()
 

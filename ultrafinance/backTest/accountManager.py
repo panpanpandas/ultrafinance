@@ -52,7 +52,7 @@ class AccountManager(object):
             self.__accountPositions[accountId].append((curTime, position))
             #record
             if self.saver:
-                self.saver.write(curTime, "account-%s" % accountId, position)
+                self.saver.write(curTime, "account", position)
 
             if position < 0:
                 raise Exception("account %s value %s less than 0" % (accountId, position))

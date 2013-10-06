@@ -23,9 +23,6 @@ class StateSaverFactory(Singleton):
         else:
             raise UfException(Errors.INVALID_SAVER_NAME,
                               "Saver name is invalid %s" % name)
-        if not tableName:
-            saver.tableName = 'output'
-        else:
-            saver.tableName = tableName
-        saver.setup(setting)
+
+        saver.setup(setting, 'output' if tableName is None else tableName)
         return saver

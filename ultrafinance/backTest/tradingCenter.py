@@ -22,6 +22,7 @@ class TradingCenter(object):
         self.__openOrders = {} #SAMPLE: {"EBAY": {orderId1: order1, orderId2: order2}}
         self.__closedOrders = {} #SAMPLE {"EBAY": [order1, order2]}
         self.__updatedOrder = {} #SAMPLE {"EBAY": [order1, order2]}
+        self.__placedOrder = {} #SAMPLE {"EBAY": [order1, order2]}
         self.__lastTickDict = None
 
     def getUpdatedOrder(self):
@@ -31,6 +32,14 @@ class TradingCenter(object):
         self.__updatedOrder.clear()
 
         return updatedOrder
+
+    def getPlacedOrder(self):
+        ''' return orders that has been placed '''
+        placedOrder = {}
+        placedOrder.update(self.__placedOrder)
+        self.__placedOrder.clear()
+
+        return placedOrder
 
     def validateOrder(self, order, tick):
         ''' validate an order '''
@@ -70,6 +79,9 @@ class TradingCenter(object):
             LOG.debug("Order placed %s" % order)
 
             self.__checkAndExecuteOrder(order)
+
+            self.__placedOrder[order.orderId] = order
+
             return order.orderId
 
         else:

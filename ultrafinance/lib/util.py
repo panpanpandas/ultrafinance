@@ -6,7 +6,10 @@ Created on Dec 18, 2010
 import sys
 from bs4 import BeautifulSoup
 from datetime import datetime
+from datetime import timedelta
+from datetime import date
 import time
+from time import gmtime, strftime
 
 import logging
 LOG = logging.getLogger()
@@ -94,3 +97,8 @@ def splitDictEqually(inputDict, chunks):
         else:
             idx = 0
     return return_list
+
+def getDateString(numDaysBefore):
+    ''' return string represent date of n days ago '''
+    t = date.today() - timedelta(days=numDaysBefore)
+    return t.strftime("%Y%m%d")

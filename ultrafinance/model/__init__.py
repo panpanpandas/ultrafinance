@@ -188,6 +188,14 @@ class Order(object):
         return json.dumps({'accountId': str(self.accountId), 'action': self.__action, 'type': self.__type, 'symbol': self.symbol,
                            'price': self.price, 'share': self.share, 'orderId': str(self.orderId), 'status': self.status})
 
+    @staticmethod
+    def fromStr(string):
+        ''' convert from string'''
+        d = json.loads(string)
+        return Order(d['accountId'], d['action'], d['type'], d['symbol'], d['share'], d.get('price'),
+                     d.get('orderId'), d.get('status'), d.get('filledTime'), d.get('executedTime'))
+
+
     type = property(getType, setType)
     action = property(getAction, setAction)
     orderId = property(getOrderId, setOrderId)

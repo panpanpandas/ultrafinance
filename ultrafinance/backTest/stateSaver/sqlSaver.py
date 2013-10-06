@@ -5,17 +5,46 @@ Created on Mar 1, 2011
 '''
 from ultrafinance.lib.errors import Errors, UfException
 from ultrafinance.backTest.stateSaver import StateSaver
+from ultrafinance.model import Order
 
-from sqlalchemy import Table, Column, Integer, String, create_engine, MetaData
+from sqlalchemy import Table, Column, Integer, String, create_engine, MetaData, and_, select
 from sqlalchemy.ext.declarative import declarative_base
+
+from ultrafinance.backTest.constant import STATE_SAVER_ACCOUNT, STATE_SAVER_UPDATED_ORDERS, STATE_SAVER_PLACED_ORDERS
+
+import sys
+import json
 
 import logging
 LOG = logging.getLogger()
 
 Base = declarative_base()
 
+class BackTestResult(object):
+    ''' back test result class '''
+    def __init__(self, time, account, updateOrders, placedOrders):
+        ''' constructor '''
+        self.time = time
+        self.account = account
+        self.updateOrders = updateOrders
+        self.placedOrders = placedOrders
+
+    def __str__(self):
+        ''' convert to string '''
+        return json.dumps({"time": self.time,
+                           STATE_SAVER_ACCOUNT: self.account,
+                           STATE_SAVER_UPDATED_ORDERS: [json.loads(str(order)) for order in self.updateOrders],
+                           STATE_SAVER_PLACED_ORDERS: [json.loads(str(order)) for order in self.placedOrders]})
+
 class SqlSaver(StateSaver):
     ''' sql saver '''
+    COLUMNS = [Column('time', Integer, primary_key = True),
+               Column(STATE_SAVER_ACCOUNT, String(200)),
+               Column(STATE_SAVER_UPDATED_ORDERS, String(200)),
+               Column(STATE_SAVER_PLACED_ORDERS, String(200))]
+
+    EXISTED_TABLE_DICT = {}
+
     def __init__(self):
         ''' constructor '''
         #__writeCache:
@@ -32,35 +61,61 @@ class SqlSaver(StateSaver):
         self.engine = None
         self.firstTime = True
 
-    def setup(self, setting):
+    def setup(self, setting, tableName):
         ''' setup '''
         if 'db' in setting:
             self.db = setting['db']
             self.engine = create_engine(setting['db'], echo = False)
+            self.tableName = tableName
+            self.__constructTable()
+            self.table = SqlSaver.EXISTED_TABLE_DICT.get(tableName)
 
-    def constructTable(self, cols):
+    def __constructTable(self):
         ''' construct table '''
-        if not self.firstTime or self.table is not None or not self.tableName:
+        if not self.firstTime or self.table is not None or not self.tableName \
+        or self.tableName in SqlSaver.EXISTED_TABLE_DICT:
             return
 
-        columns = [Column('time', Integer, primary_key = True)]
-        for col in cols:
-            columns.append(Column(col, String(200)))
+        SqlSaver.EXISTED_TABLE_DICT[self.tableName] = Table(self.tableName,
+                                                            self.metadata,
+                                                            *SqlSaver.COLUMNS)
 
-        self.table = Table(self.tableName, self.metadata, *columns)
 
-    def resetTable(self, cols):
+    def resetTable(self):
         ''' create cols '''
-        self.constructTable(cols)
-
         self.table.drop(self.engine, checkfirst = True)
 
-        LOG.info("create db %s with table %s with cols %s" % (self.db, self.tableName, cols))
+        LOG.info("create db %s with table %s with cols %s" % (self.db, self.tableName, SqlSaver.COLUMNS))
         self.table.create(self.engine, checkfirst = True)
 
-    def read(self, row, col):
-        ''' read value with row and col '''
-        return None
+    def getStates(self, start, end):
+        ''' read value for a col  '''
+        if self.engine is None:
+            return []
+
+        if end is None:
+            end = sys.maxint
+
+        conn = self.engine.connect()
+        rows = conn.execute(select([self.table]).where(and_(self.table.c.time >= int(start),
+                                                            self.table.c.time < int(end))))
+
+        return [self.__tupleToResult(row) for row in rows]
+
+    def __tupleToResult(self, row):
+        ''' convert tuple queried from sql to BackTestResult'''
+        try:
+            return BackTestResult(row['time'], row['account'], [Order.fromStr(orderString) for orderString in json.loads(row['updatedOrders'])],
+                                  [Order.fromStr(orderString) for orderString in json.loads(row['placedOrders'])])
+        except Exception as ex:
+            LOG.error("Unknown exception doing __tupleToResult in sqlSaver " + str(ex) + " --row-- " + str(row))
+            return BackTestResult('-1', '-1', '[]', '[]')
+
+
+    def __sqlToResult(self, row):
+        ''' convert row result '''
+        return (row.time, )
+
 
     def write(self, timestamp, col, value):
         ''' write value with row and col '''
@@ -78,12 +133,7 @@ class SqlSaver(StateSaver):
             raise UfException(Errors.TABLENAME_NOT_SET,
                               "Table name not set")
 
-        # reset table with all cols first
-        cols = set()
-        for colValueDict in self.__writeCache.itervalues():
-            cols.update(colValueDict.iterkeys())
-
-        self.resetTable(cols)
+        self.resetTable()
 
         # write values
         updates = []
@@ -91,9 +141,12 @@ class SqlSaver(StateSaver):
             update = {'time': row}
             update.update(colValueDict)
             # fill filed that are empty
-            for col in cols:
-                if col not in update:
-                    update[col] = ""
+            if STATE_SAVER_ACCOUNT not in update:
+                update[STATE_SAVER_ACCOUNT] = ""
+            if STATE_SAVER_PLACED_ORDERS not in update:
+                update[STATE_SAVER_PLACED_ORDERS] = "[]"
+            if STATE_SAVER_UPDATED_ORDERS not in update:
+                update[STATE_SAVER_UPDATED_ORDERS] = "[]"
 
             # convert everything to string
             for key in update.keys():
@@ -107,10 +160,9 @@ class SqlSaver(StateSaver):
 
 if __name__ == '__main__':
     s = SqlSaver()
-    s.tableName = 'unittest_outputSaver'
-    s.setup({'db': 'sqlite:////tmp/test_output.sqlite'})
+    s.setup({'db': 'sqlite:////tmp/test_output.sqlite'}, 'unittest_outputSaver')
     #h.resetCols(['accountValue', '1'])
     for i in range(5):
-        s.write(123456, 'accountValue', 10000)
+        s.write(123456, STATE_SAVER_ACCOUNT, 10000)
         s.commit()
 
