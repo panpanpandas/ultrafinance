@@ -140,8 +140,8 @@ class OneTraker(object):
     def __getCashToBuyStock(self):
         ''' calculate the amount of money to buy stock '''
         account = self.__strategy.getAccountCopy()
-        if (account.getCash() >= account.getTotalValue() / 10):
-            return account.getTotalValue() / 10
+        if (account.getCash() >= account.getTotalValue() / 15):
+            return account.getTotalValue() / 15
         else:
             return 0
 

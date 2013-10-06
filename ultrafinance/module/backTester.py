@@ -31,13 +31,12 @@ LOG = logging.getLogger()
 
 class BackTester(object):
     ''' back testing '''
-    CASH = 200000 #  1 million to start
-
-    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0):
+    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0, cash = 150000):
         LOG.debug("Loading config from %s" % configFile)
         self.__config = PyConfig()
         self.__config.setSource(configFile)
 
+        self.__cash = cash
         self.__mCalculator = MetricCalculator()
         self.__symbolLists = []
         self.__accounts = []
@@ -48,7 +47,7 @@ class BackTester(object):
     def setup(self):
         ''' setup '''
         appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_TRADE_TYPE)
-        self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_INIT_CASH, BackTester.CASH)
+        self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_INIT_CASH, self.__cash)
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE, self.__startTradeDate)
         self._setupLog()
         self._loadSymbols()
@@ -74,7 +73,7 @@ class BackTester(object):
     def _runOneTest(self, symbols):
         ''' run one test '''
         LOG.debug("Running backtest for %s" % symbols)
-        runner = TestRunner(self.__config, self.__mCalculator, self.__accounts, symbols, self.__startTickDate)
+        runner = TestRunner(self.__config, self.__mCalculator, self.__accounts, symbols, self.__startTickDate, self.__cash)
         runner.runTest()
 
     def _loadSymbols(self):
@@ -136,7 +135,7 @@ class BackTester(object):
 
 class TestRunner(object):
     ''' back testing '''
-    def __init__(self, config, mCalculator, accounts, symbols, startTickDate):
+    def __init__(self, config, mCalculator, accounts, symbols, startTickDate, cash):
         self.__accountManager = AccountManager()
         self.__accountId = None
         self.__tickFeeder = TickFeeder(start = startTickDate)
@@ -149,6 +148,7 @@ class TestRunner(object):
         self.__symbols = symbols
         self.__config = config
         self.__mCalculator = mCalculator
+        self.__cash = cash
 
     def _setup(self):
         ''' setup '''
@@ -208,7 +208,7 @@ class TestRunner(object):
         strategy.history = self.__history
 
         #associate account
-        self.__accountId = self.__accountManager.createAccount(BackTester.CASH)
+        self.__accountId = self.__accountManager.createAccount(self.__cash)
         strategy.accountId = self.__accountId
         strategy.accountManager = self.__accountManager
 
