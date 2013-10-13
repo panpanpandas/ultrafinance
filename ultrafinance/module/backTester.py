@@ -31,7 +31,7 @@ LOG = logging.getLogger()
 
 class BackTester(object):
     ''' back testing '''
-    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0, cash = 150000):
+    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0, endTradeDate = None, cash = 150000):
         LOG.debug("Loading config from %s" % configFile)
         self.__config = PyConfig()
         self.__config.setSource(configFile)
@@ -42,6 +42,7 @@ class BackTester(object):
         self.__accounts = []
         self.__startTickDate = startTickDate
         self.__startTradeDate = startTradeDate
+        self.__endTradeDate = endTradeDate
         self.__firstSaver = None
 
     def setup(self):
@@ -49,6 +50,7 @@ class BackTester(object):
         appGlobal[TRADE_TYPE] = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_TRADE_TYPE)
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_INIT_CASH, self.__cash)
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE, self.__startTradeDate)
+        self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_END_TRADE_DATE, self.__endTradeDate)
         self._setupLog()
         self._loadSymbols()
 
@@ -73,7 +75,7 @@ class BackTester(object):
     def _runOneTest(self, symbols):
         ''' run one test '''
         LOG.debug("Running backtest for %s" % symbols)
-        runner = TestRunner(self.__config, self.__mCalculator, self.__accounts, symbols, self.__startTickDate, self.__cash)
+        runner = TestRunner(self.__config, self.__mCalculator, self.__accounts, symbols, self.__startTickDate, self.__endTradeDate, self.__cash)
         runner.runTest()
 
     def _loadSymbols(self):
@@ -135,10 +137,10 @@ class BackTester(object):
 
 class TestRunner(object):
     ''' back testing '''
-    def __init__(self, config, mCalculator, accounts, symbols, startTickDate, cash):
+    def __init__(self, config, mCalculator, accounts, symbols, startTickDate, endTradeDate, cash):
         self.__accountManager = AccountManager()
         self.__accountId = None
-        self.__tickFeeder = TickFeeder(start = startTickDate)
+        self.__tickFeeder = TickFeeder(start = startTickDate, end = endTradeDate)
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
         self.__indexHelper = IndexHelper()
@@ -255,7 +257,7 @@ def getBackTestTableName(symbols, strategyName):
 
 
 if __name__ == "__main__":
-    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 19900101, startTradeDate =  20111220)
+    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 19900101, startTradeDate = 19900101, endTradeDate = 20121212)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()

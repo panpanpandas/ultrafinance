@@ -20,6 +20,7 @@ CONF_STRATEGY_NAME = 'backtest.strategy_name'
 CONF_SAVER = 'backtest.output_saver'
 CONF_OUTPUT_DB = 'backtest.output_db'
 CONF_START_TRADE_DATE = 'backtest.start_trade_date'
+CONF_END_TRADE_DATE = 'backtest.end_trade_date'
 
 #period strategy
 CONF_STRATEGY_PERIOD = 'backtest.strategy.period'

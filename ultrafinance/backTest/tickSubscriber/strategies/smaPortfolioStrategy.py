@@ -292,7 +292,5 @@ class OneTraker(object):
         if not self.__stopOrderId and self.__getCashToBuyStock():
             self.__buyIfMeet(tick)
 
-
-
         self.__updatePreviousState(tick)
 
