@@ -48,3 +48,30 @@ class Sma(object):
             return self.__value
         else:
             return None
+
+
+class Vwap(object):
+    def __init__(self, period):
+        assert period == int(period) and period > 0, "Period must be an integer > 0"
+        self.__period = period
+        self.__prices = deque()
+        self.__volumes = deque()
+        self.__value = None
+
+    def getLastValue(self):
+        return self.__value
+
+    def __call__(self, price, volume):
+        if volume <= 0 or price <= 0:
+            return
+
+        self.__prices.append(price)
+        self.__volumes.append(volume)
+
+        if len(self.__prices) > self.__period:
+            self.__prices.popleft()
+            self.__volumes.popleft()
+            self.__value = sum(self.__prices[i] * self.__volumes[i] for i in range(len(self.__prices))) / float(sum(self.__volumes) )
+            return self.__value
+        else:
+            return None

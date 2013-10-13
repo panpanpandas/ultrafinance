@@ -48,8 +48,8 @@ class QuoteSql(Base):
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume = Column(String(12))
-    adjClose = Column(String(12))
+    volume = Column(Integer)
+    adjClose = Column(Float)
 
     def __init__(self, symbol, time, open, high, low, close, volume, adjClose):
         ''' constructor '''
@@ -76,7 +76,7 @@ class TickSql(Base):
     high = Column(Float)
     low = Column(Float)
     close = Column(Float)
-    volume = Column(String(12))
+    volume = Column(Integer)
 
     def __init__(self, symbol, time, open, high, low, close, volume):
         ''' constructor '''
@@ -129,7 +129,8 @@ class SqlDAM(BaseDAM):
     def __sqlToTupleQuote(self, row):
         ''' convert row result to tuple Quote '''
         #return TupleQuote(row.time, row.open, row.high, row.low, row.close, row.volume, row.adjClose)
-        return TupleQuote(row.time, row.close)
+        #TODO -- remove type conversion, crawler should get the right type
+        return TupleQuote(row.time, row.close, int(row.volume))
 
     def __sqlToTick(self, row):
         ''' convert row result to Tick '''

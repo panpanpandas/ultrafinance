@@ -77,12 +77,16 @@ class OneTraker(object):
         self.__smaShort = Sma(10)
         self.__smaMid = Sma(60)
         self.__smaLong = Sma(300)
+        self.__smaVolumeShort = Sma(10)
+        self.__smaVolumeMid = Sma(60)
 
         #state of previous day
         self.__previousTick = None
         self.__previousSmaShort = None
         self.__previousSmaMid = None
         self.__previousSmaLong = None
+        self.__previousSmaVolumeShort = None
+        self.__previousSmaVolumeMid = None
 
 
     def __buyIfMeet(self, tick):
@@ -107,11 +111,11 @@ class OneTraker(object):
             if tick.close/self.__previousTick.close > 1.1:
                 return
 
-            if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue():
+            if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < self.__previousSmaVolumeShort:
                 # assume no commission fee for now
                 self.__placeBuyOrder(tick)
 
-            elif self.__previousSmaLong < self.__previousSmaShort < self.__previousSmaMid and self.__smaLong.getLastValue() < self.__smaMid.getLastValue() < self.__smaShort.getLastValue():
+            elif self.__previousSmaLong < self.__previousSmaShort < self.__previousSmaMid and self.__smaLong.getLastValue() < self.__smaMid.getLastValue() < self.__smaShort.getLastValue() and self.__previousSmaVolumeMid < self.__previousSmaVolumeShort:
                 # assume no commission fee for now
                 self.__placeBuyOrder(tick)
 
@@ -256,7 +260,8 @@ class OneTraker(object):
         self.__previousSmaShort = self.__smaShort.getLastValue()
         self.__previousSmaMid = self.__smaMid.getLastValue()
         self.__previousSmaLong = self.__smaLong.getLastValue()
-
+        self.__previousSmaVolumeShort = self.__smaVolumeShort.getLastValue()
+        self.__previousSmaVolumeMid = self.__smaVolumeMid.getLastValue()
 
     def tickUpdate(self, tick):
         ''' consume ticks '''
@@ -265,6 +270,8 @@ class OneTraker(object):
         self.__smaShort(tick.close)
         self.__smaMid(tick.close)
         self.__smaLong(tick.close)
+        self.__smaVolumeShort(tick.volume)
+        self.__smaVolumeMid(tick.volume)
 
         # if not enough data, skip to reduce risk -- SKIP NEWLY IPOs
         if not self.__smaLong.getLastValue() or not self.__smaMid.getLastValue() or not self.__smaShort.getLastValue():
