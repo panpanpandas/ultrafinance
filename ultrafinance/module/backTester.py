@@ -257,7 +257,7 @@ def getBackTestTableName(symbols, strategyName):
 
 
 if __name__ == "__main__":
-    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 19900101, startTradeDate = 19900101, endTradeDate = 20121212)
+    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 19900101, startTradeDate = 19900101, endTradeDate = 20130903)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()

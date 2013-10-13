@@ -26,7 +26,7 @@ When to Buy:
 from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
 from ultrafinance.pyTaLib.indicator import Sma
-from ultrafinance.backTest.constant import CONF_START_TRADE_DATE
+from ultrafinance.backTest.constant import CONF_START_TRADE_DATE, CONF_BUYING_RATIO
 import math
 
 import logging
@@ -39,11 +39,12 @@ class SMAPortfolioStrategy(BaseStrategy):
         super(SMAPortfolioStrategy, self).__init__("smaPortfolioStrategy")
         self.__trakers = {}
         self.startDate = int(configDict.get(CONF_START_TRADE_DATE))
+        self.buyingRatio = int(configDict.get(CONF_BUYING_RATIO) if CONF_BUYING_RATIO in configDict else 25)
 
     def __setUpTrakers(self):
         ''' set symbols '''
         for symbol in self.symbols:
-            self.__trakers[symbol] = OneTraker(symbol, self)
+            self.__trakers[symbol] = OneTraker(symbol, self, self.buyingRatio)
 
     def orderExecuted(self, orderDict):
         ''' call back for executed order '''
@@ -62,12 +63,13 @@ class SMAPortfolioStrategy(BaseStrategy):
 
 class OneTraker(object):
     ''' tracker for one stock '''
-    def __init__(self, symbol, strategy):
+    def __init__(self, symbol, strategy, buyingRatio):
         ''' constructor '''
 
         self.__symbol = symbol
         self.__strategy = strategy
         self.__startDate = strategy.startDate
+        self.__buyingRatio = buyingRatio
 
         # order id
         self.__stopOrderId = None
@@ -144,8 +146,8 @@ class OneTraker(object):
     def __getCashToBuyStock(self):
         ''' calculate the amount of money to buy stock '''
         account = self.__strategy.getAccountCopy()
-        if (account.getCash() >= account.getTotalValue() / 15):
-            return account.getTotalValue() / 15
+        if (account.getCash() >= account.getTotalValue() / self.__buyingRatio):
+            return account.getTotalValue() / self.__buyingRatio
         else:
             return 0
 
