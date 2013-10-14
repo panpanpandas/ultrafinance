@@ -113,11 +113,11 @@ class OneTraker(object):
             if tick.close/self.__previousTick.close > 1.1:
                 return
 
-            if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < self.__previousSmaVolumeShort:
+            if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < (self.__previousSmaVolumeShort/1.1):
                 # assume no commission fee for now
                 self.__placeBuyOrder(tick)
 
-            elif self.__previousSmaLong < self.__previousSmaShort < self.__previousSmaMid and self.__smaLong.getLastValue() < self.__smaMid.getLastValue() < self.__smaShort.getLastValue() and self.__previousSmaVolumeMid < self.__previousSmaVolumeShort:
+            elif self.__previousSmaLong < self.__previousSmaShort < self.__previousSmaMid and self.__smaLong.getLastValue() < self.__smaMid.getLastValue() < self.__smaShort.getLastValue() and self.__previousSmaVolumeMid < (self.__previousSmaVolumeShort/1.1):
                 # assume no commission fee for now
                 self.__placeBuyOrder(tick)
 
