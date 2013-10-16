@@ -101,15 +101,16 @@ class TickFeeder(object):
         #self.__loadIndex()
 
         for timeStamp in sorted(self.timeTicksDict.iterkeys()):
-            while self.__updatedTick:
-                time.sleep(0)
-
             # make sure trading center finish updating first
             self._freshTradingCenter(self.timeTicksDict[timeStamp])
             #self._freshIndexHelper(self.indexTicksDict.get(timeStamp))
 
             self._freshUpdatedTick(timeStamp, self.timeTicksDict[timeStamp])
             self._updateHistory(timeStamp, self.timeTicksDict[timeStamp], self.indexTicksDict.get(timeStamp))
+
+            while self.__updatedTick:
+                time.sleep(0)
+
 
     def _updateHistory(self, timeStamp, symbolTicksDict, indexTick):
         ''' update history '''
