@@ -25,7 +25,7 @@ When to Buy:
 '''
 from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
-from ultrafinance.pyTaLib.indicator import Sma
+from ultrafinance.pyTaLib.indicator import Sma, MovingLow
 from ultrafinance.backTest.constant import CONF_START_TRADE_DATE, CONF_BUYING_RATIO
 import math
 
@@ -81,10 +81,12 @@ class OneTraker(object):
         self.__smaLong = Sma(300)
         self.__smaVolumeShort = Sma(10)
         self.__smaVolumeMid = Sma(60)
+        self.__movingLowShort = MovingLow(10)
 
         #state of previous day
         self.__previousTick = None
         self.__previousSmaShort = None
+        self.__previousMovingLowShort = None
         self.__previousSmaMid = None
         self.__previousSmaLong = None
         self.__previousSmaVolumeShort = None
@@ -110,7 +112,7 @@ class OneTraker(object):
 
         # place buy order
         if (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaMid.getLastValue() > self.__smaLong.getLastValue()):
-            if tick.close/self.__previousTick.close > 1.1:
+            if tick.close/self.__previousMovingLowShort > 1.2:
                 return
 
             if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < (self.__previousSmaVolumeShort/1.1):
@@ -264,6 +266,7 @@ class OneTraker(object):
         self.__previousSmaLong = self.__smaLong.getLastValue()
         self.__previousSmaVolumeShort = self.__smaVolumeShort.getLastValue()
         self.__previousSmaVolumeMid = self.__smaVolumeMid.getLastValue()
+        self.__previousMovingLowShort = self.__movingLowShort.getLastValue()
 
     def tickUpdate(self, tick):
         ''' consume ticks '''
@@ -274,6 +277,7 @@ class OneTraker(object):
         self.__smaLong(tick.close)
         self.__smaVolumeShort(tick.volume)
         self.__smaVolumeMid(tick.volume)
+        self.__movingLowShort(tick.close)
 
         # if not enough data, skip to reduce risk -- SKIP NEWLY IPOs
         if not self.__smaLong.getLastValue() or not self.__smaMid.getLastValue() or not self.__smaShort.getLastValue():
