@@ -82,11 +82,13 @@ class OneTraker(object):
         self.__smaVolumeShort = Sma(10)
         self.__smaVolumeMid = Sma(60)
         self.__movingLowShort = MovingLow(10)
+        self.__movingLowWeek = MovingLow(3)
 
         #state of previous day
         self.__previousTick = None
         self.__previousSmaShort = None
         self.__previousMovingLowShort = None
+        self.__previousMovingLowWeek = None
         self.__previousSmaMid = None
         self.__previousSmaLong = None
         self.__previousSmaVolumeShort = None
@@ -112,7 +114,7 @@ class OneTraker(object):
 
         # place buy order
         if (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaMid.getLastValue() > self.__smaLong.getLastValue()):
-            if tick.close/self.__previousMovingLowShort > 1.2:
+            if tick.close/self.__previousMovingLowShort < 1.03 or tick.close/self.__previousMovingLowWeek > 1.05:
                 return
 
             if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < (self.__previousSmaVolumeShort/1.1):
@@ -267,6 +269,7 @@ class OneTraker(object):
         self.__previousSmaVolumeShort = self.__smaVolumeShort.getLastValue()
         self.__previousSmaVolumeMid = self.__smaVolumeMid.getLastValue()
         self.__previousMovingLowShort = self.__movingLowShort.getLastValue()
+        self.__previousMovingLowWeek = self.__movingLowWeek.getLastValue()
 
     def tickUpdate(self, tick):
         ''' consume ticks '''
@@ -278,6 +281,7 @@ class OneTraker(object):
         self.__smaVolumeShort(tick.volume)
         self.__smaVolumeMid(tick.volume)
         self.__movingLowShort(tick.close)
+        self.__movingLowWeek(tick.close)
 
         # if not enough data, skip to reduce risk -- SKIP NEWLY IPOs
         if not self.__smaLong.getLastValue() or not self.__smaMid.getLastValue() or not self.__smaShort.getLastValue():
