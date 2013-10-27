@@ -6,12 +6,12 @@ Created on Nov 9, 2011
 from ultrafinance.dam.baseDAM import BaseDAM
 from ultrafinance.model import Quote, Tick, TupleQuote
 from ultrafinance.lib.util import splitListEqually
-from math import ceil
 import sys
 
 from sqlalchemy import Column, Integer, String, Float, Sequence, create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+import time
 
 Base = declarative_base()
 
@@ -103,7 +103,6 @@ class SqlDAM(BaseDAM):
         ''' constructor '''
         super(SqlDAM, self).__init__()
         self.echo = echo
-        self.session = None
         self.first = True
 
     def __getEngine(self):
@@ -118,9 +117,13 @@ class SqlDAM(BaseDAM):
         self.db = setting['db']
         if self.__getEngine() is None:
             SqlDAM.ENGINE_DICT[self.db] = create_engine(self.db, echo = self.echo)
-            SqlDAM.SESSION_DICT[self.db] = sessionmaker(bind = SqlDAM.ENGINE_DICT[self.db])
 
-        self.session = SqlDAM.SESSION_DICT[self.db]()
+    def __getSession(self):
+        ''' get or create session if non-exist '''
+        if self.db not in SqlDAM.SESSION_DICT:
+            SqlDAM.SESSION_DICT[self.db] = sessionmaker(bind = SqlDAM.ENGINE_DICT[self.db])()
+
+        return SqlDAM.SESSION_DICT[self.db]
 
     def __sqlToQuote(self, row):
         ''' convert row result to Quote '''
@@ -152,9 +155,10 @@ class SqlDAM(BaseDAM):
         ''' read quotes '''
         if end is None:
             end = sys.maxint
-        rows = self.session.query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
-                                                        QuoteSql.time >= int(start),
-                                                        QuoteSql.time < int(end)))
+        rows = self.__getSession().query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
+                                                               QuoteSql.time >= int(start),
+                                                               QuoteSql.time < int(end)))
+
 
         return [self.__sqlToQuote(row) for row in rows]
 
@@ -162,9 +166,9 @@ class SqlDAM(BaseDAM):
         ''' read quotes as tuple '''
         if end is None:
             end = sys.maxint
-        rows = self.session.query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
-                                                        QuoteSql.time >= int(start),
-                                                        QuoteSql.time < int(end)))
+        rows = self.__getSession().query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
+                                                               QuoteSql.time >= int(start),
+                                                               QuoteSql.time < int(end)))
 
         return [self.__sqlToTupleQuote(row) for row in rows]
 
@@ -178,14 +182,15 @@ class SqlDAM(BaseDAM):
         ret = {}
         symbolChunks = splitListEqually(symbols, 100)
         for chunk in symbolChunks:
-            rows = self.session.query(QuoteSql).filter(and_(QuoteSql.symbol.in_(chunk),
-                                                            QuoteSql.time >= int(start),
-                                                            QuoteSql.time < int(end)))
+            rows = self.__getSession().query(QuoteSql.symbol, QuoteSql.time, QuoteSql.close, QuoteSql.volume).filter(and_(QuoteSql.symbol.in_(chunk),
+                                                                                                                          QuoteSql.time >= int(start),
+                                                                                                                          QuoteSql.time < int(end)))
 
             for row in rows:
-                if row.symbol not in ret:
-                    ret[row.symbol] = []
-                ret[row.symbol].append(self.__sqlToTupleQuote(row))
+                if row.time not in ret:
+                    ret[row.time] = {}
+
+                ret[row.time][row.symbol] = self.__sqlToTupleQuote(row)
 
         return ret
 
@@ -194,9 +199,9 @@ class SqlDAM(BaseDAM):
         ''' read ticks as tuple '''
         if end is None:
             end = sys.maxint
-        rows = self.session.query(TickSql).filter(and_(TickSql.symbol == self.symbol,
-                                                       TickSql.time >= int(start),
-                                                       TickSql.time < int(end)))
+        rows = self.__getSession().query(TickSql).filter(and_(TickSql.symbol == self.symbol,
+                                                              TickSql.time >= int(start),
+                                                              TickSql.time < int(end)))
 
         return [self.__sqlToTupleTick(row) for row in rows]
 
@@ -204,9 +209,9 @@ class SqlDAM(BaseDAM):
         ''' read ticks '''
         if end is None:
             end = sys.maxint
-        rows = self.session.query(TickSql).filter(and_(TickSql.symbol == self.symbol,
-                                                       TickSql.time >= int(start),
-                                                       TickSql.time < int(end)))
+        rows = self.__getSession().query(TickSql).filter(and_(TickSql.symbol == self.symbol,
+                                                              TickSql.time >= int(start),
+                                                              TickSql.time < int(end)))
 
         return [self.__sqlToTick(row) for row in rows]
 
@@ -216,7 +221,7 @@ class SqlDAM(BaseDAM):
             Base.metadata.create_all(self.__getEngine(), checkfirst = True)
             self.first = False
 
-        self.session.add_all([self.__quoteToSql(quote) for quote in quotes])
+        self.__getSession().add_all([self.__quoteToSql(quote) for quote in quotes])
 
     def writeTicks(self, ticks):
         ''' write ticks '''
@@ -228,7 +233,7 @@ class SqlDAM(BaseDAM):
 
     def commit(self):
         ''' commit changes '''
-        self.session.commit()
+        self.__getSession().commit()
 
     def destruct(self):
         ''' destructor '''
@@ -251,7 +256,7 @@ class SqlDAM(BaseDAM):
 
     def readFundamental(self):
         ''' read fundamental '''
-        rows = self.session.query(FmSql).filter(and_(FmSql.symbol == self.symbol))
+        rows = self.__getSession().query(FmSql).filter(and_(FmSql.symbol == self.symbol))
         return self._sqlToFundamental(rows)
 
     def _sqlToFundamental(self, rows):
