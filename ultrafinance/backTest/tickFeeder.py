@@ -66,11 +66,8 @@ class TickFeeder(object):
 
         LOG.info('Indexing ticks for %s' % self.__symbols)
         try:
-            startTime = time.time()
-
             self.timeTicksDict = self._getSymbolTicksDict(self.__symbols)
 
-            print "reading tooks %d" % (time.time() - startTime)
         except KeyboardInterrupt as ki:
             LOG.warn("Interrupted by user  when loading ticks for %s" % self.__symbols)
             raise ki

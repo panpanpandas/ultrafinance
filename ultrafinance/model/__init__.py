@@ -10,7 +10,7 @@ from ultrafinance.lib.errors import UfException, Errors
 # namedtuple are used to handle data getting from csv or internet
 TICK_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume']
 #QUOTE_FIELDS = ['time', 'open', 'high', 'low', 'close', 'volume', 'adjClose']
-QUOTE_FIELDS = ['time', 'close', 'volume']
+QUOTE_FIELDS = ['time', 'close', 'volume', 'low', 'high']
 
 class Tick(object):
     ''' tick class '''

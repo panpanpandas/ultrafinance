@@ -179,22 +179,22 @@ class TradingCenter(object):
         if Action.BUY == order.action:
             if Type.MARKET == order.type:
                 return True
-            elif Type.LIMIT == order.type and float(tick.close) <= float(order.price):
+            elif Type.LIMIT == order.type and float(tick.low) <= float(order.price):
                 return True
         elif Action.SELL == order.action:
             if Type.MARKET == order.type:
                 return True
-            elif Type.STOP == order.type and float(tick.close) <= float(order.price):
+            elif Type.STOP == order.type and float(tick.low) <= float(order.price):
                 return True
         elif Action.SELL_SHORT == order.action:
             if Type.MARKET == order.type:
                 return True
-            elif Type.LIMIT == order.type and float(tick.close) <= float(order.price):
+            elif Type.LIMIT == order.type and float(tick.high) >= float(order.price):
                 return True
         elif Action.BUY_TO_COVER == order.action:
             if Type.MARKET == order.type:
                 return True
-            elif Type.STOP == order.type and float(tick.close) >= float(order.price):
+            elif Type.STOP == order.type and float(tick.high) >= float(order.price):
                 return True
         else:
             return False

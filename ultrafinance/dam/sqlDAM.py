@@ -133,7 +133,7 @@ class SqlDAM(BaseDAM):
         ''' convert row result to tuple Quote '''
         #return TupleQuote(row.time, row.open, row.high, row.low, row.close, row.volume, row.adjClose)
         #TODO -- remove type conversion, crawler should get the right type
-        return TupleQuote(row.time, row.close, int(row.volume))
+        return TupleQuote(row.time, row.close, int(row.volume), row.low, row.high)
 
     def __sqlToTick(self, row):
         ''' convert row result to Tick '''
@@ -182,9 +182,10 @@ class SqlDAM(BaseDAM):
         ret = {}
         symbolChunks = splitListEqually(symbols, 100)
         for chunk in symbolChunks:
-            rows = self.__getSession().query(QuoteSql.symbol, QuoteSql.time, QuoteSql.close, QuoteSql.volume).filter(and_(QuoteSql.symbol.in_(chunk),
-                                                                                                                          QuoteSql.time >= int(start),
-                                                                                                                          QuoteSql.time < int(end)))
+            rows = self.__getSession().query(QuoteSql.symbol, QuoteSql.time, QuoteSql.close, QuoteSql.volume,
+                                             QuoteSql.low, QuoteSql.high).filter(and_(QuoteSql.symbol.in_(chunk),
+                                                                                      QuoteSql.time >= int(start),
+                                                                                      QuoteSql.time < int(end)))
 
             for row in rows:
                 if row.time not in ret:
