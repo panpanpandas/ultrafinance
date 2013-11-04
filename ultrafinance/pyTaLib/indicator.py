@@ -4,6 +4,7 @@ Created on May 26, 2012
 @author: ppa
 '''
 import numpy
+from numpy import polyval, polyfit
 from math import sqrt
 from collections import deque
 
@@ -45,6 +46,27 @@ class Sma(object):
         if len(self.__stream) > self.__period:
             self.__stream.popleft()
             self.__value = sum(self.__stream) / float(len(self.__stream) )
+            return self.__value
+        else:
+            return None
+
+
+class LinearRegression(object):
+    def __init__(self, period):
+        assert period == int(period) and period > 0, "Period must be an integer > 0"
+        self.__period = period
+        self.__stream = deque()
+        self.__value = None
+
+    def getLastValue(self):
+        return self.__value
+
+    def __call__(self, n):
+        self.__stream.append(n)
+        if len(self.__stream) > self.__period:
+            self.__stream.popleft()
+            (m, b) = polyfit(range(0, self.__period), self.__stream, 1)
+            self.__value = polyval([m, b], self.__period)
             return self.__value
         else:
             return None

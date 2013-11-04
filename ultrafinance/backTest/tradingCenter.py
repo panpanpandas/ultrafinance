@@ -78,7 +78,9 @@ class TradingCenter(object):
 
             LOG.debug("Order placed %s" % order)
 
-            self.__checkAndExecuteOrder(order)
+            # TODO: REMOVE THIS, order should be checked and executed at next quote
+            if order.type != Type.STOP:
+                self.__checkAndExecuteOrder(order)
 
             self.__placedOrder[order.orderId] = order
 

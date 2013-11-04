@@ -31,14 +31,14 @@ LOG = logging.getLogger()
 
 class BackTester(object):
     ''' back testing '''
-    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0, endTradeDate = None, cash = 150000):
+    def __init__(self, configFile, startTickDate = 0, startTradeDate = 0, endTradeDate = None, cash = 150000, symbolLists = None):
         LOG.debug("Loading config from %s" % configFile)
         self.__config = PyConfig()
         self.__config.setSource(configFile)
 
         self.__cash = cash
         self.__mCalculator = MetricCalculator()
-        self.__symbolLists = []
+        self.__symbolLists = symbolLists
         self.__accounts = []
         self.__startTickDate = startTickDate
         self.__startTradeDate = startTradeDate
@@ -52,7 +52,8 @@ class BackTester(object):
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE, self.__startTradeDate)
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_END_TRADE_DATE, self.__endTradeDate)
         self._setupLog()
-        self._loadSymbols()
+        if not self.__symbolLists:
+            self._loadSymbols()
 
     def __getFirstSaver(self):
         ''' get first saver, create it if not exist'''
@@ -84,6 +85,9 @@ class BackTester(object):
         assert symbolFile is not None, "%s is required in config file" % CONF_SYMBOL_FILE
 
         LOG.info("loading symbols from %s" % os.path.join(self.__config.getDir(), symbolFile))
+        if not self.__symbolLists:
+            self.__symbolLists = []
+
         with open(os.path.join(self.__config.getDir(), symbolFile), "r") as f:
             for symbols in f:
                 if symbols not in self.__symbolLists:
@@ -124,8 +128,9 @@ class BackTester(object):
         return holdings
 
     def getMetrics(self):
-        ''' get alll metrics '''
+        ''' get all metrics '''
         return self.__mCalculator.getMetrics()
+
 
     def getOpenOrders(self):
         ''' get open orders '''
@@ -257,7 +262,7 @@ def getBackTestTableName(symbols, strategyName):
 
 
 if __name__ == "__main__":
-    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 19900101, startTradeDate = 19900101, endTradeDate = 20130903)
+    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 20001010, startTradeDate = 20021010, endTradeDate = 20131010, symbolLists = [["TXT"]])
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()

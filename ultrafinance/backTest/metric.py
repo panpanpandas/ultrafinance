@@ -24,6 +24,7 @@ class BasicMetric(BaseMetric):
     ''' basic metrics '''
     MAX_TIME_VALUE = 'maxTimeValue'
     MIN_TIME_VALUE = 'minTimeValue'
+    MAX_DRAW_DOWN = "maxDrawdown"
     STDDEV = 'stddev'
     SRATIO = 'sharpeRatio'
     START_TIME = "startTime"
@@ -45,12 +46,26 @@ class BasicMetric(BaseMetric):
         if not timePositions:
             return self.result
 
+        # get max value, min value, max draw down
+        lastHigest = 0
+        maxDrawDownTimeStamp = 0
+        maxDrawDownPosition = 0
         for (timeStamp, position) in timePositions:
             if self.result[BasicMetric.MAX_TIME_VALUE][0] is None or self.result[BasicMetric.MAX_TIME_VALUE][1] < position:
                 self.result[BasicMetric.MAX_TIME_VALUE] = timeStamp, position
             if self.result[BasicMetric.MIN_TIME_VALUE][0] is None or self.result[BasicMetric.MIN_TIME_VALUE][1] > position:
                 self.result[BasicMetric.MIN_TIME_VALUE] = timeStamp, position
+            if position > lastHigest:
+                lastHigest = position
+                maxDrawDownPosition = position
+                maxDrawDownTimeStamp = timeStamp
+            elif maxDrawDownPosition > position:
+                maxDrawDownPosition = position
+                maxDrawDownTimeStamp = timeStamp
 
+
+        self.result[BasicMetric.MAX_DRAW_DOWN] = (0, 0) if lastHigest == 0 else \
+            (maxDrawDownTimeStamp, 1 - (maxDrawDownPosition / lastHigest))
         self.result[BasicMetric.START_TIME] = timePositions[0][0]
         self.result[BasicMetric.END_TIME] = timePositions[-1][0]
         self.result[BasicMetric.END_VALUE] = timePositions[-1][1]
@@ -61,10 +76,11 @@ class BasicMetric(BaseMetric):
 
     def formatResult(self):
         ''' format result '''
-        return "Lowest value %.2f at %s; Highest %.2f at %s; %s - %s end values %.1f; Sharpe ratio is %.2f" % \
+        return "Lowest value %.2f at %s; Highest %.2f at %s; %s - %s end values %.1f; %s - %s end values %.1f; Sharpe ratio is %.2f" % \
             (self.result[BasicMetric.MIN_TIME_VALUE][1], self.result[BasicMetric.MIN_TIME_VALUE][0],
              self.result[BasicMetric.MAX_TIME_VALUE][1], self.result[BasicMetric.MAX_TIME_VALUE][0],
              self.result[BasicMetric.START_TIME], self.result[BasicMetric.END_TIME], self.result[BasicMetric.END_VALUE],
+             self.result[BasicMetric.MAX_DRAW_DOWN][1], self.result[BaseMetric.MAX_DRAW_DOWN][0],
              self.result[BasicMetric.SRATIO])
 
 class MetricCalculator(object):
