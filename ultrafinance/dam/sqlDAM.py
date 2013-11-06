@@ -9,7 +9,7 @@ from ultrafinance.lib.util import splitListEqually
 import sys
 
 from sqlalchemy import Column, Integer, String, Float, Sequence, create_engine, and_
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 import time
 
@@ -96,34 +96,22 @@ class SqlDAM(BaseDAM):
     '''
     SQL DAM
     '''
-    ENGINE_DICT = {}
-    SESSION_DICT = {}
-
     def __init__(self, echo = False):
         ''' constructor '''
         super(SqlDAM, self).__init__()
         self.echo = echo
         self.first = True
+        self.engine = None
+        self.Session = None
 
-    def __getEngine(self):
-        ''' get engine '''
-        return SqlDAM.ENGINE_DICT.get(self.db)
 
     def setup(self, setting):
         ''' set up '''
         if 'db' not in setting:
             raise Exception("db not specified in setting")
 
-        self.db = setting['db']
-        if self.__getEngine() is None:
-            SqlDAM.ENGINE_DICT[self.db] = create_engine(self.db, echo = self.echo)
-
-    def __getSession(self):
-        ''' get or create session if non-exist '''
-        if self.db not in SqlDAM.SESSION_DICT:
-            SqlDAM.SESSION_DICT[self.db] = sessionmaker(bind = SqlDAM.ENGINE_DICT[self.db])()
-
-        return SqlDAM.SESSION_DICT[self.db]
+        self.engine = create_engine(setting['db'], echo = self.echo)
+        self.Session = scoped_session(sessionmaker(bind = self.engine))
 
     def __sqlToQuote(self, row):
         ''' convert row result to Quote '''
@@ -155,10 +143,14 @@ class SqlDAM(BaseDAM):
         ''' read quotes '''
         if end is None:
             end = sys.maxint
-        rows = self.__getSession().query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
-                                                               QuoteSql.time >= int(start),
-                                                               QuoteSql.time < int(end)))
 
+        session = self.Session()
+        try:
+            rows = session.query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
+                                                            QuoteSql.time >= int(start),
+                                                            QuoteSql.time < int(end)))
+        finally:
+            self.Session.remove()
 
         return [self.__sqlToQuote(row) for row in rows]
 
@@ -166,9 +158,14 @@ class SqlDAM(BaseDAM):
         ''' read quotes as tuple '''
         if end is None:
             end = sys.maxint
-        rows = self.__getSession().query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
-                                                               QuoteSql.time >= int(start),
-                                                               QuoteSql.time < int(end)))
+
+        session = self.Session()
+        try:
+            rows = session.query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
+                                                       QuoteSql.time >= int(start),
+                                                       QuoteSql.time < int(end)))
+        finally:
+            self.Session.remove()
 
         return [self.__sqlToTupleQuote(row) for row in rows]
 
@@ -180,18 +177,22 @@ class SqlDAM(BaseDAM):
             end = sys.maxint
 
         ret = {}
-        symbolChunks = splitListEqually(symbols, 100)
-        for chunk in symbolChunks:
-            rows = self.__getSession().query(QuoteSql.symbol, QuoteSql.time, QuoteSql.close, QuoteSql.volume,
-                                             QuoteSql.low, QuoteSql.high).filter(and_(QuoteSql.symbol.in_(chunk),
-                                                                                      QuoteSql.time >= int(start),
-                                                                                      QuoteSql.time < int(end)))
+        session = self.Session()
+        try:
+            symbolChunks = splitListEqually(symbols, 100)
+            for chunk in symbolChunks:
+                rows = session.query(QuoteSql.symbol, QuoteSql.time, QuoteSql.close, QuoteSql.volume,
+                                     QuoteSql.low, QuoteSql.high).filter(and_(QuoteSql.symbol.in_(chunk),
+                                                                              QuoteSql.time >= int(start),
+                                                                              QuoteSql.time < int(end)))
 
-            for row in rows:
-                if row.time not in ret:
-                    ret[row.time] = {}
+                for row in rows:
+                    if row.time not in ret:
+                        ret[row.time] = {}
 
-                ret[row.time][row.symbol] = self.__sqlToTupleQuote(row)
+                    ret[row.time][row.symbol] = self.__sqlToTupleQuote(row)
+        finally:
+            self.Session.remove()
 
         return ret
 
@@ -200,9 +201,14 @@ class SqlDAM(BaseDAM):
         ''' read ticks as tuple '''
         if end is None:
             end = sys.maxint
-        rows = self.__getSession().query(TickSql).filter(and_(TickSql.symbol == self.symbol,
-                                                              TickSql.time >= int(start),
-                                                              TickSql.time < int(end)))
+
+        session = self.Session()
+        try:
+            rows = session.query(TickSql).filter(and_(TickSql.symbol == self.symbol,
+                                                      TickSql.time >= int(start),
+                                                      TickSql.time < int(end)))
+        finally:
+            self.Session.remove()
 
         return [self.__sqlToTupleTick(row) for row in rows]
 
@@ -210,36 +216,53 @@ class SqlDAM(BaseDAM):
         ''' read ticks '''
         if end is None:
             end = sys.maxint
-        rows = self.__getSession().query(TickSql).filter(and_(TickSql.symbol == self.symbol,
-                                                              TickSql.time >= int(start),
-                                                              TickSql.time < int(end)))
+
+        session = self.Session()
+        try:
+            rows = session.query(TickSql).filter(and_(TickSql.symbol == self.symbol,
+                                                      TickSql.time >= int(start),
+                                                      TickSql.time < int(end)))
+        finally:
+            self.Session.remove()
 
         return [self.__sqlToTick(row) for row in rows]
 
     def writeQuotes(self, quotes):
         ''' write quotes '''
         if self.first:
-            Base.metadata.create_all(self.__getEngine(), checkfirst = True)
+            Base.metadata.create_all(self.engine, checkfirst = True)
             self.first = False
 
-        self.__getSession().add_all([self.__quoteToSql(quote) for quote in quotes])
+        session = self.Session()
+        try:
+            session.add_all([self.__quoteToSql(quote) for quote in quotes])
+        finally:
+            self.Session.remove()
 
     def writeTicks(self, ticks):
         ''' write ticks '''
         if self.first:
-            Base.metadata.create_all(self.__getEngine(), checkfirst = True)
+            Base.metadata.create_all(self.engine, checkfirst = True)
             self.first = False
 
-        self.session.add_all([self.__tickToSql(tick) for tick in ticks])
+        session = self.Session()
+        try:
+            session.add_all([self.__tickToSql(tick) for tick in ticks])
+        finally:
+            self.Session.remove()
 
     def commit(self):
         ''' commit changes '''
-        self.__getSession().commit()
+        session = self.Session()
+        try:
+            session.commit()
+        finally:
+            self.Session.remove()
+
 
     def destruct(self):
         ''' destructor '''
-        if (self.session):
-            self.session.close()
+        self.Session.remove()
 
     '''
     read/write fundamentals
@@ -253,7 +276,11 @@ class SqlDAM(BaseDAM):
             self.first = False
 
         sqls = self._fundamentalToSqls(keyTimeValueDict)
-        self.session.add_all(sqls)
+        session = self.Session()
+        try:
+            session.add_all(sqls)
+        finally:
+            self.Session.remove()
 
     def readFundamental(self):
         ''' read fundamental '''

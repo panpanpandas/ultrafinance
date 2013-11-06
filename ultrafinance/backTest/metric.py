@@ -24,7 +24,7 @@ class BasicMetric(BaseMetric):
     ''' basic metrics '''
     MAX_TIME_VALUE = 'maxTimeValue'
     MIN_TIME_VALUE = 'minTimeValue'
-    MAX_DRAW_DOWN = "maxDrawdown"
+    MAX_DRAW_DOWN = "maxDrawDown"
     STDDEV = 'stddev'
     SRATIO = 'sharpeRatio'
     START_TIME = "startTime"

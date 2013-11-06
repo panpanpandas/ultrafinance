@@ -39,6 +39,7 @@ class BackTester(object):
         self.__cash = cash
         self.__mCalculator = MetricCalculator()
         self.__symbolLists = symbolLists
+        LOG.debug(self.__symbolLists)
         self.__accounts = []
         self.__startTickDate = startTickDate
         self.__startTradeDate = startTradeDate
@@ -52,6 +53,7 @@ class BackTester(object):
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE, self.__startTradeDate)
         self.__config.override(CONF_ULTRAFINANCE_SECTION, CONF_END_TRADE_DATE, self.__endTradeDate)
         self._setupLog()
+        LOG.debug(self.__symbolLists)
         if not self.__symbolLists:
             self._loadSymbols()
 
@@ -260,9 +262,8 @@ def getBackTestTableName(symbols, strategyName):
     return "%s_%s" % (symbols if len(symbols) <= 1 else len(symbols), strategyName)
 
 
-
 if __name__ == "__main__":
-    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 20001010, startTradeDate = 20021010, endTradeDate = 20131010, symbolLists = [["TXT"]])
+    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 20001010, startTradeDate = 20021010, endTradeDate = 20131010)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()
