@@ -109,9 +109,9 @@ class BackTester(object):
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbols, excp, traceback.format_exc(8)))
 
-    def getLatestStates(self, num = 60):
-        ''' get latest state for numb days'''
-        return [json.loads(str(result)) for result in self.__getFirstSaver().getStates(int(getDateString(num)), None)]
+    def getLatestStates(self):
+        ''' get latest state'''
+        return [json.loads(str(result)) for result in self.__getFirstSaver().getStates(0, None)]
 
     def getLatestPlacedOrders(self, num = 20):
         ''' get latest placed orders of first symbol list '''
@@ -263,7 +263,7 @@ def getBackTestTableName(symbols, strategyName):
 
 
 if __name__ == "__main__":
-    backTester = BackTester("backtest_smaPortfolio.ini", startTickDate = 20001010, startTradeDate = 20021010, endTradeDate = 20131010)
+    backTester = BackTester("backtest_zscorePortfolio.ini", startTickDate = 20001010, startTradeDate = 20021010, endTradeDate = 20131010)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()
