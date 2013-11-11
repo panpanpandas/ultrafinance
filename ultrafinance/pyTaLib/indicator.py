@@ -93,7 +93,7 @@ class MovingLow(object):
             return None
 
 
-
+'''
 class ZScoreForDollarVolume(object):
     def __init__(self, period):
         assert period == int(period) and period > 0, "Period must be an integer > 0"
@@ -122,7 +122,38 @@ class ZScoreForDollarVolume(object):
             return self.__value
         else:
             return None
+'''
 
+class ZScoreForDollarVolume(object):
+    def __init__(self, period):
+        assert period == int(period) and period > 0, "Period must be an integer > 0"
+        self.__period = period
+        self.__multiples = deque()
+        self.__value = None
+
+    def getLastValue(self):
+        return self.__value
+
+    def __call__(self, price, volume):
+        if volume <= 0 or price <= 0:
+            return
+
+        self.__multiples.append(price * volume)
+
+        if len(self.__multiples) > self.__period:
+            self.__multiples.popleft()
+
+            # normalize dollar volume with z-score
+            dv_z = stats.zscore(self.__multiples)
+
+            self.__value = dv_z[-1]
+
+            if self.__value < -2.5:
+                print self.__multiples
+
+            return self.__value
+        else:
+            return None
 
 class Vwap(object):
     def __init__(self, period):

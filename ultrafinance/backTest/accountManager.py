@@ -4,6 +4,7 @@ Created on Jan 29, 2011
 @author: ppa
 '''
 from ultrafinance.backTest.account import Account
+from ultrafinance.backTest.constant import STATE_SAVER_ACCOUNT, STATE_SAVER_HOLDING_VALUE
 
 import copy
 
@@ -48,11 +49,13 @@ class AccountManager(object):
         for accountId, account in self.__accounts.items():
             account.setLastTickDict(tickDict)
             position = account.getTotalValue()
+            holdingValue = account.getHoldingValue()
 
             self.__accountPositions[accountId].append((curTime, position))
             #record
             if self.saver:
-                self.saver.write(curTime, "account", position)
+                self.saver.write(curTime, STATE_SAVER_ACCOUNT, position)
+                self.saver.write(curTime, STATE_SAVER_HOLDING_VALUE, holdingValue)
 
             if position < 0:
                 raise Exception("account %s value %s less than 0" % (accountId, position))

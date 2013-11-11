@@ -20,7 +20,8 @@ class testGoogleFinance(unittest.TestCase):
 
     def testGetQuotes(self):
         googleFinance = GoogleFinance()
-        data = googleFinance.getQuotes('NASDAQ:EBAY', '20110101', '20110110')
+        data = googleFinance.getQuotes('NASDAQ:EBAY', '20131101', None)
+        print [str(q) for q in data]
         assert len(data)
 
     def testGetAll(self):

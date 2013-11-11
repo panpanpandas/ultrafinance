@@ -92,7 +92,7 @@ class OneTraker(object):
         ''' place sell order '''
         if self.__buyOrder:
             sellOrder = Order(accountId = self.__strategy.accountId,
-                             action = Action.BUY,
+                             action = Action.SELL,
                              type = Type.MARKET,
                              symbol = self.__symbol,
                              share = self.__buyOrder.share)
@@ -122,9 +122,10 @@ class OneTraker(object):
             self.__dateCounter = 0
             self.__placeBuyOrder(tick)
 
-        elif self.__buyOrder and (self.__dateCounter > self.__holdDays or tick.close < self.__buyOrder.price * 0.95):
+        elif self.__buyOrder and (self.__dateCounter > self.__holdDays or tick.close < self.__buyOrder.price * 0.90):
             self.__placeSellOrder(tick)
 
         if self.__buyOrder:
+            print self.__dateCounter
             self.__dateCounter += 1
 

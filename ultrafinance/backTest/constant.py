@@ -38,5 +38,6 @@ EVENT_ORDER_EXECUTED = "orderExecuted"
 
 #state saver
 STATE_SAVER_ACCOUNT = "account"
+STATE_SAVER_HOLDING_VALUE = "holdingValue"
 STATE_SAVER_UPDATED_ORDERS = "updatedOrders"
 STATE_SAVER_PLACED_ORDERS = "placedOrders"
