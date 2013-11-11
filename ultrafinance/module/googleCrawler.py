@@ -109,7 +109,7 @@ class GoogleCrawler(object):
             time.sleep(5)
 
 if __name__ == '__main__':
-    crawler = GoogleCrawler(["AAPL", "EBAY", "GOOG"], "20130401")
+    crawler = GoogleCrawler(["AAPL", "EBAY", "GOOG"], "20131101")
     crawler.getAndSaveSymbols()
     print("Sqlite location: %s" % crawler.sqlLocation)
     print("Succeeded: %s" % crawler.succeeded)
