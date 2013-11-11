@@ -7,7 +7,6 @@ Created on Dec 3, 2011
 from ultrafinance.backTest.tickSubscriber.strategies.strategyFactory import StrategyFactory
 from ultrafinance.backTest.tradingCenter import TradingCenter
 from ultrafinance.backTest.tickFeeder import TickFeeder
-from ultrafinance.lib.util import getDateString
 from ultrafinance.backTest.tradingEngine import TradingEngine
 from ultrafinance.backTest.accountManager import AccountManager
 from ultrafinance.ufConfig.pyConfig import PyConfig

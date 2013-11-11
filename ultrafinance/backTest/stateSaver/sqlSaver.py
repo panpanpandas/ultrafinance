@@ -166,6 +166,18 @@ class SqlSaver(StateSaver):
         conn.execute(self.table.insert(), updates)
         LOG.info("committed table %s at %s" % (self.table, self.db))
 
+def listTableNames(db):
+    ''' list names of tables '''
+    try:
+        engine = create_engine(db, echo = False)
+        metadata = MetaData()
+        metadata.reflect(engine)
+        return metadata.tables.keys()
+    except Exception as ex:
+        LOG.error("Unknown error " + str(ex))
+        return []
+
+
 if __name__ == '__main__':
     s = SqlSaver()
     s.setup({'db': 'sqlite:////data/test_output.sqlite'}, 'unittest_outputSaver')
@@ -174,3 +186,4 @@ if __name__ == '__main__':
         s.write(123456, STATE_SAVER_HOLDING_VALUE, 10000)
         s.commit()
 
+    print listTableNames("sqlite:////data/output.sqlite")
