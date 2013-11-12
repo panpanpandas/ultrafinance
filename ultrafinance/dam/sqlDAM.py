@@ -104,6 +104,7 @@ class SqlDAM(BaseDAM):
         self.engine = None
         self.ReadSession = None
         self.WriteSession = None
+        self.writeSession = None
 
 
     def setup(self, setting):
@@ -120,13 +121,13 @@ class SqlDAM(BaseDAM):
 
         return self.ReadSession
 
-
     def getWriteSession(self):
-        ''' return unscope session '''
+        ''' return unscope session, TODO, make it clear '''
         if self.WriteSession is None:
             self.WriteSession = sessionmaker(bind = self.engine)
+            self.writeSession = self.WriteSession()
 
-        return self.WriteSession
+        return self.writeSession
 
     def __sqlToQuote(self, row):
         ''' convert row result to Quote '''
@@ -159,7 +160,7 @@ class SqlDAM(BaseDAM):
         if end is None:
             end = sys.maxint
 
-        session = self.getReadSession()
+        session = self.getReadSession()()
         try:
             rows = session.query(QuoteSql).filter(and_(QuoteSql.symbol == self.symbol,
                                                             QuoteSql.time >= int(start),
@@ -248,7 +249,7 @@ class SqlDAM(BaseDAM):
             Base.metadata.create_all(self.engine, checkfirst = True)
             self.first = False
 
-        session = self.getWriteSession()()
+        session = self.getWriteSession()
         session.add_all([self.__quoteToSql(quote) for quote in quotes])
 
 
@@ -258,20 +259,23 @@ class SqlDAM(BaseDAM):
             Base.metadata.create_all(self.engine, checkfirst = True)
             self.first = False
 
-        session = self.getWriteSession()()
+        session = self.getWriteSession()
         session.add_all([self.__tickToSql(tick) for tick in ticks])
 
     def commit(self):
         ''' commit changes '''
-        session = self.getWriteSession()()
+        session = self.getWriteSession()
         session.commit()
 
     def destruct(self):
         ''' destructor '''
         if self.getWriteSession():
-            self.getWriteSession().remove()
+            self.WriteSession.remove()
+            self.WriteSession = None
+            self.writeSession = None
         if self.getReadSession():
             self.getReadSession().remove()
+            self.ReadSession = None
 
 
     '''
