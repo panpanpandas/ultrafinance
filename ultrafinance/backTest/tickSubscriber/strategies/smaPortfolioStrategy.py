@@ -100,10 +100,10 @@ class OneTraker(object):
         # place short sell order
         '''
         if (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaMid.getLastValue() < self.__smaLong.getLastValue()):
-            if tick.close/self.__previousTick.close < 0.9:
+            if tick.close/self.__previousMovingLowWeek < 0.95:
                 return
 
-            if self.__previousSmaShort > self.__previousSmaLong and self.__smaShort.getLastValue() < self.__smaLong.getLastValue():
+            if self.__previousSmaShort > self.__previousSmaLong and self.__smaShort.getLastValue() < self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < (self.__previousSmaVolumeShort/1.1):
                 # assume no commission fee for now
                 self.__placeSellShortOrder(tick)
 
@@ -111,10 +111,9 @@ class OneTraker(object):
                 # assume no commission fee for now
                 self.__placeSellShortOrder(tick)
         '''
-
         # place buy order
         if (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaMid.getLastValue() > self.__smaLong.getLastValue()):
-            if tick.close/self.__previousMovingLowShort < 1.03 or tick.close/self.__previousMovingLowWeek > 1.05:
+            if tick.close/self.__previousMovingLowWeek > 1.05:
                 return
 
             if self.__previousSmaShort < self.__previousSmaLong and self.__smaShort.getLastValue() > self.__smaLong.getLastValue() and self.__previousSmaVolumeMid < (self.__previousSmaVolumeShort/1.1):
@@ -190,27 +189,7 @@ class OneTraker(object):
 
     def __sellIfMeet(self, tick):
         ''' place sell order if conditions meet '''
-        '''
-        if self.__stopOrder.action == Action.BUY_TO_COVER and self.__previousSmaShort < self.__previousSmaMid and self.__previousSmaShort < self.__previousSmaLong\
-            and (self.__smaShort.getLastValue() > self.__smaLong.getLastValue() or self.__smaShort.getLastValue() > self.__smaMid.getLastValue()):
-            self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
-                                  action = Action.BUY_TO_COVER,
-                                  type = Type.MARKET,
-                                  symbol = self.__symbol,
-                                  share = self.__stopOrder.share) )
-            self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
-            self.__clearStopOrder()
-        '''
-        if self.__stopOrder.action == Action.SELL and self.__previousSmaShort > self.__previousSmaMid and self.__previousSmaShort > self.__previousSmaLong\
-            and (self.__smaShort.getLastValue() < self.__smaLong.getLastValue() or self.__smaShort.getLastValue() < self.__smaMid.getLastValue()):
-            self.__strategy.placeOrder(Order(accountId = self.__strategy.accountId,
-                                  action = Action.SELL,
-                                  type = Type.MARKET,
-                                  symbol = self.__symbol,
-                                  share = self.__stopOrder.share) )
-            self.__strategy.tradingEngine.cancelOrder(self.__symbol, self.__stopOrderId)
-            self.__clearStopOrder()
-
+        pass
 
     def orderExecuted(self, orderId):
         ''' call back for executed order '''

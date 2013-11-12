@@ -74,20 +74,13 @@ class TickFeeder(object):
         except BaseException as excp:
             LOG.warn("Unknown exception when loading ticks for %s: except %s, traceback %s" % (self.__symbols, excp, traceback.format_exc(8)))
 
-    """
+
     def __loadIndex(self):
         ''' generate timeTicksDict based on source DAM'''
-        LOG.debug('Start loading ticks, it may take a while......')
-        indexTicksDict = {}
+        LOG.debug('Start loading index ticks, it may take a while......')
+        timeTicksDict = self._getSymbolTicksDict(self.__indexSymbol)
 
-        LOG.debug('loading index...')
-        ticks = self._getSymbolTicksDict(self.__indexSymbol)
-
-        for tick in ticks:
-            indexTicksDict[tick.time] = tick
-
-        return indexTicksDict
-    """
+        return timeTicksDict
 
     def execute(self):
         ''' execute func '''
