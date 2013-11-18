@@ -10,7 +10,7 @@ from ultrafinance.model import Order
 from sqlalchemy import Table, Column, Integer, String, create_engine, MetaData, and_, select
 from sqlalchemy.ext.declarative import declarative_base
 
-from ultrafinance.backTest.constant import STATE_SAVER_ACCOUNT, STATE_SAVER_UPDATED_ORDERS, STATE_SAVER_PLACED_ORDERS, STATE_SAVER_HOLDING_VALUE
+from ultrafinance.backTest.constant import STATE_SAVER_ACCOUNT, STATE_SAVER_UPDATED_ORDERS, STATE_SAVER_PLACED_ORDERS, STATE_SAVER_HOLDING_VALUE, STATE_SAVER_INDEX_PRICE
 
 import sys
 import json
@@ -22,11 +22,12 @@ Base = declarative_base()
 
 class BackTestResult(object):
     ''' back test result class '''
-    def __init__(self, time, account, holdingValue, updateOrders, placedOrders):
+    def __init__(self, time, account, holdingValue, indexPrice, updateOrders, placedOrders):
         ''' constructor '''
         self.time = time
         self.account = account
         self.holdingValue = holdingValue
+        self.indexPrice = indexPrice
         self.updateOrders = updateOrders
         self.placedOrders = placedOrders
 
@@ -35,6 +36,7 @@ class BackTestResult(object):
         return json.dumps({"time": self.time,
                            STATE_SAVER_ACCOUNT: self.account,
                            STATE_SAVER_HOLDING_VALUE: self.holdingValue,
+                           STATE_SAVER_INDEX_PRICE: self.indexPrice,
                            STATE_SAVER_UPDATED_ORDERS: [json.loads(str(order)) for order in self.updateOrders],
                            STATE_SAVER_PLACED_ORDERS: [json.loads(str(order)) for order in self.placedOrders]})
 
@@ -42,6 +44,7 @@ class SqlSaver(StateSaver):
     ''' sql saver '''
     COLUMNS = [Column('time', Integer, primary_key = True),
                Column(STATE_SAVER_ACCOUNT, String(40)),
+               Column(STATE_SAVER_INDEX_PRICE, String(40)),
                Column(STATE_SAVER_UPDATED_ORDERS, String(200)),
                Column(STATE_SAVER_HOLDING_VALUE, String(40)),
                Column(STATE_SAVER_PLACED_ORDERS, String(200))]
@@ -111,6 +114,7 @@ class SqlSaver(StateSaver):
             return BackTestResult(row['time'],
                                   row[STATE_SAVER_ACCOUNT],
                                   row[STATE_SAVER_HOLDING_VALUE],
+                                  row[STATE_SAVER_INDEX_PRICE],
                                   [Order.fromStr(orderString) for orderString in json.loads(row[STATE_SAVER_UPDATED_ORDERS])],
                                   [Order.fromStr(orderString) for orderString in json.loads(row[STATE_SAVER_PLACED_ORDERS])])
         except Exception as ex:
@@ -151,6 +155,8 @@ class SqlSaver(StateSaver):
                 update[STATE_SAVER_ACCOUNT] = ""
             if STATE_SAVER_HOLDING_VALUE not in update:
                 update[STATE_SAVER_HOLDING_VALUE] = ""
+            if STATE_SAVER_INDEX_PRICE not in update:
+                update[STATE_SAVER_INDEX_PRICE] = ""
             if STATE_SAVER_PLACED_ORDERS not in update:
                 update[STATE_SAVER_PLACED_ORDERS] = "[]"
             if STATE_SAVER_UPDATED_ORDERS not in update:

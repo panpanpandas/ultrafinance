@@ -8,7 +8,6 @@ LOG = logging.getLogger()
 
 class IndexHelper(object):
     ''' helper class providing index info '''
-    MAX_SIZE = 252
 
     def __init__(self):
         ''' constructor '''

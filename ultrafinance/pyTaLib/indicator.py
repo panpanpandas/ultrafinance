@@ -181,4 +181,10 @@ class Vwap(object):
         else:
             return None
 
+def rsquared(x, y):
+    """ Return R^2 where x and y are array-like."""
+    if not x or not y or len(x) != len(y):
+        return -1
 
+    _, _, r_value, _, _ = stats.linregress(x, y)
+    return r_value**2

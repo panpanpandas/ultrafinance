@@ -8,6 +8,7 @@ from threading import Thread
 
 from ultrafinance.backTest.appGlobal import appGlobal
 from ultrafinance.backTest.constant import TRADE_TYPE, TICK, QUOTE
+from ultrafinance.backTest.constant import STATE_SAVER_INDEX_PRICE
 
 import traceback
 import time
@@ -28,13 +29,10 @@ class TickFeeder(object):
         self.__intervalTimeout = intervalTimeout
         self.start = start
         self.end = end
-        self.__indexDam = None
         self.tradingCenter = None
-        self.indexHelper = None
-        self.hisotry = None
+        self.saver = None
         self.__updatedTick = None
         self.timeTicksDict = {}
-        self.indexTicksDict = {}
 
     def getUpdatedTick(self):
         ''' return timeTickTuple with status changes '''
@@ -78,30 +76,30 @@ class TickFeeder(object):
     def __loadIndex(self):
         ''' generate timeTicksDict based on source DAM'''
         LOG.debug('Start loading index ticks, it may take a while......')
-        timeTicksDict = self._getSymbolTicksDict(self.__indexSymbol)
+        try:
+            return self._getSymbolTicksDict([self.__indexSymbol])
 
-        return timeTicksDict
+        except KeyboardInterrupt as ki:
+            LOG.warn("Interrupted by user  when loading ticks for %s" % self.__indexSymbol)
+            raise ki
+        except BaseException as excp:
+            LOG.warn("Unknown exception when loading ticks for %s: except %s, traceback %s" % (self.__indexSymbol, excp, traceback.format_exc(8)))
+
+        return {}
 
     def execute(self):
         ''' execute func '''
         self.__loadTicks()
-        #self.__loadIndex()
 
         for timeStamp in sorted(self.timeTicksDict.iterkeys()):
             # make sure trading center finish updating first
             self._freshTradingCenter(self.timeTicksDict[timeStamp])
-            #self._freshIndexHelper(self.indexTicksDict.get(timeStamp))
 
             self._freshUpdatedTick(timeStamp, self.timeTicksDict[timeStamp])
-            self._updateHistory(timeStamp, self.timeTicksDict[timeStamp], self.indexTicksDict.get(timeStamp))
+            #self._updateHistory(timeStamp, self.timeTicksDict[timeStamp], self.indexTicksDict.get(timeStamp))
 
             while self.__updatedTick:
                 time.sleep(0)
-
-
-    def _updateHistory(self, timeStamp, symbolTicksDict, indexTick):
-        ''' update history '''
-        self.hisotry.update(timeStamp, symbolTicksDict, indexTick)
 
     def _freshUpdatedTick(self, timeStamp, symbolTicksDict):
         ''' update self.__updatedTick '''
@@ -111,21 +109,33 @@ class TickFeeder(object):
         ''' feed trading center ticks '''
         self.tradingCenter.consumeTicks(symbolTicksDict)
 
-    def _freshIndexHelper(self, tick):
-        ''' update self.__updatedTick '''
-        self.indexHelper.appendTick(tick)
-
     def complete(self):
-        ''' call when complete feeding ticks '''
-        pass
+        '''
+        call when complete feeding ticks
+        write history to saver
+        '''
+        try:
+            if not self.saver:
+                return
 
-    def setIndexDam(self, dam):
-        ''' set index dam '''
-        self.__indexDam = dam
+            timeITicksDict = self.__loadIndex()
+            if timeITicksDict:
+                for time, symbolDict in timeITicksDict.iteritems():
+                    for symbol in symbolDict.keys():
+                        self.saver.write(time, STATE_SAVER_INDEX_PRICE, symbolDict[symbol].close)
+                        break # should only have one benchmark
+
+        except Exception as ex:
+            LOG.warn("Unknown error when recording index info:" + str(ex))
 
     def setSymbols(self, symbols):
         ''' set symbols '''
         self.__symbols = symbols
+
+    def setIndexSymbol(self, indexSymbol):
+        ''' set symbols '''
+        self.__indexSymbol = indexSymbol
+
 
     def setDam(self, dam):
         ''' set source dam '''

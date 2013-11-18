@@ -171,6 +171,7 @@ class TestRunner(object):
         self.__tradingEngine.orderProxy = self.__tradingCenter
         self.__tradingCenter.accountManager = self.__accountManager
         self.__tradingEngine.saver = self.__saver
+        self.__tickFeeder.saver = self.__saver
         self.__accountManager.saver = self.__saver
 
     def _setupTradingCenter(self):
@@ -180,14 +181,11 @@ class TestRunner(object):
     def _setupTickFeeder(self):
         ''' setup tickFeeder'''
         self.__tickFeeder.indexHelper = self.__indexHelper
-        self.__tickFeeder.hisotry = self.__history
         self.__tickFeeder.setSymbols(self.__symbols)
         self.__tickFeeder.setDam(self._createDam("")) # no need to set symbol because it's batch operation
 
-        #set index dam
-        #iSymbol = self.__config.getOption(CONF_APP_MAIN, CONF_INDEX)
-        #iDam = self._createDam(iSymbol)
-        #self.__tickFeeder.setIndexDam(iDam)
+        iSymbol = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_INDEX)
+        self.__tickFeeder.setIndexSymbol(iSymbol)
 
     def _createDam(self, symbol):
         ''' setup Dam'''
@@ -212,7 +210,6 @@ class TestRunner(object):
         strategy = StrategyFactory.createStrategy(self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME),
                                                   self.__config.getSection(CONF_ULTRAFINANCE_SECTION))
         strategy.setSymbols(self.__symbols)
-        strategy.indexHelper = self.__indexHelper
         strategy.history = self.__history
 
         #associate account
@@ -234,10 +231,13 @@ class TestRunner(object):
 
         #start tickFeeder
         self.__tickFeeder.execute()
-        self.__tradingEngine.stop()
-        thread.join(timeout = 60)
-
+        self.__tickFeeder.complete()
         self.__mCalculator.calculate(self.__symbols, self.__accountManager.getAccountPostions(self.__accountId))
+
+        self.__tradingEngine.stop()
+        thread.join(timeout = 240)
+
+
 
     def _printResult(self):
         ''' print result'''
