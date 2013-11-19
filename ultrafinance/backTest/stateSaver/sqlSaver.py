@@ -148,15 +148,14 @@ class SqlSaver(StateSaver):
         # write values
         updates = []
         for row, colValueDict in self.__writeCache.iteritems():
+            if STATE_SAVER_ACCOUNT not in colValueDict or STATE_SAVER_INDEX_PRICE not in colValueDict:
+                continue
+
             update = {'time': row}
             update.update(colValueDict)
             # fill column that are empty
-            if STATE_SAVER_ACCOUNT not in update:
-                update[STATE_SAVER_ACCOUNT] = ""
             if STATE_SAVER_HOLDING_VALUE not in update:
                 update[STATE_SAVER_HOLDING_VALUE] = ""
-            if STATE_SAVER_INDEX_PRICE not in update:
-                update[STATE_SAVER_INDEX_PRICE] = ""
             if STATE_SAVER_PLACED_ORDERS not in update:
                 update[STATE_SAVER_PLACED_ORDERS] = "[]"
             if STATE_SAVER_UPDATED_ORDERS not in update:

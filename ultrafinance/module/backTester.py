@@ -232,7 +232,7 @@ class TestRunner(object):
         #start tickFeeder
         self.__tickFeeder.execute()
         self.__tickFeeder.complete()
-        self.__mCalculator.calculate(self.__symbols, self.__accountManager.getAccountPostions(self.__accountId))
+        self.__mCalculator.calculate(self.__symbols, self.__accountManager.getAccountPostions(self.__accountId), self.__tickFeeder.iTimePositions)
 
         self.__tradingEngine.stop()
         thread.join(timeout = 240)
