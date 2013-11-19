@@ -30,7 +30,7 @@ class BasicMetric(BaseMetric):
     START_TIME = "startTime"
     END_TIME="endTime"
     END_VALUE="endValue"
-    R_SQUIRED = "rSquired"
+    R_SQUARED = "rSquared"
 
     def __init__(self):
         super(BasicMetric, self).__init__()
@@ -38,7 +38,7 @@ class BasicMetric(BaseMetric):
                        BasicMetric.MIN_TIME_VALUE: (None, -1),
                        BasicMetric.STDDEV:-1,
                        BasicMetric.SRATIO:-1,
-                       BasicMetric.R_SQUIRED:-1,
+                       BasicMetric.R_SQUARED:-1,
                        BasicMetric.START_TIME:-1,
                        BasicMetric.END_TIME:-1,
                        BasicMetric.END_VALUE:-1}
@@ -72,18 +72,18 @@ class BasicMetric(BaseMetric):
         self.result[BasicMetric.END_VALUE] = timePositions[-1][1]
         self.result[BasicMetric.STDDEV] = stddev([timePosition[1] for timePosition in timePositions])
         self.result[BasicMetric.SRATIO] = sharpeRatio([timePosition[1] for timePosition in timePositions])
-        self.result[BasicMetric.R_SQUIRED] = rsquared([tp[1] for tp in timePositions], [iTimePositionDict.get(tp[0], tp[1]) for tp in timePositions])
+        self.result[BasicMetric.R_SQUARED] = rsquared([tp[1] for tp in timePositions], [iTimePositionDict.get(tp[0], tp[1]) for tp in timePositions])
 
         return self.result
 
     def formatResult(self):
         ''' format result '''
-        return "Lowest value %.2f at %s; Highest %.2f at %s; %s - %s end values %.1f; %s - %s end values %.1f; Sharpe ratio is %.2f; r squired is %.2f" % \
+        return "Lowest value %.2f at %s; Highest %.2f at %s; %s - %s end values %.1f; %s - %s end values %.1f; Sharpe ratio is %.2f; r squared is %.2f" % \
             (self.result[BasicMetric.MIN_TIME_VALUE][1], self.result[BasicMetric.MIN_TIME_VALUE][0],
              self.result[BasicMetric.MAX_TIME_VALUE][1], self.result[BasicMetric.MAX_TIME_VALUE][0],
              self.result[BasicMetric.START_TIME], self.result[BasicMetric.END_TIME], self.result[BasicMetric.END_VALUE],
              self.result[BasicMetric.MAX_DRAW_DOWN][1], self.result[BaseMetric.MAX_DRAW_DOWN][0],
-             self.result[BasicMetric.SRATIO], self.result[BasicMetric.R_SQUIRED])
+             self.result[BasicMetric.SRATIO], self.result[BasicMetric.R_SQUARED])
 
 class MetricCalculator(object):
     ''' TODO: make it more generic for more metrics '''
