@@ -33,7 +33,7 @@ class TickFeeder(object):
         self.saver = None
         self.__updatedTick = None
         self.timeTicksDict = {}
-        self.iTimePositions = []
+        self.iTimePositionDict = {}
 
     def getUpdatedTick(self):
         ''' return timeTickTuple with status changes '''
@@ -124,7 +124,7 @@ class TickFeeder(object):
                 for time, symbolDict in timeITicksDict.iteritems():
                     for symbol in symbolDict.keys():
                         self.saver.write(time, STATE_SAVER_INDEX_PRICE, symbolDict[symbol].close)
-                        self.iTimePositions.append((time, symbolDict[symbol].close))
+                        self.iTimePositionDict[time] = symbolDict[symbol].close
                         break # should only have one benchmark
 
 

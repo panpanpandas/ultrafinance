@@ -232,7 +232,14 @@ class TestRunner(object):
         #start tickFeeder
         self.__tickFeeder.execute()
         self.__tickFeeder.complete()
-        self.__mCalculator.calculate(self.__symbols, self.__accountManager.getAccountPostions(self.__accountId), self.__tickFeeder.iTimePositions)
+
+        timePositions = self.__accountManager.getAccountPostions(self.__accountId)
+        startTradeDate = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_START_TRADE_DATE)
+        if startTradeDate:
+            startTradeDate = int(startTradeDate)
+            timePositions = [tp for tp in timePositions if tp[0] >= startTradeDate]
+
+        self.__mCalculator.calculate(self.__symbols, timePositions, self.__tickFeeder.iTimePositionDict)
 
         self.__tradingEngine.stop()
         thread.join(timeout = 240)

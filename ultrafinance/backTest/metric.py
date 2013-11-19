@@ -38,11 +38,12 @@ class BasicMetric(BaseMetric):
                        BasicMetric.MIN_TIME_VALUE: (None, -1),
                        BasicMetric.STDDEV:-1,
                        BasicMetric.SRATIO:-1,
+                       BasicMetric.R_SQUIRED:-1,
                        BasicMetric.START_TIME:-1,
                        BasicMetric.END_TIME:-1,
                        BasicMetric.END_VALUE:-1}
 
-    def calculate(self, timePositions, iTimePositions):
+    def calculate(self, timePositions, iTimePositionDict):
         ''' calculate basic metrics '''
         if not timePositions:
             return self.result
@@ -71,7 +72,7 @@ class BasicMetric(BaseMetric):
         self.result[BasicMetric.END_VALUE] = timePositions[-1][1]
         self.result[BasicMetric.STDDEV] = stddev([timePosition[1] for timePosition in timePositions])
         self.result[BasicMetric.SRATIO] = sharpeRatio([timePosition[1] for timePosition in timePositions])
-        self.result[BasicMetric.R_SQUIRED] = rsquared(timePositions, iTimePositions)
+        self.result[BasicMetric.R_SQUIRED] = rsquared([tp[1] for tp in timePositions], [iTimePositionDict.get(tp[0], tp[1]) for tp in timePositions])
 
         return self.result
 
@@ -90,10 +91,10 @@ class MetricCalculator(object):
         ''' constructor '''
         self.__calculated = {}
 
-    def calculate(self, symbols, timePositions, iTimePositions):
+    def calculate(self, symbols, timePositions, iTimePositionDict):
         ''' calculate metric base on positions '''
         metric = BasicMetric()
-        metric.calculate(timePositions, iTimePositions)
+        metric.calculate(timePositions, iTimePositionDict)
         self.__calculated['_'.join(symbols)] = metric.result
 
     def formatMetrics(self):
