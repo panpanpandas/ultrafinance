@@ -119,7 +119,7 @@ class SqlSaver(StateSaver):
                                   [Order.fromStr(orderString) for orderString in json.loads(row[STATE_SAVER_PLACED_ORDERS])])
         except Exception as ex:
             LOG.error("Unknown exception doing __tupleToResult in sqlSaver " + str(ex) + " --row-- " + str(row))
-            return BackTestResult('-1', '-1', '[]', '[]')
+            return BackTestResult('-1', '-1', '-1', '-1', '[]', '[]')
 
 
     def __sqlToResult(self, row):

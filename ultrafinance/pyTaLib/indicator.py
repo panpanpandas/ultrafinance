@@ -124,7 +124,7 @@ class ZScoreForDollarVolume(object):
             return None
 '''
 
-class ZScoreForDollarVolume(object):
+class ZScore(object):
     def __init__(self, period):
         assert period == int(period) and period > 0, "Period must be an integer > 0"
         self.__period = period
@@ -134,11 +134,11 @@ class ZScoreForDollarVolume(object):
     def getLastValue(self):
         return self.__value
 
-    def __call__(self, price, volume):
-        if volume <= 0 or price <= 0:
+    def __call__(self, price):
+        if price <= 0:
             return
 
-        self.__multiples.append(price * volume)
+        self.__multiples.append(price)
 
         if len(self.__multiples) > self.__period:
             self.__multiples.popleft()

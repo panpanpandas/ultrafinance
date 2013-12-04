@@ -33,7 +33,7 @@ setup(name='ultrafinance',
       packages=['ultrafinance'],
       include_package_data=True,
       install_requires=[
-        'scipy>=0.13.0'
+        'scipy>=0.13.0',
         'numpy>=1.5.1',
         'beautifulsoup4',
         'SQLAlchemy>=0.8',

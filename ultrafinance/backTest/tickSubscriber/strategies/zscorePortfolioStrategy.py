@@ -14,8 +14,8 @@ When to Sell/Buy to cover:
 '''
 from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
-from ultrafinance.pyTaLib.indicator import ZScoreForDollarVolume
-from ultrafinance.backTest.constant import CONF_BUYING_RATIO
+from ultrafinance.pyTaLib.indicator import ZScore
+from ultrafinance.backTest.constant import CONF_START_TRADE_DATE, CONF_BUYING_RATIO
 import math
 
 import logging
@@ -27,6 +27,7 @@ class ZscorePortfolioStrategy(BaseStrategy):
         ''' constructor '''
         super(ZscorePortfolioStrategy, self).__init__("zscorePortfolioStrategy")
         self.__trakers = {}
+        self.startDate = int(configDict.get(CONF_START_TRADE_DATE))
         self.buyingRatio = int(configDict.get(CONF_BUYING_RATIO) if CONF_BUYING_RATIO in configDict else 2)
 
     def __setUpTrakers(self):
@@ -55,11 +56,13 @@ class OneTraker(object):
         ''' constructor '''
         self.__symbol = symbol
         self.__strategy = strategy
+        self.__startDate = strategy.startDate
         self.__buyingRatio = buyingRatio
         self.__threshold = 2.5
-        self.__holdDays = 15
-        self.__dateCounter = 0
-        self.__dollarVolume = ZScoreForDollarVolume(15)
+        self.__priceZscore = ZScore(120)
+        self.__volumeZscore = ZScore(120)
+        self.__toSell = False
+        self.__toBuy = False
 
         # order id
         self.__buyOrder = None
@@ -107,25 +110,35 @@ class OneTraker(object):
     def tickUpdate(self, tick):
         ''' consume ticks '''
         LOG.debug("tickUpdate %s with tick %s, price %s" % (self.__symbol, tick.time, tick.close))
-        self.__dollarVolume(tick.close, tick.volume)
+        self.__priceZscore(tick.close)
+        self.__volumeZscore(tick.volume)
+
+        #if haven't started, don't do any trading
+        if tick.time <= self.__startDate:
+            return
 
         # if not enough data, skip to reduce risk
-        if not self.__dollarVolume.getLastValue():
+        if not self.__priceZscore.getLastValue() or not self.__volumeZscore.getLastValue():
             return
 
-        # get dollar volumes
-        delta_z = self.__dollarVolume.getLastValue()
-        if delta_z is None:
+        # get zscore
+        priceZscore = self.__priceZscore.getLastValue()
+        volumeZscore = self.__volumeZscore.getLastValue()
+        if priceZscore is None or volumeZscore is None:
             return
 
-        if delta_z < (-self.__threshold) and not self.__buyOrder:
-            self.__dateCounter = 0
+        if self.__toBuy:
             self.__placeBuyOrder(tick)
+            self.__toBuy = False
+            return
 
-        elif self.__buyOrder and (self.__dateCounter > self.__holdDays or tick.close < self.__buyOrder.price * 0.90):
+        if self.__toSell:
             self.__placeSellOrder(tick)
+            self.__toSell = False
+            return
 
-        if self.__buyOrder:
-            print self.__dateCounter
-            self.__dateCounter += 1
+        if priceZscore < (-self.__threshold) and not self.__buyOrder and abs(volumeZscore) > 1.5:
+            self.__toBuy = True
 
+        elif self.__buyOrder and priceZscore > 0.5:
+            self.__toSell = True
