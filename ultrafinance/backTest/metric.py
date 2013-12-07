@@ -85,7 +85,7 @@ class BasicMetric(BaseMetric):
              self.result[BasicMetric.MAX_DRAW_DOWN][1], self.result[BaseMetric.MAX_DRAW_DOWN][0],
              self.result[BasicMetric.SRATIO], self.result[BasicMetric.R_SQUARED])
 
-class MetricCalculator(object):
+class MetricManager(object):
     ''' TODO: make it more generic for more metrics '''
     def __init__(self):
         ''' constructor '''
@@ -96,6 +96,7 @@ class MetricCalculator(object):
         metric = BasicMetric()
         metric.calculate(timePositions, iTimePositionDict)
         self.__calculated['_'.join(symbols)] = metric.result
+        return metric.result
 
     def formatMetrics(self):
         ''' output all calculated metrics '''

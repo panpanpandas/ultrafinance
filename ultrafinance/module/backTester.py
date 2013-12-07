@@ -13,10 +13,11 @@ from ultrafinance.ufConfig.pyConfig import PyConfig
 from ultrafinance.dam.DAMFactory import DAMFactory
 from ultrafinance.backTest.stateSaver.stateSaverFactory import StateSaverFactory
 from ultrafinance.backTest.appGlobal import appGlobal
-from ultrafinance.backTest.metric import MetricCalculator
+from ultrafinance.backTest.metric import MetricManager
 from ultrafinance.backTest.indexHelper import IndexHelper
 from ultrafinance.backTest.history import History
 from ultrafinance.backTest.constant import *
+from ultrafinance.backTest.metric import BasicMetric
 import os
 import sys
 
@@ -36,9 +37,8 @@ class BackTester(object):
         self.__config.setSource(configFile)
 
         self.__cash = cash
-        self.__mCalculator = MetricCalculator()
+        self.__mCalculator = MetricManager()
         self.__symbolLists = symbolLists
-        LOG.debug(self.__symbolLists)
         self.__accounts = []
         self.__startTickDate = startTickDate
         self.__startTradeDate = startTradeDate
@@ -55,19 +55,6 @@ class BackTester(object):
         LOG.debug(self.__symbolLists)
         if not self.__symbolLists:
             self._loadSymbols()
-
-    def __getFirstSaver(self):
-        ''' get first saver, create it if not exist'''
-        saverName = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_SAVER)
-        outputDb = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_OUTPUT_DB)
-        if saverName and len(self.__symbolLists) > 0:
-            self.__firstSaver = StateSaverFactory.createStateSaver(saverName,
-                                                                   {'db': outputDb},
-                                                                   getBackTestTableName(self.__symbolLists[0],
-                                                                                        self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME)))
-
-        return self.__firstSaver
-
 
     def _setupLog(self):
         ''' setup logging '''
@@ -108,34 +95,9 @@ class BackTester(object):
                 LOG.error("Unexpected error when backtesting %s -- except %s, traceback %s" \
                           % (symbols, excp, traceback.format_exc(8)))
 
-    def getLatestStates(self):
-        ''' get latest state'''
-        return [json.loads(str(result)) for result in self.__getFirstSaver().getStates(0, None)]
-
-    def getLatestPlacedOrders(self, num = 20):
-        ''' get latest placed orders of first symbol list '''
-        orders = []
-        for account in self.__accounts:
-            orders.extend(account.orderHistory[-num:])
-
-        return orders
-
-    def getHoldings(self):
-        ''' get holdings '''
-        holdings = []
-        for account in self.__accounts:
-            holdings.append(account.holdings)
-
-        return holdings
-
     def getMetrics(self):
         ''' get all metrics '''
         return self.__mCalculator.getMetrics()
-
-
-    def getOpenOrders(self):
-        ''' get open orders '''
-        return self.__
 
     def printMetrics(self):
         ''' print metrics '''
@@ -143,9 +105,11 @@ class BackTester(object):
 
 class TestRunner(object):
     ''' back testing '''
-    def __init__(self, config, mCalculator, accounts, symbols, startTickDate, endTradeDate, cash):
+    def __init__(self, config, metricManager, accounts, symbols, startTickDate, endTradeDate, cash):
         self.__accountManager = AccountManager()
         self.__accountId = None
+        self.__startTickDate = startTickDate
+        self.__endTradeDate = endTradeDate
         self.__tickFeeder = TickFeeder(start = startTickDate, end = endTradeDate)
         self.__tradingCenter = TradingCenter()
         self.__tradingEngine = TradingEngine()
@@ -155,7 +119,7 @@ class TestRunner(object):
         self.__saver = None
         self.__symbols = symbols
         self.__config = config
-        self.__mCalculator = mCalculator
+        self.__metricManager = metricManager
         self.__cash = cash
 
     def _setup(self):
@@ -199,11 +163,15 @@ class TestRunner(object):
     def _setupSaver(self):
         ''' setup Saver '''
         saverName = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_SAVER)
-        outputDb = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_OUTPUT_DB)
+        outputDbPrefix = self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_OUTPUT_DB_PREFIX)
         if saverName:
             self.__saver = StateSaverFactory.createStateSaver(saverName,
-                                                              {'db': outputDb},
-                                                              getBackTestTableName(self.__symbols, self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME)))
+                                                              {'db': outputDbPrefix + getBackTestResultDbName(self.__symbols,
+                                                                                                              self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME),
+                                                                                                              self.__startTickDate,
+                                                                                                              self.__endTradeDate)},
+                                                              "result")
+
 
     def _setupStrategy(self):
         ''' setup tradingEngine'''
@@ -239,11 +207,25 @@ class TestRunner(object):
             startTradeDate = int(startTradeDate)
             timePositions = [tp for tp in timePositions if tp[0] >= startTradeDate]
 
-        self.__mCalculator.calculate(self.__symbols, timePositions, self.__tickFeeder.iTimePositionDict)
+        #get and save metrics
+        result = self.__metricManager.calculate(self.__symbols, timePositions, self.__tickFeeder.iTimePositionDict)
+        account = self.__accountManager.getAccount(self.__accountId)
+        self.__saver.writeMetrics(result[BasicMetric.START_TIME],
+                                  result[BasicMetric.END_TIME],
+                                  result[BasicMetric.MIN_TIME_VALUE][1],
+                                  result[BasicMetric.MAX_TIME_VALUE][1],
+                                  result[BasicMetric.SRATIO],
+                                  result[BasicMetric.MAX_DRAW_DOWN][1],
+                                  result[BasicMetric.R_SQUARED],
+                                  account.getTotalValue(),
+                                  account.holdings)
+
+        #write to saver
+        LOG.debug("Writing state to saver")
+        self.__saver.commit()
 
         self.__tradingEngine.stop()
         thread.join(timeout = 240)
-
 
 
     def _printResult(self):
@@ -263,15 +245,13 @@ class TestRunner(object):
 
 
 ############Util function################################
-def getBackTestTableName(symbols, strategyName):
+def getBackTestResultDbName(symbols, strategyName, startTickDate, endTradeDate):
     ''' get table name for back test result'''
-    return "%s_%s" % (symbols if len(symbols) <= 1 else len(symbols), strategyName)
-
+    return "%s__%s__%s__%s" % ('_'.join(symbols) if len(symbols) <= 1 else len(symbols), strategyName, startTickDate, endTradeDate if endTradeDate else "Now")
 
 if __name__ == "__main__":
     backTester = BackTester("backtest_zscorePortfolio.ini", startTickDate = 19901010, startTradeDate = 19901010, endTradeDate = 20131010)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()
-    print backTester.getLatestStates()
 

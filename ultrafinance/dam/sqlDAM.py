@@ -11,7 +11,6 @@ import sys
 from sqlalchemy import Column, Integer, String, Float, Sequence, create_engine, and_
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
-import time
 
 Base = declarative_base()
 

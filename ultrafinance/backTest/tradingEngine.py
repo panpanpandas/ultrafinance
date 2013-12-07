@@ -111,11 +111,6 @@ class TradingEngine(object):
             for sub in subDict.iterkeys():
                 sub.complete()
 
-        #write to saver
-        if self.saver:
-            LOG.debug("Writing state to saver")
-            self.saver.commit()
-
     def consumeTicks(self, ticks, sub, event):
         ''' publish ticks to sub '''
         thread = Thread(target = getattr(sub, event), args = (ticks,))

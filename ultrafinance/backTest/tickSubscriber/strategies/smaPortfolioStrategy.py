@@ -78,7 +78,7 @@ class OneTraker(object):
 
         self.__smaShort = Sma(10)
         self.__smaMid = Sma(60)
-        self.__smaLong = Sma(300)
+        self.__smaLong = Sma(200)
         self.__smaVolumeShort = Sma(10)
         self.__smaVolumeMid = Sma(60)
         self.__movingLowShort = MovingLow(10)
