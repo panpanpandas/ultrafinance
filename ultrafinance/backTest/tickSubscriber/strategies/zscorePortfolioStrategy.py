@@ -127,6 +127,12 @@ class OneTraker(object):
         if priceZscore is None or volumeZscore is None:
             return
 
+        if priceZscore < (-self.__threshold) and not self.__buyOrder and abs(volumeZscore) > 1.5:
+            self.__placeBuyOrder(tick)
+
+        elif self.__buyOrder and priceZscore > 0.5:
+            self.__placeSellOrder(tick)
+        """
         if self.__toBuy:
             self.__placeBuyOrder(tick)
             self.__toBuy = False
@@ -142,3 +148,4 @@ class OneTraker(object):
 
         elif self.__buyOrder and priceZscore > 0.5:
             self.__toSell = True
+        """
