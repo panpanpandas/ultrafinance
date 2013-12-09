@@ -12,7 +12,7 @@ LOG = logging.getLogger()
 class StateSaverFactory(Singleton):
     ''' factory for output saver '''
     @staticmethod
-    def createStateSaver(name, setting, tableName):
+    def createStateSaver(name, setting):
         ''' create state saver '''
         if 'sql' == name:
             from ultrafinance.backTest.stateSaver.sqlSaver import SqlSaver

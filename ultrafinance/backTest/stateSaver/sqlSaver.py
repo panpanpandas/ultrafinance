@@ -113,7 +113,7 @@ class SqlSaver(StateSaver):
             end = sys.maxint
 
         conn = self.engine.connect()
-        rows = conn.execute(select([self.resultTable]).where(and_(SqlSaver.RESULT_TABLE.c.time >= int(start),
+        rows = conn.execute(select([SqlSaver.RESULT_TABLE]).where(and_(SqlSaver.RESULT_TABLE.c.time >= int(start),
                                                                   SqlSaver.RESULT_TABLE.c.time < int(end))))
 
         #return [self.__tupleToResult(row) for row in rows]
@@ -141,7 +141,7 @@ class SqlSaver(StateSaver):
             LOG.error("Unknown exception doing __tupleToResult in sqlSaver " + str(ex) + " --row-- " + str(row))
             return BackTestResult('-1', '-1', '-1', '-1', '[]', '[]')
 
-    def getMetrics(self, start, end):
+    def getMetrics(self):
         ''' read value for a col  '''
         d = {}
         if self.engine is None:

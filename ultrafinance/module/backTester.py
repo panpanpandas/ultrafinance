@@ -169,8 +169,7 @@ class TestRunner(object):
                                                               {'db': outputDbPrefix + getBackTestResultDbName(self.__symbols,
                                                                                                               self.__config.getOption(CONF_ULTRAFINANCE_SECTION, CONF_STRATEGY_NAME),
                                                                                                               self.__startTickDate,
-                                                                                                              self.__endTradeDate)},
-                                                              "result")
+                                                                                                              self.__endTradeDate)})
 
 
     def _setupStrategy(self):

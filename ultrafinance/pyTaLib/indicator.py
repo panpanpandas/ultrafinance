@@ -148,9 +148,6 @@ class ZScore(object):
 
             self.__value = dv_z[-1]
 
-            if self.__value < -2.5:
-                print self.__multiples
-
             return self.__value
         else:
             return None
