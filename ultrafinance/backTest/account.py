@@ -35,17 +35,18 @@ class Account(object):
             preShare, prePrice = self.__holdings[symbol]
             preValue = preShare * prePrice
             curShare = share + preShare
-            curPrice = (share * price + preValue) / curShare
-            self.__holdings[symbol] = [curShare, curPrice]
 
-    def __reduceHolding(self, symbol, share):
-        ''' reduce holding '''
-        preShare, prePrice = self.__holdings[symbol]
-        curShare = preShare - share
-        self.__holdings[symbol] = [curShare, prePrice]
+            if curShare == 0:
+                curPrice = 0
+            elif (curShare < 0 and preShare > 0) or (curShare > 0  and preShare < 0):
+                curPrice = price
+            else:
+                curPrice = (share * price + preValue) / curShare
+            self.__holdings[symbol] = [curShare, curPrice]
 
     def execute(self, order, tick):
         ''' execute order'''
+
         msg = self.validate(order, tick)
         if msg != None:
             raise UfException(Errors.ORDER_INVALID_ERROR,
@@ -56,24 +57,16 @@ class Account(object):
         if Type.MARKET == order.type:
             order.price = tick.close
 
-        if Action.BUY == order.action:
-            self.__cash = self.__cash - value - self.__commision
-            self.__addHolding(order.symbol, order.share, order.price)
-        elif Action.SELL == order.action:
-            self.__cash = self.__cash + value - self.__commision
-            self.__reduceHolding(order.symbol, order.share)
-        elif Action.SELL_SHORT == order.action:
-            self.__cash = self.__cash + value - self.__commision
-            self.__addHolding(order.symbol, 0 - order.share, order.price)
-        elif Action.BUY_TO_COVER == order.action:
-            self.__cash = self.__cash - value - self.__commision
-            self.__reduceHolding(order.symbol, 0 - order.share)
+        self.__cash = self.__cash - value - self.__commision
+        self.__addHolding(order.symbol, order.share, order.price)
 
         self.__orderHisotry.append([tick.time, order])
 
 
     def validate(self, order, tick):
         ''' validate order to check whether it's do-able or not '''
+        return
+
         value = self.__getOrderValue(order, tick)
         cost = value + self.__commision
         msg = None
@@ -128,6 +121,25 @@ class Account(object):
 
         return value
 
+    def __getShortHoldingValue(self):
+        ''' get short value of holdings '''
+        missingSymbols = set(self.__holdings.keys()) - set(self.__lastTickDict.keys())
+        if missingSymbols:
+            raise UfException(Errors.MISSING_SYMBOL,
+                              "no all symbols in holdings have price: %s" % missingSymbols)
+
+        value = 0.0
+        for symbol, (share, _) in self.__holdings.items():
+            if share < 0:
+                price = self.__lastTickDict[symbol].close
+                value -= share * price
+
+        return value
+
+    def __getBuyingPower(self):
+        ''' get buying power '''
+        return self.__cash - (2 * self.__getShortHoldingValue())
+
     def getTotalValue(self):
         ''' get total value '''
         return self.getCash() + self.getHoldingValue()
@@ -179,3 +191,4 @@ class Account(object):
     cash = property(getCash)
     orderHistory = property(__getOrderHistory)
     commision = property(__getCommision)
+    buyingPower = property(__getBuyingPower)

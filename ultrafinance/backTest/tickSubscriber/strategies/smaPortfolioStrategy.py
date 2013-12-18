@@ -142,7 +142,7 @@ class OneTraker(object):
                           type = Type.STOP,
                           symbol = self.__symbol,
                           price = tick.close * 1.05,
-                          share = share)
+                          share = 0 - share)
             self.__placeStopOrder(stopOrder)
 
 
@@ -175,7 +175,7 @@ class OneTraker(object):
                           type = Type.STOP,
                           symbol = self.__symbol,
                           price = tick.close * 0.95,
-                          share = share)
+                          share = 0 - share)
             self.__placeStopOrder(stopOrder)
 
     def __placeStopOrder(self, order):
