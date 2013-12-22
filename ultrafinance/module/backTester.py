@@ -249,7 +249,7 @@ def getBackTestResultDbName(symbols, strategyName, startTickDate, endTradeDate):
     return "%s__%s__%s__%s" % ('_'.join(symbols) if len(symbols) <= 1 else len(symbols), strategyName, startTickDate, endTradeDate if endTradeDate else "Now")
 
 if __name__ == "__main__":
-    backTester = BackTester("backtest_zscorePortfolio.ini", startTickDate = 19901010, startTradeDate = 19901010, endTradeDate = 20131010)
+    backTester = BackTester("backtest_zscoreMomentumPortfolio.ini", startTickDate = 19901010, startTradeDate = 19901010, endTradeDate = 20131010)
     backTester.setup()
     backTester.runTests()
     backTester.printMetrics()

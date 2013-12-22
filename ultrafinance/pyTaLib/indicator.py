@@ -128,25 +128,44 @@ class ZScore(object):
     def __init__(self, period):
         assert period == int(period) and period > 0, "Period must be an integer > 0"
         self.__period = period
-        self.__multiples = deque()
+        self.__values = deque()
         self.__value = None
 
     def getLastValue(self):
         return self.__value
 
-    def __call__(self, price):
-        if price <= 0:
-            return
+    def __call__(self, value):
+        self.__values.append(value)
 
-        self.__multiples.append(price)
-
-        if len(self.__multiples) > self.__period:
-            self.__multiples.popleft()
+        if len(self.__values) > self.__period:
+            self.__values.popleft()
 
             # normalize dollar volume with z-score
-            dv_z = stats.zscore(self.__multiples)
+            dv_z = stats.zscore(self.__values)
 
             self.__value = dv_z[-1]
+
+            return self.__value
+        else:
+            return None
+
+class Momentum(object):
+    def __init__(self, period):
+        assert period == int(period) and period > 0, "Period must be an integer > 0"
+        self.__period = period
+        self.__values = deque()
+        self.__value = None
+
+    def getLastValue(self):
+        return self.__value
+
+    def __call__(self, value):
+        self.__values.append(value)
+
+        if len(self.__values) > self.__period:
+            old = self.__values.popleft()
+
+            self.__value = value - old
 
             return self.__value
         else:
@@ -185,3 +204,5 @@ def rsquared(x, y):
 
     _, _, r_value, _, _ = stats.linregress(x, y)
     return r_value**2
+
+

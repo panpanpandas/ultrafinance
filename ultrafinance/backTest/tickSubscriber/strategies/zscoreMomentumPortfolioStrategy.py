@@ -4,7 +4,7 @@ Created on Nov 09, 2013
 This strategy use zscore to trade stocks
 
 When to Buy/Short:
-if zsocore is > 2.5
+if zsocore is > 2
 
 When to Sell/Buy to cover:
 1 after 10 days
@@ -14,18 +14,18 @@ When to Sell/Buy to cover:
 '''
 from ultrafinance.model import Type, Action, Order
 from ultrafinance.backTest.tickSubscriber.strategies.baseStrategy import BaseStrategy
-from ultrafinance.pyTaLib.indicator import ZScore
+from ultrafinance.pyTaLib.indicator import ZScore, Momentum
 from ultrafinance.backTest.constant import CONF_START_TRADE_DATE, CONF_BUYING_RATIO
 import math
 
 import logging
 LOG = logging.getLogger()
 
-class ZscorePortfolioStrategy(BaseStrategy):
+class ZscoreMomentumPortfolioStrategy(BaseStrategy):
     ''' period strategy '''
     def __init__(self, configDict):
         ''' constructor '''
-        super(ZscorePortfolioStrategy, self).__init__("zscorePortfolioStrategy")
+        super(ZscoreMomentumPortfolioStrategy, self).__init__("zscoreMomentumPortfolioStrategy")
         self.__trakers = {}
         self.startDate = int(configDict.get(CONF_START_TRADE_DATE))
         self.buyingRatio = int(configDict.get(CONF_BUYING_RATIO) if CONF_BUYING_RATIO in configDict else 2)
@@ -61,8 +61,9 @@ class OneTraker(object):
         self.__buyThreshold = -2
         self.__sellThreshold = 0.5
         self.__priceZscore = ZScore(120)
+        self.__shortPriceZscore = ZScore(10)
         self.__volumeZscore = ZScore(120)
-        self.__toSell = False
+        self.__zscoreMomentums = Momentum(60)
         self.__toBuy = False
 
         # order id
@@ -117,24 +118,31 @@ class OneTraker(object):
         LOG.debug("tickUpdate %s with tick %s, price %s" % (self.__symbol, tick.time, tick.close))
         self.__priceZscore(tick.close)
         self.__volumeZscore(tick.volume)
+        self.__shortPriceZscore(tick.close)
+
+        # get zscore
+        priceZscore = self.__priceZscore.getLastValue()
+        shortPriceZscore = self.__shortPriceZscore.getLastValue()
+        volumeZscore = self.__volumeZscore.getLastValue()
+        priceMomentum = None
+        if shortPriceZscore:
+            self.__zscoreMomentums(shortPriceZscore)
+            priceMomentum = self.__zscoreMomentums.getLastValue()
 
         #if haven't started, don't do any trading
         if tick.time <= self.__startDate:
             return
 
         # if not enough data, skip to reduce risk
-        if not self.__priceZscore.getLastValue() or not self.__volumeZscore.getLastValue():
+        if priceZscore is None or volumeZscore is None or priceMomentum is None:
             return
 
-        # get zscore
-        priceZscore = self.__priceZscore.getLastValue()
-        volumeZscore = self.__volumeZscore.getLastValue()
-        if priceZscore is None or volumeZscore is None:
-            return
-
-        if priceZscore < self.__buyThreshold and self.__position <= 0 and abs(volumeZscore) > 1:
-            self.__placeBuyOrder(tick)
-
+        if self.__toBuy:
+            if priceMomentum < 0:
+                self.__placeBuyOrder(tick)
+                self.__toBuy = False
+        elif priceZscore < self.__buyThreshold and self.__position <= 0 and abs(volumeZscore) > 1:
+            self.__toBuy = True
         elif priceZscore > self.__sellThreshold and self.__position > 0 and abs(volumeZscore) > 1:
             self.__placeSellOrder(tick)
         """

@@ -8,6 +8,7 @@ from ultrafinance.backTest.tickSubscriber.strategies.periodStrategy import Perio
 from ultrafinance.backTest.tickSubscriber.strategies.smaStrategy import SMAStrategy
 from ultrafinance.backTest.tickSubscriber.strategies.smaPortfolioStrategy import SMAPortfolioStrategy
 from ultrafinance.backTest.tickSubscriber.strategies.zscorePortfolioStrategy import ZscorePortfolioStrategy
+from ultrafinance.backTest.tickSubscriber.strategies.zscoreMomentumPortfolioStrategy import ZscoreMomentumPortfolioStrategy
 
 from ultrafinance.lib.errors import Errors, UfException
 
@@ -16,7 +17,8 @@ class StrategyFactory(object):
     STRATEGY_DICT = {'period': PeriodStrategy,
                      'sma': SMAStrategy,
                      'smaPortfolio': SMAPortfolioStrategy,
-                     'zscorePortfolio': ZscorePortfolioStrategy}
+                     'zscorePortfolio': ZscorePortfolioStrategy,
+                     'zscoreMomentumPortfolio': ZscoreMomentumPortfolioStrategy}
 
     @staticmethod
     def createStrategy(name, configDict):
