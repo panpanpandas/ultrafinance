@@ -61,9 +61,8 @@ class OneTraker(object):
         self.__buyThreshold = -2
         self.__sellThreshold = 0.5
         self.__priceZscore = ZScore(120)
-        self.__shortPriceZscore = ZScore(10)
         self.__volumeZscore = ZScore(120)
-        self.__zscoreMomentums = Momentum(60)
+        self.__zscoreMomentums = Momentum(5)
         self.__toBuy = False
 
         # order id
@@ -118,15 +117,13 @@ class OneTraker(object):
         LOG.debug("tickUpdate %s with tick %s, price %s" % (self.__symbol, tick.time, tick.close))
         self.__priceZscore(tick.close)
         self.__volumeZscore(tick.volume)
-        self.__shortPriceZscore(tick.close)
 
         # get zscore
         priceZscore = self.__priceZscore.getLastValue()
-        shortPriceZscore = self.__shortPriceZscore.getLastValue()
         volumeZscore = self.__volumeZscore.getLastValue()
         priceMomentum = None
-        if shortPriceZscore:
-            self.__zscoreMomentums(shortPriceZscore)
+        if priceZscore:
+            self.__zscoreMomentums(priceZscore)
             priceMomentum = self.__zscoreMomentums.getLastValue()
 
         #if haven't started, don't do any trading
@@ -145,20 +142,3 @@ class OneTraker(object):
             self.__toBuy = True
         elif priceZscore > self.__sellThreshold and self.__position > 0 and abs(volumeZscore) > 1:
             self.__placeSellOrder(tick)
-        """
-        if self.__toBuy:
-            self.__placeBuyOrder(tick)
-            self.__toBuy = False
-            return
-
-        if self.__toSell:
-            self.__placeSellOrder(tick)
-            self.__toSell = False
-            return
-
-        if priceZscore < (-self.__threshold) and not self.__buyOrder and abs(volumeZscore) > 1.5:
-            self.__toBuy = True
-
-        elif self.__buyOrder and priceZscore > 0.5:
-            self.__toSell = True
-        """
