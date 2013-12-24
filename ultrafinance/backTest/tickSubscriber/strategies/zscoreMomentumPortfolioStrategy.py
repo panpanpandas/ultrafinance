@@ -58,15 +58,16 @@ class OneTraker(object):
         self.__strategy = strategy
         self.__startDate = strategy.startDate
         self.__buyingRatio = buyingRatio
-        self.__buyThreshold = -2
+        self.__buyThreshold = 1.5
         self.__sellThreshold = 0.5
-        self.__priceZscore = ZScore(120)
-        self.__volumeZscore = ZScore(120)
-        self.__zscoreMomentums = Momentum(5)
-        self.__toBuy = False
+        self.__priceZscore = ZScore(150)
+        self.__volumeZscore = ZScore(150)
+        self.__dayCounter = 0
+        self.__dayCounterThreshold = 5
 
         # order id
         self.__position = 0
+        self.__buyPrice = 0
 
 
     def __getCashToBuyStock(self):
@@ -81,17 +82,18 @@ class OneTraker(object):
     def __placeBuyOrder(self, tick):
         ''' place buy order'''
         cash = self.__getCashToBuyStock()
-        if cash == 0 or self.__position > 0:
+        if cash == 0:
             return
 
-        share = math.floor(cash / float(tick.close)) - self.__position
+        share = math.floor(cash / float(tick.close))
         order = Order(accountId = self.__strategy.accountId,
                          action = Action.BUY,
                          type = Type.MARKET,
                          symbol = self.__symbol,
                          share = share)
         if self.__strategy.placeOrder(order):
-            self.__position = math.floor(cash / float(tick.close))
+            self.__position = share
+            self.__buyPrice = tick.close
 
     def __placeSellOrder(self, tick):
         ''' place sell order '''
@@ -106,6 +108,7 @@ class OneTraker(object):
                          share = -share)
         if self.__strategy.placeOrder(order):
             self.__position = 0
+            self.__buyPrice = 0
 
 
     def orderExecuted(self, orderId):
@@ -121,24 +124,22 @@ class OneTraker(object):
         # get zscore
         priceZscore = self.__priceZscore.getLastValue()
         volumeZscore = self.__volumeZscore.getLastValue()
-        priceMomentum = None
-        if priceZscore:
-            self.__zscoreMomentums(priceZscore)
-            priceMomentum = self.__zscoreMomentums.getLastValue()
 
         #if haven't started, don't do any trading
         if tick.time <= self.__startDate:
             return
 
         # if not enough data, skip to reduce risk
-        if priceZscore is None or volumeZscore is None or priceMomentum is None:
+        if priceZscore is None or volumeZscore is None:
             return
 
-        if self.__toBuy:
-            if priceMomentum < 0:
-                self.__placeBuyOrder(tick)
-                self.__toBuy = False
-        elif priceZscore < self.__buyThreshold and self.__position <= 0 and abs(volumeZscore) > 1:
-            self.__toBuy = True
-        elif priceZscore > self.__sellThreshold and self.__position > 0 and abs(volumeZscore) > 1:
-            self.__placeSellOrder(tick)
+        if self.__position > 0:
+            self.__dayCounter += 1
+
+        if priceZscore > self.__buyThreshold and self.__position <= 0 and abs(volumeZscore) > 1:
+            self.__placeBuyOrder(tick)
+        elif self.__position > 0:
+            if (self.__dayCounter > self.__dayCounterThreshold and priceZscore < self.__sellThreshold)\
+            or priceZscore < 0 or self.__buyPrice * 0.9 > tick.close:
+                self.__placeSellOrder(tick)
+                self.__dayCounter = 0
