@@ -60,6 +60,7 @@ class OneTraker(object):
         self.__buyingRatio = buyingRatio
         self.__buyThreshold = 1.5
         self.__sellThreshold = 0.5
+        self.__preZscore = None
         self.__priceZscore = ZScore(150)
         self.__volumeZscore = ZScore(150)
         self.__dayCounter = 0
@@ -136,10 +137,12 @@ class OneTraker(object):
         if self.__position > 0:
             self.__dayCounter += 1
 
-        if priceZscore > self.__buyThreshold and self.__position <= 0 and abs(volumeZscore) > 1:
+        if priceZscore > self.__buyThreshold and self.__preZscore and self.__preZscore < self.__buyThreshold and self.__position <= 0 and abs(volumeZscore) > 1:
             self.__placeBuyOrder(tick)
         elif self.__position > 0:
             if (self.__dayCounter > self.__dayCounterThreshold and priceZscore < self.__sellThreshold)\
             or priceZscore < 0 or self.__buyPrice * 0.9 > tick.close:
                 self.__placeSellOrder(tick)
                 self.__dayCounter = 0
+
+        self.__preZscore = priceZscore
